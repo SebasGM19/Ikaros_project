@@ -1,0 +1,2 @@
+../Src/keypad_4x4.c:9:15:init_keypad	32	static
+../Src/keypad_4x4.c:52:10:read_keybord	16	static
