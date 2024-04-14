@@ -2,7 +2,7 @@
  * Keypad_4x4.c
  *
  *  Created on: Apr 13, 2024
- *      Author: Sebastian G.M.
+ *      Author: S4IOT
  */
 #include "keypad_4x4.h"
 
