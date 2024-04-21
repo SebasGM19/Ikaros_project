@@ -15,7 +15,7 @@ Status_code_t Init_8bits_Stepper_Motor(void){
 	uint32_t volatile *pPort_ModeReg = (uint32_t volatile *)(Port_C+ OFFSET_PORTS);
 
 	status = ClockEnable(Port_C, Enabled);
-	*pPort_ModeReg &= ~(Clear_eight_bits); //clean those 8 bits only for this funtion is ok by this way
+	*pPort_ModeReg &= ~(Clear_sixteen_bits); //clean those 16 bits only for this funtion is ok by this way
 	*pPort_ModeReg |= 0x5555;// equal to : 0101 0101 0101 0101
 
 	return status;
