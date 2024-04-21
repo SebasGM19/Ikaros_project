@@ -1,2 +1,4 @@
 ../Src/keypad_4x4.c:9:15:init_keypad	32	static
-../Src/keypad_4x4.c:52:10:read_keybord	16	static
+../Src/keypad_4x4.c:52:10:read_keybord	88	dynamic
+../Src/keypad_4x4.c:98:6:rowSequence	24	static
+../Src/keypad_4x4.c:111:6:columnSequence	32	static
