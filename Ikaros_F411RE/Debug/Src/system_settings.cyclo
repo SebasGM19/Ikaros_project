@@ -1,2 +1,4 @@
+C:/Users/S4IOT/Desktop/STMCube_Courses/Bare-Metal/Proyecto_personal/Ikaros_F411RE/CMSIS/core_cm4.h:1684:22:__NVIC_EnableIRQ	2
 ../Src/system_settings.c:11:15:ClockEnable	15
 ../Src/system_settings.c:70:15:Delay	3
+../Src/system_settings.c:91:6:timer_clock_enables	1
