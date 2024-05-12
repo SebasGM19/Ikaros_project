@@ -115,6 +115,7 @@ void timer_wait(void){
 	while(!((TIM2_5_UIF) & (*TIM_REG_SR))){} //cuando sea falso que se mantenga, ver si es normalmente en 0 o 1
 	*TIM_REG_SR &= ~TIM2_5_UIF; //cuando salga volvemos a limpiar esa bandera
 	//para el delay aqui se deberia desactivar el timer para que no se siguiera repitinedo
+	//hacer librerias de delay
 }
 
 //uint8_t Delay_with_timer2(void){
