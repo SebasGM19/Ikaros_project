@@ -111,7 +111,7 @@ void timer_1hz_1s_init(void){
 }
 
 void timer_wait(void){
-	uint32_t const volatile * const TIM_REG_SR = (uint32_t const volatile *const)(TIM2_ADDRESS + TIMx_SR); //agregamos el 10 para decirle el offset
+	uint32_t volatile *TIM_REG_SR = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_SR); //agregamos el 10 para decirle el offset
 	while(!((TIM2_5_UIF) & (*TIM_REG_SR))){} //cuando sea falso que se mantenga, ver si es normalmente en 0 o 1
 	*TIM_REG_SR &= ~TIM2_5_UIF; //cuando salga volvemos a limpiar esa bandera
 	//para el delay aqui se deberia desactivar el timer para que no se siguiera repitinedo
