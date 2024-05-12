@@ -1,8 +1,0 @@
-"./Src/gpios.o"
-"./Src/keypad_4x4.o"
-"./Src/main.o"
-"./Src/stepper_motor.o"
-"./Src/syscalls.o"
-"./Src/sysmem.o"
-"./Src/system_settings.o"
-"./Startup/startup_stm32f411retx.o"

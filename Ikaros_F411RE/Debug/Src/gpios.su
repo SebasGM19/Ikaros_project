@@ -1,4 +1,0 @@
-../Src/gpios.c:10:22:GPIO_DigitalRead	24	static
-../Src/gpios.c:21:22:GPIO_DigitalWrite	24	static
-../Src/gpios.c:37:15:SetPinMode	24	static
-../Src/gpios.c:75:15:GpioPullUpDownState	24	static

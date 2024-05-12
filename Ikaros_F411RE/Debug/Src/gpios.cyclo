@@ -1,4 +1,0 @@
-../Src/gpios.c:10:22:GPIO_DigitalRead	2
-../Src/gpios.c:21:22:GPIO_DigitalWrite	2
-../Src/gpios.c:37:15:SetPinMode	17
-../Src/gpios.c:75:15:GpioPullUpDownState	1
