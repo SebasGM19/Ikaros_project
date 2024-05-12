@@ -13,6 +13,8 @@
 #include "stm32f411xe.h"
 #include "stdbool.h"
 
+#define BOARD_CLOCK (16000000) //set to 16MHz
+
 typedef enum{
 	Success,
 	PinNotAvailable,
@@ -197,6 +199,8 @@ typedef enum{
 }TIM2_TIM5_SR_status_t;
 
 Status_code_t ClockEnable(Set_Port_t Port_define, Enabled_Disabled_t Intention);
-Status_code_t Delay(uint32_t Miliseconds);
+Status_code_t Delay_clock(Enabled_Disabled_t state);
+//Status_code_t Delay(uint32_t Miliseconds);
 void timer_1hz_1s_init(void);
+void timer_wait(void);
 #endif /* SYSTEM_SETTINGS_H_ */

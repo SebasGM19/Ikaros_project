@@ -24,18 +24,24 @@
 #endif
 
 int main(void){
-	bool Pin_state = true;
+	bool Pin_state = false;
 
 	SetPinMode(Port_A, Pin_5, Output);
 	GPIO_DigitalWrite(Port_A, Pin_5, Low);
+	GPIO_DigitalWrite(Port_A, Pin_5, High);
+	GPIO_DigitalWrite(Port_A, Pin_5, Low);
+
+
 
 		timer_1hz_1s_init();// solo se incializa y se repite una y otra vez
 	while(1){
 
-		GPIO_DigitalWrite(Port_A, Pin_5, Pin_state);
-		Pin_state = !Pin_state;
+		GPIO_DigitalWrite(Port_A, Pin_5, High);
+
 		timer_wait();
 
+		GPIO_DigitalWrite(Port_A, Pin_5, Low);
+		timer_wait();
 
 	}
 

@@ -67,37 +67,63 @@ Status_code_t ClockEnable(Set_Port_t Port_define, Enabled_Disabled_t Intention){
 
 }
 
-Status_code_t Delay(uint32_t Miliseconds){ //do it in microseconds later
+//Status_code_t Delay(uint32_t Miliseconds){ //do it in microseconds later
+//
+//	uint64_t count =0;
+//	uint64_t volatile time = 0;
+//
+//	if(Miliseconds >= 1000000){
+//		return DelayTimeNotSupported;
+//	}
+//	count= Miliseconds*2022;
+//
+//	while(time<count){
+//		time++;
+//	}
+//	time =0;
+//	count =0;
+//
+//	return Success;
+//}
 
-	uint64_t count =0;
-	uint64_t volatile time = 0;
 
-	if(Miliseconds >= 1000000){
-		return DelayTimeNotSupported;
-	}
-	count= Miliseconds*2022;
+Status_code_t Delay_clock(Enabled_Disabled_t state){
+	uint32_t volatile *pClockControlReg = (uint32_t volatile *)(RCC_ADDRESS + RCC_OFFSET_APB1ENR);
+	*pClockControlReg |= (Enabled<<TIMER_2); //hasta aqui solo habilitamos el reloj del tim2
 
-	while(time<count){
-		time++;
-	}
-	time =0;
-	count =0;
-
+	state? (*pClockControlReg |= (Enabled<<TIMER_2)) : (*pClockControlReg |= (Disabled<<TIMER_2));
 	return Success;
 }
 
-
+//Status_code_t Delay(uint32_t microseconds){
+//
+//
+//}
 
 void timer_1hz_1s_init(void){
+	uint32_t microseconds_timer =0;
+	uint32_t time_nedded = 1000000; //in microseconds
+	uint32_t arr_set_value =0;
+	uint32_t psc_set_value =16; //para esto es lo minimo para tener cuenta en microsegundos
+	float micro_time =0.0f;
+	micro_time = time_nedded*0.000001;
+
 	uint32_t volatile *pClockControlReg = (uint32_t volatile *)(RCC_ADDRESS + RCC_OFFSET_APB1ENR);
 	*pClockControlReg |= (Enabled<<TIMER_2); //hasta aqui solo habilitamos el reloj del tim2
 	//la condiguracion es para 1hz entonces para el tiempo es 1/hz =s
 
+	uint32_t volatile *TIM_REG_SR = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_SR); //agregamos el 10 para decirle el offset
+	*TIM_REG_SR &= ~TIM2_5_UIF; //limpiamos la bandera
+
+
 	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_PSC);
-	*TIM_REG_PSC = (1600 - 1); //clk nuestro 16 000 000 (16Mhz) = 16 000 000/1 600 = 10 000
+	*TIM_REG_PSC = (psc_set_value - 1); //clk 16 000 000 (16Mhz) = 16 000 000/1 6 = 1 000 000
+
+	microseconds_timer = (uint32_t)(BOARD_CLOCK / psc_set_value);
 
 	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_ARR);
-	*TIM_REG_ARR = (10000 - 1); //termina en 10 000/10 000 = 1
+	arr_set_value = (microseconds_timer * micro_time);
+	*TIM_REG_ARR = (arr_set_value - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
 
 	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_CNT);
 	*TIM_REG_CNT = 0;
