@@ -10,6 +10,8 @@
 
 #include <stdint.h>
 #include "stm32f4xx.h"
+#include "stm32f411xe.h"
+#include "stdbool.h"
 
 typedef enum{
 	Success,
@@ -171,7 +173,30 @@ typedef enum{
 
 }TIMx_preescaler_t;
 
+typedef enum{
+	 TIM2_5_CEN= 		(1u<<0),
+	 TIM2_5_UDIS=		(1u<<1),
+	 TIM2_5_URS=		(1u<<2),
+	 TIM2_5_OPM=		(1u<<3),
+	 TIM2_5_DIR=		(1u<<4)
+ //faltan los demas bits
+}TIM2_TIM5_CR1_t;
+
+typedef enum{
+	 TIM2_5_UIF= 		(1u<<0),
+	 TIM2_5_CC1F=		(1u<<1),
+	 TIM2_5_CC2IF=		(1u<<2),
+	 TIM2_5_CC3IF=		(1u<<3),
+	 TIM2_5_CC4IF=		(1u<<4),
+	 TIM2_5_TIF=		(1u<<6),
+	 TIM2_5_CC10F=		(1u<<9),
+	 TIM2_5_CC20F=		(1u<<10),
+	 TIM2_5_CC30F=		(1u<<11),
+	 TIM2_5_CC40F=		(1u<<12),
+
+}TIM2_TIM5_SR_status_t;
+
 Status_code_t ClockEnable(Set_Port_t Port_define, Enabled_Disabled_t Intention);
 Status_code_t Delay(uint32_t Miliseconds);
-
+void timer_1hz_1s_init(void);
 #endif /* SYSTEM_SETTINGS_H_ */
