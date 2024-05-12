@@ -1,2 +1,4 @@
 ../Src/system_settings.c:11:15:ClockEnable	15
 ../Src/system_settings.c:70:15:Delay	3
+../Src/system_settings.c:91:6:timer_1hz_1s_init	1
+../Src/system_settings.c:113:6:timer_wait	2
