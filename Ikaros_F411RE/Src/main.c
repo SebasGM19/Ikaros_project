@@ -38,10 +38,10 @@ int main(void){
 
 		GPIO_DigitalWrite(Port_A, Pin_5, High);
 
-		Delay(100000);
+		Delay(1000000);
 
 		GPIO_DigitalWrite(Port_A, Pin_5, Low);
-		Delay(100000);
+		Delay(1000000);
 
 	}
 

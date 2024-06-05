@@ -77,7 +77,7 @@ Status_code_t ClockEnable(Set_Port_t Port_define, Enabled_Disabled_t Intention){
 }
 
 
-void TIMER_cleanCountFlag(TimerMapAddr_t TIMER_addr){
+void volatile TIMER_cleanCountFlag(TimerMapAddr_t TIMER_addr){
 	uint32_t volatile *TIM_REG_SR = (uint32_t volatile*)(TIMER_addr + TIMx_SR);
 
 //	if(!((TIM2_5_UIF) & (*TIM_REG_SR))){
@@ -86,7 +86,7 @@ void TIMER_cleanCountFlag(TimerMapAddr_t TIMER_addr){
 
 }
 
-void TIMER_Clock( Enabled_Disabled_t state, timers_enb_t Timer){
+void volatile TIMER_Clock( Enabled_Disabled_t state, timers_enb_t Timer){
 	RCC_offset_t volatile RccOffset = RCC_OFFSET_APB1ENR;
 
 	if(Timer >= 10){
@@ -95,14 +95,17 @@ void TIMER_Clock( Enabled_Disabled_t state, timers_enb_t Timer){
 	}
 
 	uint32_t volatile *pClockControlReg = (uint32_t volatile *)(RCC_ADDRESS + RccOffset);
-	*pClockControlReg = state ? (*pClockControlReg | (Enabled << Timer)) : (*pClockControlReg & ~(Enabled << Timer));
-
+//	*pClockControlReg = state ? (*pClockControlReg | (Enabled << Timer)) : (*pClockControlReg & ~(Enabled << Timer));
+    if(state) {
+        *pClockControlReg |= (Enabled << Timer);
+    } else {
+        *pClockControlReg &= ~(Enabled << Timer);
+    }
 }
 
-void TIMER_WaitFlag(TimerMapAddr_t TIMER_addr){ //use of SR and UIF?
-
+void volatile TIMER_WaitFlag(TimerMapAddr_t TIMER_addr){ //use of SR and UIF?
 	uint32_t volatile *TIM_REG_SR = (uint32_t volatile*)(TIMER_addr + TIMx_SR);
-	while(!((TIM2_5_UIF) & (*TIM_REG_SR))){}
+	while(!(TIM2_5_UIF & *TIM_REG_SR)){}
 	TIMER_cleanCountFlag(TIMER_addr);
 
 }
@@ -117,16 +120,23 @@ Status_code_t Delay(uint32_t microseconds){
 		uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_ARR);
 		uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_CNT);
 		uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_CR1);
+//		uint32_t volatile *TIM_REG_SR = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_SR);
 
 		TIMER_Clock(Enabled,TIMER_2);
 
-		TIMER_cleanCountFlag(TIM2_ADDRESS);
 
+		*TIM_REG_CR1 &= ~TIM2_5_CEN; // Disable timer before configuration
 		*TIM_REG_PSC = (PSC_TO_MICROSEC_DELAY-1);
 		*TIM_REG_ARR = (USEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MICROSEC_DELAY,microseconds) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
-		*TIM_REG_CNT = 0;
-		*TIM_REG_CR1 |= TIM2_5_CEN;
+//		*TIM_REG_CNT = 0;
+		TIMER_cleanCountFlag(TIM2_ADDRESS);
 
+
+		*TIM_REG_CNT = 0;
+		for(uint8_t i =0;i<100;i++){
+			__NOP();
+		}
+		*TIM_REG_CR1 |= TIM2_5_CEN;
 		TIMER_WaitFlag(TIM2_ADDRESS);
 
 		TIMER_Clock(Disabled,TIMER_2);
