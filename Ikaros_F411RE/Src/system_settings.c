@@ -8,6 +8,8 @@
 
 #include "system_settings.h"
 
+#define TIM3_HANDLER TIM3_IRQHandler
+
 //static void TIMER_cleanCountFlag(TimerMapAddr_t TIMER_addr);
 //static void TIMER_Clock( Enabled_Disabled_t state, timers_enb_t Timer);
 //static void TIMER_WaitFlag(TimerMapAddr_t TIMER_addr);
@@ -120,7 +122,6 @@ Status_code_t Delay(uint32_t microseconds){
 		uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_ARR);
 		uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_CNT);
 		uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_CR1);
-//		uint32_t volatile *TIM_REG_SR = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_SR);
 
 		TIMER_Clock(Enabled,TIMER_2);
 
@@ -128,11 +129,11 @@ Status_code_t Delay(uint32_t microseconds){
 		*TIM_REG_CR1 &= ~TIM2_5_CEN; // Disable timer before configuration
 		*TIM_REG_PSC = (PSC_TO_MICROSEC_DELAY-1);
 		*TIM_REG_ARR = (USEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MICROSEC_DELAY,microseconds) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
-//		*TIM_REG_CNT = 0;
 		TIMER_cleanCountFlag(TIM2_ADDRESS);
 
 
 		*TIM_REG_CNT = 0;
+
 		for(uint8_t i =0;i<100;i++){
 			__NOP();
 		}
@@ -145,6 +146,38 @@ Status_code_t Delay(uint32_t microseconds){
 
 }
 
+
+void TIM3_HANDLER(void){
+
+}
+
+void init_timer3(uint32_t microseconds){ //init function to execute handler after the count happend
+
+	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_PSC);
+	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_ARR);
+	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CNT);
+	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
+
+	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_DIER);
+	TIMER_Clock(Enabled,TIMER_3);
+
+	*TIM_REG_CR1 &= ~TIM2_5_CEN; // Disable timer before configuration
+	*TIM_REG_PSC = (PSC_TO_MICROSEC_DELAY-1);
+	*TIM_REG_ARR = (USEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MICROSEC_DELAY,microseconds) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+	*TIM_REG_CNT = 0;
+
+	for(uint8_t i =0;i<100;i++){
+		__NOP();
+	}
+
+	*TIM_REG_CR1 |= TIM2_5_CEN;
+
+
+	*TIM_REG_DIER |= TIM2_5_UIE;
+
+	NVIC_EnableIRQ(TIM3_IRQn);
+
+}
 
 
 //void timer_1hz_1s_init(void){
@@ -178,7 +211,7 @@ Status_code_t Delay(uint32_t microseconds){
 //	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_CR1);
 //	*TIM_REG_CR1 |= TIM2_5_CEN;
 //
-////	NVIC_EnableIRQ(TIM2_IRQn);
+//	NVIC_EnableIRQ(TIM2_IRQn);
 //
 //
 //}

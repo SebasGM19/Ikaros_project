@@ -220,6 +220,21 @@ typedef enum{
 
 }TIM2_TIM5_SR_status_t;
 
+typedef enum{
+	 TIM2_5_UIE= 		(1u<<0),
+	 TIM2_5_CC1IE=		(1u<<1),
+	 TIM2_5_CC2IE=		(1u<<2),
+	 TIM2_5_CC3IE=		(1u<<3),
+	 TIM2_5_CC4IE=		(1u<<4),
+	 TIM2_5_TIE=		(1u<<6),
+	 TIM2_5_UDE=		(1u<<8),
+	 TIM2_5_CC1DE=		(1u<<9),
+	 TIM2_5_CC2DE=		(1u<<10),
+	 TIM2_5_CC3DE=		(1u<<11),
+	 TIM2_5_CC4DE=		(1u<<12),
+	 TIM2_5_TDE=		(1u<<14)
+}TIM2_TIM5_DIER_t;
+
 void InitSystem(void);
 Status_code_t ClockEnable(Set_Port_t Port_define, Enabled_Disabled_t Intention);
 Status_code_t Delay(uint32_t microseconds);
