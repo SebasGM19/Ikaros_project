@@ -134,9 +134,9 @@ Status_code_t Delay(uint32_t microseconds){
 
 		*TIM_REG_CNT = 0;
 
-		for(uint8_t i =0;i<100;i++){
-			__NOP();
-		}
+//		for(uint8_t i =0;i<100;i++){
+//			__NOP();
+//		}
 		*TIM_REG_CR1 |= TIM2_5_CEN;
 		TIMER_WaitFlag(TIM2_ADDRESS);
 
