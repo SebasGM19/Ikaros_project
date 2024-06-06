@@ -41,7 +41,7 @@ void volatile TIMER_WaitFlag(TimerMapAddr_t TIMER_addr){ //use of SR and UIF?
 
 void TIM3_HANDLER(void){
 	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CNT);
-
+	TIMER_cleanCountFlag(TIM3_ADDRESS);
 
 	*TIM_REG_CNT = 0;
 
