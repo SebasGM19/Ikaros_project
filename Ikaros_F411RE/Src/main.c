@@ -23,10 +23,10 @@
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
+
 int main(void){
 //	bool Pin_state = false;
-	InitSystem();
-
+//	InitSystem();
 	SetPinMode(Port_A, Pin_5, Output);
 	GPIO_DigitalWrite(Port_A, Pin_5, Low);
 	GPIO_DigitalWrite(Port_A, Pin_5, High);
