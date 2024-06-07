@@ -1,4 +1,0 @@
-../Src/keypad_4x4.c:9:15:init_keypad	6
-../Src/keypad_4x4.c:52:10:read_keybord	9
-../Src/keypad_4x4.c:98:6:rowSequence	3
-../Src/keypad_4x4.c:111:6:columnSequence	8

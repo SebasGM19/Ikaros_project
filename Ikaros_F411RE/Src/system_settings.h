@@ -13,6 +13,11 @@
 #include "stm32f411xe.h"
 #include "stdbool.h"
 
+#define BOARD_CLOCK 			(16000000) //set to 16MHz
+#define PSC_TO_MICROSEC_DELAY	(uint32_t)(16) //minimum to microsecond count
+#define USEC_TO_DELAY(CLOCK_BASE,PSC,DELAY)	 (uint32_t)((((CLOCK_BASE) / (PSC)) * ((DELAY) * (0.000001))) )
+
+
 typedef enum{
 	Success,
 	PinNotAvailable,
@@ -28,11 +33,11 @@ typedef enum{
 }Enabled_Disabled_t;
 
 typedef enum{
-	Clean_one_bit =0x01,
-	Clear_two_bits=0x03,
-	Clear_four_bits = 0xF,
-	Clear_eight_bits =0xFF,
-	Clear_sixteen_bits =0xFFFF
+	Clean_one_bit =			0x01,
+	Clear_two_bits=			0x03,
+	Clear_four_bits = 		0xF,
+	Clear_eight_bits =		0xFF,
+	Clear_sixteen_bits =	0xFFFF
 }RegAuxClean_t;
 
 
@@ -57,10 +62,10 @@ typedef enum{
 }Clock_enabled_t; //BUS AHB1 todos estos
 
 typedef enum{
-	TIM2_ADDRESS = 			0x40000000, //APB1 BUS
-	TIM3_ADDRESS =			0x40000400,
-	TIM4_ADDRESS =			0x40000800,
-	TIM5_ADDRESS =			0x40000C00,
+//	TIM2_ADDRESS = 			0x40000000, //APB1 BUS
+//	TIM3_ADDRESS =			0x40000400,
+//	TIM4_ADDRESS =			0x40000800,
+//	TIM5_ADDRESS =			0x40000C00,
 	RTC_BKP_REG_ADDRESS = 	0x40002800,
 	WWDG_ADDRESS = 			0x40002C00,
 	IWDG_ADDRESS = 			0x40003000,
@@ -74,7 +79,7 @@ typedef enum{
 	I2C3_ADDRESS = 			0x40005C00,
 	PWR_ADDRESS = 			0x40007000, //APB1
 
-	TIM1_ADDRESS = 			0x40010000, //APB2 BUS
+//	TIM1_ADDRESS = 			0x40010000, //APB2 BUS
 	USART1_ADDRESS = 		0x40011000,
 	USART6_ADDRESS = 		0x40011400,
 	ADC1_ADDRESS = 			0x40011000,
@@ -83,9 +88,9 @@ typedef enum{
 	SPI4_I2C4_ADDRESS = 	0x40013400,
 	SYSCFG_ADDRESS= 		0x40013800,
 	EXT1_ADDRESS =			0x40013C00,
-	TIM9_ADDRESS = 			0x40014000,
-	TIM10_ADDRESS = 		0x40014400,
-	TIM11_ADDRESS = 		0x40014800,
+//	TIM9_ADDRESS = 			0x40014000,
+//	TIM10_ADDRESS = 		0x40014400,
+//	TIM11_ADDRESS = 		0x40014800,
 	SPI5_I2S5_ADDRESS = 	0x40015000,
 
 	CRC_ADDRESS = 			0x40023000, //AHB1 BUS
@@ -97,6 +102,20 @@ typedef enum{
 	USB_OTG_FS_ADDRESS = 	0x50000000 //BUS AHB2
 
 }memoryMapAddress_t;
+
+
+//typedef enum{
+//	TIM2_ADDRESS = 			0x40000000, //APB1 BUS
+//	TIM3_ADDRESS =			0x40000400,
+//	TIM4_ADDRESS =			0x40000800,
+//	TIM5_ADDRESS =			0x40000C00,
+//
+//	TIM1_ADDRESS = 			0x40010000, //APB2 BUS
+//	TIM9_ADDRESS = 			0x40014000,
+//	TIM10_ADDRESS = 		0x40014400,
+//	TIM11_ADDRESS = 		0x40014800,
+//
+//}TimerMapAddr_t;
 
 typedef enum{
 	RCC_OFFSET_CR =			0x00,
@@ -124,79 +143,103 @@ typedef enum{
 }RCC_offset_t;
 
 typedef enum{
-	OFFSET_PORTS =0x00,
+	OFFSET_PORTS =	0x00,
 }peripherial_offset_t;
 
 
-typedef enum{
-	TIMER_2,
-	TIMER_3,
-	TIMER_4,
-	TIMER_5
+//typedef enum{
+//	TIMER_2, //APB1
+//	TIMER_3,
+//	TIMER_4,
+//	TIMER_5,
+//
+//	TIMER_1 = 	10, //APB2 substrac 10
+//	TIMER_9 = 	26,
+//	TIMER_10 = 	27,
+//	TIMER_11 = 	28
+//
+//}timers_enb_t;
+//
+//typedef enum{
+//	TIMx_CR1 =		0x00,
+//	TIMx_CR2 =		0x04,
+//	TIMx_SMCR =		0x08,
+//	TIMx_DIER = 	0x0C,
+//	TIMx_SR = 		0x10,
+//	TIMx_EGR = 		0x14,
+//	TIMx_CCMR1 = 	0x18,
+//	TIMx_CCMR2 = 	0x1C,
+//	TIMx_CCER = 	0x20,
+//	TIMx_CNT = 		0x24, //important
+//	TIMx_PSC = 		0x28, //important
+//	TIMx_ARR = 		0x2C, //important
+//	TIMx_CCR1 = 	0x34,
+//	TIMx_CCR2 = 	0x38,
+//	TIMx_CCR3 =		0x3C,
+//	TIMx_CCR4 = 	0x40,
+//	TIMx_DCR = 		0x48,
+//	TIMx_DMAR = 	0x4C,
+//	TIM2_TIM5_OR = 	0x50
+//
+//}TIMx_register_offset_t;
+//
+//typedef enum{
+//	TIMx_DIV_BY_1 = 	(1u<<1),
+//	TIMx_DIV_BY_2 =		(1u<<2),
+//	TIMx_DIV_BY_4=		(1u<<3),
+//	TIMx_DIV_BY_8=		(1u<<4),
+//	TIMx_DIV_BY_16=		(1u<<5),
+//	TIMx_DIV_BY_32=		(1u<<6),
+//	TIMx_DIV_BY_64=		(1u<<7),
+//	TIMx_DIV_BY_128=	(1u<<8),
+//	TIMx_DIV_BY_256=	(1u<<9),
+//	TIMx_DIV_BY_512=	(1u<<10)
+//
+//}TIMx_preescaler_t;
+//
+//typedef enum{
+//	 TIM2_TO_TIM5_CEN= 		(1u<<0),
+//	 TIM2_TO_TIM5_UDIS=		(1u<<1),
+//	 TIM2_TO_TIM5_URS=		(1u<<2),
+//	 TIM2_TO_TIM5_OPM=		(1u<<3),
+//	 TIM2_TO_TIM5_DIR=		(1u<<4)
+// //faltan los demas bits //pendiente
+//}TIM2_TIM5_CR1_t;
+//
+//typedef enum{
+//	 TIM2_TO_TIM5_UIF= 		(1u<<0),
+//	 TIM2_TO_TIM5_CC1F=		(1u<<1),
+//	 TIM2_TO_TIM5_CC2IF=	(1u<<2),
+//	 TIM2_TO_TIM5_CC3IF=	(1u<<3),
+//	 TIM2_TO_TIM5_CC4IF=	(1u<<4),
+//	 TIM2_TO_TIM5_TIF=		(1u<<6),
+//	 TIM2_TO_TIM5_CC10F=	(1u<<9),
+//	 TIM2_TO_TIM5_CC20F=	(1u<<10),
+//	 TIM2_TO_TIM5_CC30F=	(1u<<11),
+//	 TIM2_TO_TIM5_CC40F=	(1u<<12),
+//
+//}TIM2_TIM5_SR_status_t;
+//
+//typedef enum{
+//	 TIM2_TO_TIM5_UIE= 		(1u<<0),
+//	 TIM2_TO_TIM5_CC1IE=	(1u<<1),
+//	 TIM2_TO_TIM5_CC2IE=	(1u<<2),
+//	 TIM2_TO_TIM5_CC3IE=	(1u<<3),
+//	 TIM2_TO_TIM5_CC4IE=	(1u<<4),
+//	 TIM2_TO_TIM5_TIE=		(1u<<6),
+//	 TIM2_TO_TIM5_UDE=		(1u<<8),
+//	 TIM2_TO_TIM5_CC1DE=	(1u<<9),
+//	 TIM2_TO_TIM5_CC2DE=	(1u<<10),
+//	 TIM2_TO_TIM5_CC3DE=	(1u<<11),
+//	 TIM2_TO_TIM5_CC4DE=	(1u<<12),
+//	 TIM2_TO_TIM5_TDE=		(1u<<14)
+//}TIM2_TIM5_DIER_t;
 
-}timers_enb_t;
-
-typedef enum{
-	TIMx_CR1 =0x00,
-	TIMx_CR2 =0x04,
-	TIMx_SMCR =0x08,
-	TIMx_DIER = 0x0C,
-	TIMx_SR = 0x10,
-	TIMx_EGR = 0x14,
-	TIMx_CCMR1 = 0x18,
-	TIMx_CCMR2 = 0x1C,
-	TIMx_CCER = 0x20,
-	TIMx_CNT = 0x24, //important
-	TIMx_PSC = 0x28, //important
-	TIMx_ARR = 0x2C, //important
-	TIMx_CCR1 = 0x34,
-	TIMx_CCR2 = 0x38,
-	TIMx_CCR3 =0x3C,
-	TIMx_CCR4 = 0x40,
-	TIMx_DCR = 0x48,
-	TIMx_DMAR = 0x4C,
-	TIM2_TIM5_OR = 0x50
-
-}TIM2_TIM5_register_offset_t;
-
-typedef enum{
-	TIMx_DIV_BY_1 = 	(1u<<1),
-	TIMx_DIV_BY_2 =		(1u<<2),
-	TIMx_DIV_BY_4=		(1u<<3),
-	TIMx_DIV_BY_8=		(1u<<4),
-	TIMx_DIV_BY_16=		(1u<<5),
-	TIMx_DIV_BY_32=		(1u<<6),
-	TIMx_DIV_BY_64=		(1u<<7),
-	TIMx_DIV_BY_128=	(1u<<8),
-	TIMx_DIV_BY_256=	(1u<<9),
-	TIMx_DIV_BY_512=	(1u<<10)
-
-}TIMx_preescaler_t;
-
-typedef enum{
-	 TIM2_5_CEN= 		(1u<<0),
-	 TIM2_5_UDIS=		(1u<<1),
-	 TIM2_5_URS=		(1u<<2),
-	 TIM2_5_OPM=		(1u<<3),
-	 TIM2_5_DIR=		(1u<<4)
- //faltan los demas bits
-}TIM2_TIM5_CR1_t;
-
-typedef enum{
-	 TIM2_5_UIF= 		(1u<<0),
-	 TIM2_5_CC1F=		(1u<<1),
-	 TIM2_5_CC2IF=		(1u<<2),
-	 TIM2_5_CC3IF=		(1u<<3),
-	 TIM2_5_CC4IF=		(1u<<4),
-	 TIM2_5_TIF=		(1u<<6),
-	 TIM2_5_CC10F=		(1u<<9),
-	 TIM2_5_CC20F=		(1u<<10),
-	 TIM2_5_CC30F=		(1u<<11),
-	 TIM2_5_CC40F=		(1u<<12),
-
-}TIM2_TIM5_SR_status_t;
-
+void InitSystem(void);
 Status_code_t ClockEnable(Set_Port_t Port_define, Enabled_Disabled_t Intention);
-Status_code_t Delay(uint32_t Miliseconds);
-void timer_1hz_1s_init(void);
+Status_code_t Delay(uint32_t microseconds);
+//void TIMER_WaitFlag(TimerMapAddr_t TIMER_addr);
+//void TIMER_cleanCountFlag(TimerMapAddr_t TIMER_addr);
+//void TIMER_Clock( Enabled_Disabled_t state, timers_enb_t Timer);
+
 #endif /* SYSTEM_SETTINGS_H_ */

@@ -7,6 +7,12 @@
  */
 
 #include "system_settings.h"
+#include "timers.h"
+
+void InitSystem(void){
+	Delay(100);
+
+}
 
 Status_code_t ClockEnable(Set_Port_t Port_define, Enabled_Disabled_t Intention){
 	Status_code_t status=Success;
@@ -67,64 +73,37 @@ Status_code_t ClockEnable(Set_Port_t Port_define, Enabled_Disabled_t Intention){
 
 }
 
-Status_code_t Delay(uint32_t Miliseconds){ //do it in microseconds later
+Status_code_t Delay(uint32_t microseconds){
 
-	uint64_t count =0;
-	uint64_t volatile time = 0;
-
-	if(Miliseconds >= 1000000){
+	if(microseconds < 100){
 		return DelayTimeNotSupported;
 	}
-	count= Miliseconds*2022;
+		uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_PSC);
+		uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_ARR);
+		uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_CNT);
+		uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_CR1);
 
-	while(time<count){
-		time++;
-	}
-	time =0;
-	count =0;
+		TIMER_Clock(Enabled,TIMER_2);
 
-	return Success;
-}
+		*TIM_REG_CR1 &= ~TIM2_TO_TIM5_CEN; // Disable timer before configuration
+		*TIM_REG_PSC = (PSC_TO_MICROSEC_DELAY-1);
+		*TIM_REG_ARR = (USEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MICROSEC_DELAY,microseconds) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+		TIMER_cleanCountFlag(TIM2_ADDRESS);
 
 
+		*TIM_REG_CNT = 0;
 
-void timer_1hz_1s_init(void){
-	uint32_t volatile *pClockControlReg = (uint32_t volatile *)(RCC_ADDRESS + RCC_OFFSET_APB1ENR);
-	*pClockControlReg |= (Enabled<<TIMER_2); //hasta aqui solo habilitamos el reloj del tim2
-	//la condiguracion es para 1hz entonces para el tiempo es 1/hz =s
+//		for(uint8_t i =0;i<100;i++){
+//			__NOP();
+//		}
+		*TIM_REG_CR1 |= TIM2_TO_TIM5_CEN;
+		TIMER_WaitFlag(TIM2_ADDRESS);
 
-	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_PSC);
-	*TIM_REG_PSC = (1600 - 1); //clk nuestro 16 000 000 (16Mhz) = 16 000 000/1 600 = 10 000
+		TIMER_Clock(Disabled,TIMER_2);
 
-	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_ARR);
-	*TIM_REG_ARR = (10000 - 1); //termina en 10 000/10 000 = 1
-
-	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_CNT);
-	*TIM_REG_CNT = 0;
-
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_CR1);
-	*TIM_REG_CR1 |= TIM2_5_CEN;
-
-//	NVIC_EnableIRQ(TIM2_IRQn);
-
+		return Success;
 
 }
 
-void timer_wait(void){
-	uint32_t volatile *TIM_REG_SR = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_SR); //agregamos el 10 para decirle el offset
-	while(!((TIM2_5_UIF) & (*TIM_REG_SR))){} //cuando sea falso que se mantenga, ver si es normalmente en 0 o 1
-	*TIM_REG_SR &= ~TIM2_5_UIF; //cuando salga volvemos a limpiar esa bandera
-	//para el delay aqui se deberia desactivar el timer para que no se siguiera repitinedo
-	//hacer librerias de delay
-}
 
-//uint8_t Delay_with_timer2(void){
-//
-//	//primero habilitar el reloj del timer2 APB1 con el offset del apb1
-//	//set el preescaler
-//	//set auto reload value
-//	//clear counter
-//	//enabled timer
-//
-//
-//}
+

@@ -1,5 +1,0 @@
-../Src/stepper_motor.c:11:15:Init_8bits_Stepper_Motor	16	static
-../Src/stepper_motor.c:26:15:Write_8bits_Stepper_Motor	24	static
-../Src/stepper_motor.c:38:15:Init_4bits_Stepper_Motor	40	static
-../Src/stepper_motor.c:87:15:Write_4bits_Stepper_Motor	32	static
-../Src/stepper_motor.c:121:10:search_bits	40	static

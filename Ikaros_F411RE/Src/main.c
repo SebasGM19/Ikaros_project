@@ -23,19 +23,25 @@
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
-int main(void){
-	bool Pin_state = true;
 
+int main(void){
+//	bool Pin_state = false;
+//	InitSystem();
 	SetPinMode(Port_A, Pin_5, Output);
 	GPIO_DigitalWrite(Port_A, Pin_5, Low);
+	GPIO_DigitalWrite(Port_A, Pin_5, High);
+	GPIO_DigitalWrite(Port_A, Pin_5, Low);
 
-		timer_1hz_1s_init();// solo se incializa y se repite una y otra vez
+
+//		timer_1hz_1s_init();// solo se incializa y se repite una y otra vez
 	while(1){
 
-		GPIO_DigitalWrite(Port_A, Pin_5, Pin_state);
-		Pin_state = !Pin_state;
-		timer_wait();
+		GPIO_DigitalWrite(Port_A, Pin_5, High);
 
+		Delay(1000000);
+
+		GPIO_DigitalWrite(Port_A, Pin_5, Low);
+		Delay(1000000);
 
 	}
 
