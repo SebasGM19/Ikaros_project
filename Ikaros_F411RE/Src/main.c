@@ -17,7 +17,9 @@
  */
 #include "system_settings.h"
 #include "gpios.h"
-#include "stepper_motor.h"
+//#include "stepper_motor.h"
+//#include "keypad_4x4.h"
+#include "timers.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
@@ -25,26 +27,24 @@
 
 
 int main(void){
-//	bool Pin_state = false;
-//	InitSystem();
 	SetPinMode(Port_A, Pin_5, Output);
 	GPIO_DigitalWrite(Port_A, Pin_5, Low);
 	GPIO_DigitalWrite(Port_A, Pin_5, High);
 	GPIO_DigitalWrite(Port_A, Pin_5, Low);
 
+//	TIM5_Init(1000000);
 
-//		timer_1hz_1s_init();// solo se incializa y se repite una y otra vez
 	while(1){
 
 		GPIO_DigitalWrite(Port_A, Pin_5, High);
 
-		Delay(1000000);
+		Delay(500000);
 
 		GPIO_DigitalWrite(Port_A, Pin_5, Low);
-		Delay(1000000);
+		Delay(500000);
 
 	}
-
+//	TIM5_Deinit();
 	return 0;
 }
 
