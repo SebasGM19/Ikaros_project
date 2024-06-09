@@ -9,10 +9,15 @@
 #define TIMERS_H_
 
 #include "system_settings.h"
+#include "gpios.h"
+
 
 #define TIM3_HANDLER TIM3_IRQHandler
 #define TIM4_HANDLER TIM4_IRQHandler
 #define TIM5_HANDLER TIM5_IRQHandler
+
+/*Value in microseconds Equals to 2^32 bit count*/
+#define MAX_TIME_TIM5_AND_TIM2	(uint32_t)(4294967290)
 
 typedef enum{
 	TIMER_2, //APB1
@@ -102,25 +107,13 @@ typedef enum{
 	 TIM2_TO_TIM5_TDE=		(1u<<14)
 }TIM2_TIM5_DIER_t;
 
-typedef enum{
-	TIM2_ADDRESS = 	0x40000000, //APB1 BUS
-	TIM3_ADDRESS =	0x40000400,
-	TIM4_ADDRESS =	0x40000800,
-	TIM5_ADDRESS =	0x40000C00,
-
-	TIM1_ADDRESS = 	0x40010000, //APB2 BUS
-	TIM9_ADDRESS = 	0x40014000,
-	TIM10_ADDRESS = 0x40014400,
-	TIM11_ADDRESS = 0x40014800,
-
-}TimerMapAddr_t;
 
 void volatile TIMER_WaitFlag(TimerMapAddr_t TIMER_addr);
 void volatile TIMER_Clock(Enabled_Disabled_t state, timers_enb_t Timer);
 void volatile TIMER_cleanCountFlag(TimerMapAddr_t TIMER_addr);
 
-void TIM3_Init(uint32_t microseconds);
-void TIM3_Deinit(void);
-void TIM3_HANDLER(void);
+Status_code_t TIM5_Init(uint32_t microseconds);
+void TIM5_Deinit(void);
+void TIM5_HANDLER(void);
 
 #endif /* TIMERS_H_ */

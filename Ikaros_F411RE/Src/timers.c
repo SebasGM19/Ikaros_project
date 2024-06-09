@@ -38,46 +38,52 @@ void volatile TIMER_WaitFlag(TimerMapAddr_t TIMER_addr){ //use of SR and UIF?
 }
 
 
+bool stados_led =false;
 
-void TIM3_HANDLER(void){
+void TIM5_HANDLER(void){
 	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CNT);
-	TIMER_cleanCountFlag(TIM3_ADDRESS);
+	TIMER_cleanCountFlag(TIM5_ADDRESS);
+
+	/*Develop all the functions to be executed here*/
+	stados_led = !stados_led;
+	GPIO_DigitalWrite(Port_A, Pin_5, stados_led);
 
 	*TIM_REG_CNT = 0;
 
 }
 
-void TIM3_Deinit(void){
+void TIM5_Deinit(void){
 
-	TIMER_Clock(Disabled,TIMER_3);
-	NVIC_DisableIRQ(TIM3_IRQn);
+	NVIC_DisableIRQ(TIM5_IRQn);
+	TIMER_Clock(Disabled,TIMER_5);
 
 }
 
-void TIM3_Init(uint32_t microseconds){ //init function to execute handler after the count happend
+Status_code_t TIM5_Init(uint32_t microseconds){ //init function to execute handler after the count happend
 
-	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_PSC);
-	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_ARR);
-	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CNT);
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
+	if(microseconds > MAX_TIME_TIM5_AND_TIM2){
+		return TimeSetNotSuported;
+	}
 
-	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_DIER);
-	TIMER_Clock(Enabled,TIMER_3);
+	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_PSC);
+	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_ARR);
+	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CNT);
+	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CR1);
+
+	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_DIER);
+	TIMER_Clock(Enabled,TIMER_5);
 
 	*TIM_REG_CR1 &= ~TIM2_TO_TIM5_CEN; // Disable timer before configuration
 	*TIM_REG_PSC = (PSC_TO_MICROSEC_DELAY-1);
 	*TIM_REG_ARR = (USEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MICROSEC_DELAY,microseconds) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
 	*TIM_REG_CNT = 0;
 
-//	for(uint8_t i =0;i<100;i++){
-//		__NOP();
-//	}
-
 	*TIM_REG_CR1 |= TIM2_TO_TIM5_CEN;
 
 
 	*TIM_REG_DIER |= TIM2_TO_TIM5_UIE;
 
-	NVIC_EnableIRQ(TIM3_IRQn);
+	NVIC_EnableIRQ(TIM5_IRQn);
+	return Success;
 
 }

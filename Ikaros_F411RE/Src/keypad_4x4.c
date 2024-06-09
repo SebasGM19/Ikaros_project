@@ -6,7 +6,9 @@
  */
 #include "keypad_4x4.h"
 
-Status_code_t init_keypad(keypad_alternatives_t keypad_alternative){
+/*ATENTION!! --FUNCTIONS NOT READY YET--*/
+
+Status_code_t Init_keypad(keypad_alternatives_t keypad_alternative){
 
 	Set_Port_t Port_option = Port_A; //set as a default
 	uint16_t volatile PositionsOfPin =0;
@@ -15,9 +17,6 @@ Status_code_t init_keypad(keypad_alternatives_t keypad_alternative){
 	switch(keypad_alternative){
 	case keypad_PortA:
 		Port_option = Port_A;
-		break;
-	case keypad_PortB:
-		Port_option = Port_B;
 		break;
 	case keypad_PortC:
 		Port_option = Port_C;
@@ -49,7 +48,7 @@ Status_code_t init_keypad(keypad_alternatives_t keypad_alternative){
 	return Success;
 }
 
-uint32_t read_keybord(keypad_alternatives_t keypad_alternative){
+uint32_t Read_keybord(keypad_alternatives_t keypad_alternative){
 
 	Set_Port_t Port_option = Port_A; //set as a default
 	uint8_t dataArray[MAX_INPUT_DATA];
@@ -62,9 +61,6 @@ uint32_t read_keybord(keypad_alternatives_t keypad_alternative){
 	switch(keypad_alternative){
 	case keypad_PortA:
 		Port_option = Port_A;
-		break;
-	case keypad_PortB:
-		Port_option = Port_B;
 		break;
 	case keypad_PortC:
 		Port_option = Port_C;
@@ -81,7 +77,7 @@ uint32_t read_keybord(keypad_alternatives_t keypad_alternative){
 		if(positionXY>3){
 			positionXY=0;
 		}
-	}while((dataArray[array_position]!= HASHTAG) && array_position < MAX_INPUT_DATA);
+	}while((dataArray[array_position]!= HASH));
 
 	if(array_position == 1){ //if # is only pressed will return 0
 		return 0;
@@ -114,7 +110,7 @@ void columnSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low
 
 	for(uint8_t column =0; column<NUM_OUTPUT_INPUT_COUNT; column++){ //aqui se mueve entre columnas
 
-		if(GPIO_DigitalRead(Port_option, (Pin_defined+column+INPUT_OFFSET))){
+		if(!GPIO_DigitalRead(Port_option, (Pin_defined+column+INPUT_OFFSET))){
 			Delay(100); //small delay to avoid debouncing
 			if(column == fourth_column){
 				pressed_boton = (ASCII_A)+column; //for A,B,C,D but will do nothing
@@ -123,7 +119,7 @@ void columnSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low
 				pressed_boton = STAR; //FOR * but will do nothing
 
 			}else if(column == third_column && row_to_low == fourth_row){
-				pressed_boton = HASHTAG; //FOR * but will do nothing
+				pressed_boton = HASH; //to exit the loop
 				pDataArray[(*data_lenght)] = pressed_boton;
 				(*data_lenght)+=1;
 
