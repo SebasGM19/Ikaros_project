@@ -11,7 +11,7 @@
 
 
 Status_code_t ClockEnable(Set_Port_t Port_define, Enabled_Disabled_t Intention){
-	Status_code_t status=Success;
+	Status_code_t status = Success;
 	uint32_t volatile *pClockControlReg = (uint32_t volatile *)(RCC_ADDRESS + RCC_OFFSET_AHB1ENR);
 
 	if(Intention){
@@ -104,7 +104,7 @@ void resetDelay(TimerMapAddr_t Timer){
 
 Status_code_t Delay(uint32_t microseconds){
 
-	if(microseconds < 100 || microseconds > MAX_TIME_TIM5_AND_TIM2){
+	if(microseconds < 50 || microseconds > MAX_TIME_TIM5_AND_TIM2){
 		return DelayTimeNotSupported;
 	}
 		uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM2_ADDRESS + TIMx_PSC);

@@ -37,34 +37,21 @@ void volatile TIMER_WaitFlag(TimerMapAddr_t TIMER_addr){ //use of SR and UIF?
 
 }
 
-
-bool stados_led =false;
+bool toggle_led = false;
 
 void TIM5_HANDLER(void){
-	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CNT);
 	TIMER_cleanCountFlag(TIM5_ADDRESS);
-
-	/*Develop all the functions to be executed here*/
-	stados_led = !stados_led;
-	GPIO_DigitalWrite(Port_A, Pin_5, stados_led);
-
-	*TIM_REG_CNT = 0;
+	/*Develop all the code to be executed in a second thread down here*/
+	toggle_led = !toggle_led;
+	GPIO_DigitalWrite(Port_A, Pin_5, toggle_led);
 
 }
 
-void TIM5_Deinit(void){
-
-	NVIC_DisableIRQ(TIM5_IRQn);
-	TIMER_Clock(Disabled,TIMER_5);
-
-}
-
-Status_code_t TIM5_Init(uint32_t microseconds){ //init function to execute handler after the count happend
+Status_code_t TIM5_Init(uint32_t microseconds){
 
 	if(microseconds > MAX_TIME_TIM5_AND_TIM2){
 		return TimeSetNotSuported;
 	}
-
 	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_PSC);
 	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_ARR);
 	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CNT);
@@ -85,5 +72,12 @@ Status_code_t TIM5_Init(uint32_t microseconds){ //init function to execute handl
 
 	NVIC_EnableIRQ(TIM5_IRQn);
 	return Success;
+
+}
+
+void TIM5_Deinit(void){
+
+	NVIC_DisableIRQ(TIM5_IRQn);
+	TIMER_Clock(Disabled,TIMER_5);
 
 }

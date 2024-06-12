@@ -13,6 +13,8 @@
 #include "stm32f4xx.h"
 #include "stm32f411xe.h"
 #include "stdbool.h"
+#include <string.h>
+#include <stdlib.h>
 
 
 

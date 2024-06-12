@@ -18,33 +18,34 @@
 #include "system_settings.h"
 #include "gpios.h"
 //#include "stepper_motor.h"
-//#include "keypad_4x4.h"
+#include "keypad_4x4.h"
 #include "timers.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
-
+uint32_t data_keypad=0;
 int main(void){
 	SetPinMode(Port_A, Pin_5, Output);
-	GPIO_DigitalWrite(Port_A, Pin_5, Low);
-	GPIO_DigitalWrite(Port_A, Pin_5, High);
-	GPIO_DigitalWrite(Port_A, Pin_5, Low);
 
 //	TIM5_Init(1000000);
+	Init_keypad(keypad_PortC);
 
 	while(1){
+		data_keypad = Read_keypad(keypad_PortC);
 
-		GPIO_DigitalWrite(Port_A, Pin_5, High);
+		Delay(1000000);
 
-		Delay(500000);
-
-		GPIO_DigitalWrite(Port_A, Pin_5, Low);
-		Delay(500000);
+//		GPIO_DigitalWrite(Port_A, Pin_5, High);
+//
+//		Delay(500000);
+//
+//		GPIO_DigitalWrite(Port_A, Pin_5, Low);
+//		Delay(500000);
 
 	}
-//	TIM5_Deinit();
+	TIM5_Deinit();
 	return 0;
 }
 
