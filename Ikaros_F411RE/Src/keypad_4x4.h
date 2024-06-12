@@ -10,6 +10,10 @@
 
 #define NUM_OUTPUT_INPUT_COUNT		(4)
 #define INPUT_OFFSET				(4)
+
+#define MAX_ROWS					(4)
+#define MAX_COLUMNS					(4)
+
 #define MAX_INPUT_DATA				(10)
 #define ASCII_A						(0x41)
 #define HASH						(0x23)
@@ -17,12 +21,10 @@
 
 #include "system_settings.h"
 #include "gpios.h"
-#include <string.h>
-#include <stdlib.h>
 
 typedef enum{
-	keypad_PortC = 0, //start with in the firts GPIO of the alternative corresponding to the R1
-	keypad_PortA = 4,
+	keypad_PortA = 4,	//start with the first GPIO of the alternative corresponding to the R1
+	keypad_PortC = 6,
 }keypad_alternatives_t;
 
 typedef enum{
@@ -48,7 +50,7 @@ Status_code_t Init_keypad(keypad_alternatives_t keypad_alternative);
 /*____________________________________________________________________________________________*/
 
 
-uint32_t Read_keybord(keypad_alternatives_t keypad_alternative);
+uint32_t Read_keypad(keypad_alternatives_t keypad_alternative);
 
 
 void rowSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low_states_t row_to_low);

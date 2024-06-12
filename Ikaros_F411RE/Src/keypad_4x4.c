@@ -6,7 +6,12 @@
  */
 #include "keypad_4x4.h"
 
-/*ATENTION!! --FUNCTIONS NOT READY YET--*/
+uint8_t KeypadMap[MAX_ROWS][MAX_COLUMNS] = {
+	{'1','2','3','A'},
+	{'4','5','6','B'},
+	{'7','8','9','C'},
+	{'*','0','#','D'}
+};
 
 Status_code_t Init_keypad(keypad_alternatives_t keypad_alternative){
 
@@ -48,7 +53,7 @@ Status_code_t Init_keypad(keypad_alternatives_t keypad_alternative){
 	return Success;
 }
 
-uint32_t Read_keybord(keypad_alternatives_t keypad_alternative){
+uint32_t Read_keypad(keypad_alternatives_t keypad_alternative){
 
 	Set_Port_t Port_option = Port_A; //set as a default
 	uint8_t dataArray[MAX_INPUT_DATA];
@@ -77,15 +82,15 @@ uint32_t Read_keybord(keypad_alternatives_t keypad_alternative){
 		if(positionXY>3){
 			positionXY=0;
 		}
-	}while((dataArray[array_position]!= HASH));
+	}while((dataArray[(array_position)]!= HASH));
 
-	if(array_position == 1){ //if # is only pressed will return 0
+	if(array_position == 0){ //if # is only pressed will return 0
 		return 0;
 	}
 
-	uint8_t finalDataArray[(array_position-1)];
-	memset(finalDataArray,'\0',(array_position-1));
-	strncat((char *)(finalDataArray), (const char *)(dataArray),(array_position-1));
+	uint8_t finalDataArray[(array_position)];
+	memset(finalDataArray,'\0',(array_position));
+	strncat((char *)(finalDataArray), (const char *)(dataArray),(array_position));
 	capture_value = (uint32_t)atoi((char *)finalDataArray);
 
 	return capture_value;
@@ -108,10 +113,15 @@ void columnSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low
 
 	uint8_t pressed_boton=0;
 
-	for(uint8_t column =0; column<NUM_OUTPUT_INPUT_COUNT; column++){ //aqui se mueve entre columnas
+	for(uint8_t column = 0; column<NUM_OUTPUT_INPUT_COUNT; column++){ //aqui se mueve entre columnas
 
 		if(!GPIO_DigitalRead(Port_option, (Pin_defined+column+INPUT_OFFSET))){
-			Delay(100); //small delay to avoid debouncing
+
+			while(!GPIO_DigitalRead(Port_option, (Pin_defined+column+INPUT_OFFSET)));//wait until the button is not pressed
+			/*later put a condition to avoid the infinite button pressed*/
+
+			Delay(10000); //small delay to avoid troubles
+
 			if(column == fourth_column){
 				pressed_boton = (ASCII_A)+column; //for A,B,C,D but will do nothing
 
@@ -121,10 +131,9 @@ void columnSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low
 			}else if(column == third_column && row_to_low == fourth_row){
 				pressed_boton = HASH; //to exit the loop
 				pDataArray[(*data_lenght)] = pressed_boton;
-				(*data_lenght)+=1;
 
 			}else{
-				pressed_boton = (3*row_to_low)+column;
+				pressed_boton = KeypadMap[row_to_low][column];
 				pDataArray[(*data_lenght)] = pressed_boton;
 				(*data_lenght)+=1;
 			}
