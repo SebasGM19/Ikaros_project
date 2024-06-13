@@ -30,10 +30,10 @@ int main(void){
 	SetPinMode(Port_A, Pin_5, Output);
 
 //	TIM5_Init(1000000);
-	Init_keypad(keypad_PortC);
+	Init_keypad(keypad_PortA);
 
 	while(1){
-		data_keypad = Read_keypad(keypad_PortC);
+		data_keypad = Read_keypad(keypad_PortA);
 
 		Delay(1000000);
 

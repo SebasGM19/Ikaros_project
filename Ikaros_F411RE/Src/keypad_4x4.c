@@ -82,7 +82,7 @@ uint32_t Read_keypad(keypad_alternatives_t keypad_alternative){
 		if(positionXY>3){
 			positionXY=0;
 		}
-	}while((dataArray[(array_position)]!= HASH));
+	}while((dataArray[(array_position)]!= HASH) && array_position < MAX_INPUT_DATA);
 
 	if(array_position == 0){ //if # is only pressed will return 0
 		return 0;
@@ -120,7 +120,7 @@ void columnSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low
 			while(!GPIO_DigitalRead(Port_option, (Pin_defined+column+INPUT_OFFSET)));//wait until the button is not pressed
 			/*later put a condition to avoid the infinite button pressed*/
 
-			Delay(10000); //small delay to avoid troubles
+			Delay(100000); //small delay to avoid troubles
 
 			if(column == fourth_column){
 				pressed_boton = (ASCII_A)+column; //for A,B,C,D but will do nothing

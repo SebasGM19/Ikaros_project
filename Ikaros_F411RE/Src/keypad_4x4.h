@@ -14,7 +14,7 @@
 #define MAX_ROWS					(4)
 #define MAX_COLUMNS					(4)
 
-#define MAX_INPUT_DATA				(10)
+#define MAX_INPUT_DATA				(9)
 #define ASCII_A						(0x41)
 #define HASH						(0x23)
 #define STAR						(0x2A)
