@@ -11,8 +11,31 @@
 #include "system_settings.h"
 #include "gpios.h"
 
+#define LCD_16X2
+//#define LCD_16X4
+
+
+#if defined(LCD_16X2)
 #define X_LENGTH (16)
 #define Y_HEIGHT (2)
+
+#elif defined(LCD_16X4)
+
+#define X_LENGTH (16)
+#define Y_HEIGHT (4)
+
+
+#else
+#error "Please select first the target STM32F4xx device used in your application (in stm32f4xx.h file)"
+#endif
+
+
+
+typedef struct{
+	Pin_number_t PIN_RS;
+	Pin_number_t PIN_RW;
+	Pin_number_t PIN_E;
+}controls_gpios_t;
 
 
 typedef enum {
