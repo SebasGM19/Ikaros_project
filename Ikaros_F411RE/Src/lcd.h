@@ -24,9 +24,8 @@
 #define X_LENGTH (16)
 #define Y_HEIGHT (4)
 
-
 #else
-#error "Please select first the target STM32F4xx device used in your application (in stm32f4xx.h file)"
+#error "Display Longitude Not Available"
 #endif
 
 
@@ -62,7 +61,7 @@ typedef enum{
 void set_new_coordinates(uint8_t new_X_value, uint8_t new_Y_value);
 void get_actual_coordinates(uint8_t X_position,uint8_t Y_position);
 void set_controls_gpios(Pin_number_t RS, Pin_number_t RW, Pin_number_t E,Set_Port_t PORT);
-Status_code_t Set_command(uint8_t command, command_type_t type);
+Status_code_t Send_command(uint8_t command, command_type_t type);
 Status_code_t Init_lcd(lcd_alternative_t lcd_option);
 void lcd_print(uint8_t* data, uint8_t *data_lenght);
 void lcd_printXY(uint8_t X_axis, uint8_t Y_axis, uint8_t* data, uint8_t *data_lenght);

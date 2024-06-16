@@ -80,7 +80,7 @@ void set_controls_gpios(Pin_number_t RS, Pin_number_t RW, Pin_number_t E,Set_Por
  * PIN_10 = 1, PIN_9 =0, PIN_8 = 0, PIN_7 = 1
  *
  */
-Status_code_t Set_command(uint8_t command, command_type_t type){
+Status_code_t Send_command(uint8_t command, command_type_t type){
 	uint8_t MSB = 0;
 	uint8_t LSB = 0;
 
@@ -145,30 +145,37 @@ Status_code_t Init_lcd(lcd_alternative_t lcd_alternative){
 	}
 
 	Delay(100000);
-	Set_command(SET_8_BITS_MODE, set_command);
+	Send_command(SET_8_BITS_MODE, set_command);
 	Delay(5000);
-	Set_command(SET_8_BITS_MODE, set_command);
+	Send_command(SET_8_BITS_MODE, set_command);
 	Delay(5000);
-	Set_command(SET_8_BITS_MODE, set_command);
+	Send_command(SET_8_BITS_MODE, set_command);
 	Delay(5000);
-	Set_command(SET_4_BITS_CONFIGURATION, set_command);
+	Send_command(SET_4_BITS_CONFIGURATION, set_command);
 	Delay(5000);
-	Set_command(SET_2_LINES_QUALITY_5X8, set_command);
+	Send_command(SET_2_LINES_QUALITY_5X8, set_command);
 	Delay(5000);
-	Set_command(START_LCD_WITHOUT_CURSOR, set_command);
+	Send_command(START_LCD_WITHOUT_CURSOR, set_command);
 	Delay(5000);
-	Set_command(CLEAN_SCREEN, set_command);
+	Send_command(CLEAN_SCREEN, set_command);
 	Delay(5000);
 
 	return Success;
 }
 
 /*en esta funcion solo se podra escribir en la primera linea, cada vez que se escriba se limpiara la pantalla
- * volvera a la posicion inicial y despues escribira nuevamente el mensaje
+ * volvera a la posicion inicial (0,0) y despues escribira nuevamente el mensaje
  */
 void lcd_print(uint8_t* data, uint8_t *data_lenght){
-//aqui no se seleccionara la posicion, solo imprimira en donde sea que este que al encender es la posicion 0,0
 
+	uint8_t data_left_to_send =0;
+
+	lcd_clean_screen();
+	while(data_left_to_send < (*data_lenght)){
+		Send_command((*data), write_command);
+		data_left_to_send++;
+		data++;
+	}
 }
 
 
@@ -183,12 +190,13 @@ void lcd_printXY(uint8_t X_axis, uint8_t Y_axis, uint8_t* data, uint8_t *data_le
 
 //limpia la pantalla
 void lcd_clean_screen(void){
-
+	Send_command(CLEAN_SCREEN, set_command);
+	lcd_return_to_home();
 }
 
 //vuelve a la posicion 0,0
 void lcd_return_to_home(void){
-
+	Send_command(RETURN_HOME, set_command);
 }
 
 
