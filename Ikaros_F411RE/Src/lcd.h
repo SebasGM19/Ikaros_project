@@ -14,8 +14,12 @@
 #define LCD_16X2
 //#define LCD_16X4
 
+#define POSITION_CERO (0x80)
+#define START_AT_ROW1	(0x00)
+#define START_AT_ROW2	(0x40)
 
 #if defined(LCD_16X2)
+
 #define X_LENGTH (16)
 #define Y_HEIGHT (2)
 
@@ -23,6 +27,8 @@
 
 #define X_LENGTH (16)
 #define Y_HEIGHT (4)
+#define START_AT_ROW3	(0x10)
+#define START_AT_ROW4	(0x50)
 
 #else
 #error "Display Longitude Not Available"
@@ -47,8 +53,8 @@ typedef enum {
 
 typedef enum {
 
-	lcd_PortB=7,
-	lcd_PortC=10
+	lcd_PortB=4,
+	lcd_PortC=7
 
 }lcd_alternative_t;
 
@@ -62,7 +68,7 @@ void set_new_coordinates(uint8_t new_X_value, uint8_t new_Y_value);
 void get_actual_coordinates(uint8_t X_position,uint8_t Y_position);
 void set_controls_gpios(Pin_number_t RS, Pin_number_t RW, Pin_number_t E,Set_Port_t PORT);
 Status_code_t Send_command(uint8_t command, command_type_t type);
-Status_code_t Init_lcd(lcd_alternative_t lcd_option);
+Status_code_t lcd_init(lcd_alternative_t lcd_option);
 void lcd_print(uint8_t* data, uint8_t *data_lenght);
 void lcd_printXY(uint8_t X_axis, uint8_t Y_axis, uint8_t* data, uint8_t *data_lenght);
 void lcd_clean_screen(void);

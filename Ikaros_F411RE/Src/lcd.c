@@ -10,10 +10,11 @@
 uint8_t volatile coordinate_X = 0;//Coordinates
 uint8_t volatile coordinate_Y = 0;
 
-uint8_t letraA = 0b01000001;
 
 //todos estos comandos se deben enviar con el rs en 0 espera minima de 5ms en cada indicacion excepto cuando se energiza (100ms)
 #define SET_8_BITS_MODE				(0x30) //indica que se quiere configurar 3
+#define SET_8_BITS_MODE2				(0x32) //indica que se quiere configurar 3
+
 #define SET_4_BITS_CONFIGURATION	(0x20) //4BITS 2LINES, 5x8
 #define SET_2_LINES_QUALITY_5X8		(0x28)
 #define START_LCD_WITHOUT_CURSOR	(0x0C)
@@ -28,11 +29,6 @@ uint8_t letraA = 0b01000001;
 #define MOVE_DISPLAY_TO_LEFT			(0x18) //mueve la escritua de la pantalla a la izquierda
 #define MOVE_DISPLAY_TO_RIGHT			(0x1C) //mueve la escritur de la pantalla a la derecha
 
-//comandos de posicion altura
-#define START_AT_ROW1	(0x00)  //para definir la posicion de debe de mandar el comando de donde desea iniciar
-#define START_AT_ROW2	(0x40)
-#define START_AT_ROW3	(0x10)
-#define START_AT_ROW4	(0x50)
 
 //NOTA
 /*
@@ -80,38 +76,42 @@ void set_controls_gpios(Pin_number_t RS, Pin_number_t RW, Pin_number_t E,Set_Por
  * PIN_10 = 1, PIN_9 =0, PIN_8 = 0, PIN_7 = 1
  *
  */
+
+
 Status_code_t Send_command(uint8_t command, command_type_t type){
 	uint8_t MSB = 0;
 	uint8_t LSB = 0;
 
 	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_RS, type);
 
-	MSB = (command >> 4);
+	MSB = (command & 0xF0)>>4;
 	LSB = (command & 0x0F); 	//keep only the first 4 bits
 
-	for(uint8_t i =0; i<3;i++){
+	for(uint8_t i =0; i<4;i++){
 		GPIO_DigitalWrite(control_alternative.PORT, (control_alternative.PIN_D4 + i), (MSB&1));
 		MSB = MSB>>1;
 	}
-	Delay(100);
+
+	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_E, High);
+	Delay(10);
 	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_E, Low);
-	Delay(100);
+	Delay(10);
 
 
-	for(uint8_t i =0; i<3;i++){
+	for(uint8_t i =0; i<4;i++){
 		GPIO_DigitalWrite(control_alternative.PORT, (control_alternative.PIN_D4 + i), (LSB&1));
 		LSB = LSB>>1;
 	}
 	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_E, High);
-	Delay(100);
+	Delay(10);
 	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_E, Low);
-	Delay(100);
+	Delay(10);
 
 	return Success;
 
 }
 
-Status_code_t Init_lcd(lcd_alternative_t lcd_alternative){
+Status_code_t lcd_init(lcd_alternative_t lcd_alternative){
 
 	//EN tODo EL INIT DEBE DE ESTAR RS EN 0 , CUANDO PASE A ESCRITURA SE DEBERA PASAR A 1
 	uint16_t volatile PositionsOfPin =0;
@@ -141,7 +141,7 @@ Status_code_t Init_lcd(lcd_alternative_t lcd_alternative){
 
 	/*set to low all gpio*/
 	for(uint8_t i =0; i<4; i++){
-		GPIO_DigitalWrite(control_alternative.PORT, (lcd_alternative+i), Low);
+		GPIO_DigitalWrite(control_alternative.PORT, (control_alternative.PIN_D4+i), Low);
 	}
 
 	Delay(100000);
@@ -158,7 +158,10 @@ Status_code_t Init_lcd(lcd_alternative_t lcd_alternative){
 	Send_command(START_LCD_WITHOUT_CURSOR, set_command);
 	Delay(5000);
 	Send_command(CLEAN_SCREEN, set_command);
-	Delay(5000);
+	Delay(50000);
+	Send_command(POSITION_CERO, set_command);
+	Delay(50000);
+
 
 	return Success;
 }
@@ -169,10 +172,12 @@ Status_code_t Init_lcd(lcd_alternative_t lcd_alternative){
 void lcd_print(uint8_t* data, uint8_t *data_lenght){
 
 	uint8_t data_left_to_send =0;
+//	Send_command(RETURN_HOME, set_command);
 
-	lcd_clean_screen();
+//	lcd_clean_screen();
 	while(data_left_to_send < (*data_lenght)){
 		Send_command((*data), write_command);
+//		Delay(5000);
 		data_left_to_send++;
 		data++;
 	}
@@ -184,6 +189,29 @@ void lcd_print(uint8_t* data, uint8_t *data_lenght){
  * en esta funcion no se borrara nada de infor, solo se sustituira, a menos que se ingrese la funcion CLENA_SCREEN
  */
 void lcd_printXY(uint8_t X_axis, uint8_t Y_axis, uint8_t* data, uint8_t *data_lenght){
+	uint8_t X_position;
+	uint8_t Y_position;
+
+	switch(Y_axis){
+	case 1:
+		Y_position = POSITION_CERO | START_AT_ROW1;
+		break;
+	case 2:
+		Y_position = POSITION_CERO | START_AT_ROW2;
+		break;
+#if defined(LCD_16X4)
+	case 3:
+		Y_position = POSITION_CERO | START_AT_ROW3;
+		break;
+	case 4:
+		Y_position = POSITION_CERO | START_AT_ROW4;
+		break;
+#endif
+	default:
+		Y_position = POSITION_CERO | START_AT_ROW1;
+		break;
+	}
+
 	//despues de las configuraciones imprimir
 	lcd_print(data,data_lenght);
 }

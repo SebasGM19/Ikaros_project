@@ -43,7 +43,7 @@ typedef enum{
 	Clear_two_bits=			0x03, 	//to clean 1 GPIOS
 	Clear_four_bits = 		0xF, 	//to clean 2 GPIOS
 	Clear_eight_bits =		0xFF, 	//to clean 4 GPIOS
-	clear_fourteen_bits = 	0x3FF, 	//to clean 7 GPIOS
+	clear_fourteen_bits = 	0x3FFF, 	//to clean 7 GPIOS
 	Clear_sixteen_bits =	0xFFFF 	//to clean 8 GPIOS
 }RegAuxClean_t;
 
