@@ -30,7 +30,11 @@ typedef enum{
 	ClockNotSupported,
 	OptionNotSupported,
 	WrongParameter,
-	TimeSetNotSuported
+	TimeSetNotSuported,
+
+	lcd_Wrong_X_Axis_Value,
+	lcd_Wrong_Y_Axis_Value
+
 }Status_code_t;
 
 typedef enum{
@@ -39,11 +43,12 @@ typedef enum{
 }Enabled_Disabled_t;
 
 typedef enum{
-	Clean_one_bit =			0x01,
-	Clear_two_bits=			0x03,
-	Clear_four_bits = 		0xF,
-	Clear_eight_bits =		0xFF,
-	Clear_sixteen_bits =	0xFFFF
+	Clean_one_bit =			0x01, 	//to clean 1 bit
+	Clear_two_bits=			0x03, 	//to clean 1 GPIOS
+	Clear_four_bits = 		0xF, 	//to clean 2 GPIOS
+	Clear_eight_bits =		0xFF, 	//to clean 4 GPIOS
+	clear_fourteen_bits = 	0x3FFF, 	//to clean 7 GPIOS
+	Clear_sixteen_bits =	0xFFFF 	//to clean 8 GPIOS
 }RegAuxClean_t;
 
 

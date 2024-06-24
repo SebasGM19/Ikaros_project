@@ -17,37 +17,103 @@
  */
 #include "system_settings.h"
 #include "gpios.h"
-//#include "stepper_motor.h"
+#include "stepper_motor.h"
 #include "keypad_4x4.h"
 #include "timers.h"
+#include "lcd.h"
+
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
 uint32_t data_keypad=0;
-int main(void){
-	SetPinMode(Port_A, Pin_5, Output);
+uint8_t titulo1[] = "NUM:          ";
+uint8_t titulo2[] = "   BIEN HECHO   ";
+uint32_t data_key =0;
 
-//	TIM5_Init(1000000);
-	Init_keypad(keypad_PortC);
+
+int main(void){
+	lcd_init(lcd_PortB);
+	Init_keypad(keypad_PortA);
+	uint8_t longitude = (sizeof(titulo1)/sizeof(titulo1[0]))-1;
+	uint8_t longitude2 = (sizeof(titulo2)/sizeof(titulo2[0]))-1;
+//	uint8_t longitude3 = (sizeof(titulo3)/sizeof(titulo3[0]))-1;
+
+
 
 	while(1){
-		data_keypad = Read_keypad(keypad_PortC);
-
+		lcd_printXY(0, 0, titulo1, longitude);
+		data_key = print_keypad(keypad_PortA, 4, 0);
+		Delay(1000000);
+		lcd_printXY(0, 0, titulo2, longitude2);
 		Delay(1000000);
 
-//		GPIO_DigitalWrite(Port_A, Pin_5, High);
-//
-//		Delay(500000);
-//
-//		GPIO_DigitalWrite(Port_A, Pin_5, Low);
-//		Delay(500000);
-
 	}
-	TIM5_Deinit();
 	return 0;
 }
+
+
+
+//int main(void){
+//	lcd_init(lcd_PortB);
+//	uint8_t longitude = (sizeof(titulo1)/sizeof(titulo1[0]))-1;
+//	uint8_t longitude2 = (sizeof(titulo2)/sizeof(titulo2[0]))-1;
+//	uint8_t longitude3 = (sizeof(titulo3)/sizeof(titulo3[0]))-1;
+//	uint8_t longitude4 = (sizeof(titulo4)/sizeof(titulo4[0]))-1;
+//	uint8_t longitude5 = (sizeof(titulo5)/sizeof(titulo5[0]))-1;
+//	uint8_t longitude6 = (sizeof(titulo6)/sizeof(titulo6[0]))-1;
+//	uint8_t longitude7 = (sizeof(titulo7)/sizeof(titulo7[0]))-1;
+//
+//
+////	SetPinMode(Port_C, Pin_13, Input);
+//
+//
+//
+//
+//	while(1){
+//	//	TIM5_Init(1000000);
+////	Init_keypad(keypad_PortA);
+//	lcd_printXY(2, 0, titulo1, longitude);
+//	lcd_clean_screen();
+//	lcd_print(titulo2, longitude2);
+//	Delay(1000000);
+//
+//
+//	for(uint8_t i =0; i<4; i++){
+//		lcd_move_display(move_right);
+//		Delay(200000);
+//	}
+//	Delay(1000000);
+//	for(uint8_t i =0; i<4; i++){
+//		lcd_move_display(move_left);
+//		Delay(200000);
+//	}
+//
+//	lcd_clean_screen();
+//	Delay(1000000);
+//
+//	lcd_printXY(5, 1, titulo7, longitude7);
+//	Delay(1000000);
+//
+//	for(uint8_t i =0; i<8; i++){
+//		lcd_move_cursor(move_left);
+////		Delay(5000);
+//	}
+////	Delay(1000000);
+//
+//	lcd_print(titulo6, longitude6);
+//	Delay(1000000);
+//
+//	lcd_clean_screen();
+//	Delay(1000000);
+//
+//
+//
+//
+//	}
+//	return 0;
+//}
 
 //int main(void){
 //

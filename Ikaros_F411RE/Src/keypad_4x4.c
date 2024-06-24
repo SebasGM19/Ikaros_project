@@ -6,6 +6,7 @@
  */
 #include "keypad_4x4.h"
 
+
 uint8_t KeypadMap[MAX_ROWS][MAX_COLUMNS] = {
 	{'1','2','3','A'},
 	{'4','5','6','B'},
@@ -77,12 +78,62 @@ uint32_t Read_keypad(keypad_alternatives_t keypad_alternative){
 
 	do{
 		rowSequence(Port_option, keypad_alternative, (first_row +positionXY));
-		columnSequence(Port_option,keypad_alternative,(first_row + positionXY),dataArray,&array_position);
+		columnSequence(Port_option,keypad_alternative,(first_row + positionXY),dataArray,&array_position,disabled);
 		positionXY++;
 		if(positionXY>3){
 			positionXY=0;
 		}
-	}while((dataArray[(array_position)]!= HASH));
+	}while((dataArray[(array_position)]!= HASH) && array_position < MAX_INPUT_DATA);
+
+	if(array_position == 0){ //if # is only pressed will return 0
+		return 0;
+	}
+
+	uint8_t finalDataArray[(array_position)];
+	memset(finalDataArray,'\0',(array_position));
+	strncat((char *)(finalDataArray), (const char *)(dataArray),(array_position));
+	capture_value = (uint32_t)atoi((char *)finalDataArray);
+
+	return capture_value;
+}
+
+
+uint32_t print_keypad(keypad_alternatives_t keypad_alternative, uint8_t X_axis, uint8_t Y_axis){
+
+	Status_code_t status = Success;
+	Set_Port_t Port_option = Port_A; //set as a default
+	uint8_t dataArray[MAX_INPUT_DATA];
+	uint8_t positionXY =0;
+	uint8_t array_position =0;
+	uint32_t capture_value =0;
+	memset(dataArray,'\0',MAX_INPUT_DATA);
+
+
+
+	switch(keypad_alternative){
+	case keypad_PortA:
+		Port_option = Port_A;
+		break;
+	case keypad_PortC:
+		Port_option = Port_C;
+		break;
+	default:
+		return OptionNotSupported;
+	}
+
+	status = lcd_set_cursor_position(X_axis,Y_axis);
+	if(status!= Success){
+		return 0;
+	}
+
+	do{
+		rowSequence(Port_option, keypad_alternative, (first_row +positionXY));
+		columnSequence(Port_option,keypad_alternative,(first_row + positionXY),dataArray,&array_position,enable);
+		positionXY++;
+		if(positionXY>3){
+			positionXY=0;
+		}
+	}while((dataArray[(array_position)]!= HASH) && array_position < MAX_INPUT_DATA);
 
 	if(array_position == 0){ //if # is only pressed will return 0
 		return 0;
@@ -98,7 +149,7 @@ uint32_t Read_keypad(keypad_alternatives_t keypad_alternative){
 
 void rowSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low_states_t row_to_low){
 
-	for(uint8_t i =0; i<NUM_OUTPUT_INPUT_COUNT; i++){ //aqui se mueve en filas
+	for(uint8_t i =0; i<NUM_OUTPUT_INPUT_COUNT; i++){
 
 		if(i == row_to_low){
 			GPIO_DigitalWrite(Port_option, (Pin_defined+i),Low);
@@ -109,7 +160,7 @@ void rowSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low_st
 
 }
 
-void columnSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low_states_t row_to_low, uint8_t* pDataArray, uint8_t* data_lenght){
+void columnSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low_states_t row_to_low, uint8_t* pDataArray, uint8_t* data_lenght, print_activate_t opPrint){
 
 	uint8_t pressed_boton=0;
 
@@ -120,7 +171,7 @@ void columnSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low
 			while(!GPIO_DigitalRead(Port_option, (Pin_defined+column+INPUT_OFFSET)));//wait until the button is not pressed
 			/*later put a condition to avoid the infinite button pressed*/
 
-			Delay(10000); //small delay to avoid troubles
+			Delay(150000); //small delay to avoid troubles
 
 			if(column == fourth_column){
 				pressed_boton = (ASCII_A)+column; //for A,B,C,D but will do nothing
@@ -136,6 +187,10 @@ void columnSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low
 				pressed_boton = KeypadMap[row_to_low][column];
 				pDataArray[(*data_lenght)] = pressed_boton;
 				(*data_lenght)+=1;
+
+				if(opPrint){
+					lcd_print(&pressed_boton, 1);
+				}
 			}
 		}
 
