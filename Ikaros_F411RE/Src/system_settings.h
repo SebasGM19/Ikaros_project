@@ -30,7 +30,11 @@ typedef enum{
 	ClockNotSupported,
 	OptionNotSupported,
 	WrongParameter,
-	TimeSetNotSuported
+	TimeSetNotSuported,
+
+	lcd_Wrong_X_Axis_Value,
+	lcd_Wrong_Y_Axis_Value
+
 }Status_code_t;
 
 typedef enum{

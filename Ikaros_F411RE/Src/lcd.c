@@ -4,70 +4,26 @@
  *  Created on: Jun 12, 2024
  *      Author: sebas
  */
-
 #include "lcd.h"
 
-uint8_t volatile coordinate_X = 0;//Coordinates
-uint8_t volatile coordinate_Y = 0;
-
-
-//todos estos comandos se deben enviar con el rs en 0 espera minima de 5ms en cada indicacion excepto cuando se energiza (100ms)
-#define SET_8_BITS_MODE				(0x30) //indica que se quiere configurar 3
-#define SET_8_BITS_MODE2				(0x32) //indica que se quiere configurar 3
-
-#define SET_4_BITS_CONFIGURATION	(0x20) //4BITS 2LINES, 5x8
-#define SET_2_LINES_QUALITY_5X8		(0x28)
-#define START_LCD_WITHOUT_CURSOR	(0x0C)
-#define CLEAN_SCREEN		 		(0x01)
-//then indicate the position, you should indicate the position to start
-//the function lcd_print() se utilizara para solo mostrar en la primera linea y cada vez se b¿r
-
-//comandos de posicion
-#define RETURN_HOME						(0x02) //vuelve al inicio (0,0)
-#define MOVE_CURSOS_TO_LEFT				(0x10)
-#define MOVE_CURSOR_TO_RIGHT			(0x14)
-#define MOVE_DISPLAY_TO_LEFT			(0x18) //mueve la escritua de la pantalla a la izquierda
-#define MOVE_DISPLAY_TO_RIGHT			(0x1C) //mueve la escritur de la pantalla a la derecha
-
-
-//NOTA
-/*
- * ROW 1 start at 0x00 and end in 0x0F it meand is map from = 0 to 15 in Xaxis of the firts row(Yaxis 0)
- */
-
-//para definir la posicion de debe de mandar el comando de donde desea iniciar
-/*
- * se debera definir el inicio de la escritura con la posicion 0x80|START_AT_ROWX = comando a mandar
- * ejemplo:
- * 0x80|0x40 = 0xC0 este comando sera enviado despues de aplicar el comando CLEAN_SCREEN
- */
 
 controls_gpios_t volatile control_alternative;
-
-void set_new_coordinates(uint8_t new_X_value, uint8_t new_Y_value){
-	coordinate_X = new_X_value;
-	coordinate_Y = new_Y_value;
-}
-
-void get_actual_coordinates(uint8_t X_position,uint8_t Y_position){
-	X_position = coordinate_X;
-	Y_position = coordinate_Y;
-}
-
-void set_controls_gpios(Pin_number_t RS, Pin_number_t RW, Pin_number_t E,Set_Port_t PORT){
-	control_alternative.PIN_RS = RS;
-	control_alternative.PIN_RW = RW;
-	control_alternative.PIN_E = E;
-	control_alternative.PIN_D4 = (E+1);
-	control_alternative.PORT = PORT;
-
-}
+//uint8_t volatile coordinate_X = 0;//Coordinates
+//uint8_t volatile coordinate_Y = 0;
+//
+//
+//void set_new_coordinates(uint8_t new_X_value, uint8_t new_Y_value){
+//	coordinate_X = new_X_value;
+//	coordinate_Y = new_Y_value;
+//}
+//
+//void get_actual_coordinates(uint8_t X_position,uint8_t Y_position){
+//	X_position = coordinate_X;
+//	Y_position = coordinate_Y;
+//}
 
 
 /*
- * para enviar un comando se separa en 4 bits el ultimo bit de los MSB correspondera al menor GPIO
- * Es decir si es configuracion B el PIN_7 sera al que le corresponde el ultimo bit de los 4
- *
  * Example: 0001 1001
  * 0001
  * PIN_10 = 0, PIN_9 =0, PIN_8 = 0, PIN_7 = 1
@@ -76,7 +32,14 @@ void set_controls_gpios(Pin_number_t RS, Pin_number_t RW, Pin_number_t E,Set_Por
  * PIN_10 = 1, PIN_9 =0, PIN_8 = 0, PIN_7 = 1
  *
  */
+void set_controls_gpios(Pin_number_t RS, Pin_number_t RW, Pin_number_t E,Set_Port_t PORT){
+	control_alternative.PIN_RS = RS;
+	control_alternative.PIN_RW = RW;
+	control_alternative.PIN_E = E;
+	control_alternative.PIN_D4 = (E+1);
+	control_alternative.PORT = PORT;
 
+}
 
 Status_code_t Send_command(uint8_t command, command_type_t type){
 	uint8_t MSB = 0;
@@ -111,9 +74,12 @@ Status_code_t Send_command(uint8_t command, command_type_t type){
 
 }
 
+/*
+ * function to init the lcd configuration selected, all the commands are set_commmands, it means, RS will be 0 and
+ * RS in 1 for write data
+ */
 Status_code_t lcd_init(lcd_alternative_t lcd_alternative){
 
-	//EN tODo EL INIT DEBE DE ESTAR RS EN 0 , CUANDO PASE A ESCRITURA SE DEBERA PASAR A 1
 	uint16_t volatile PositionsOfPin =0;
 
 	switch(lcd_alternative){
@@ -159,72 +125,115 @@ Status_code_t lcd_init(lcd_alternative_t lcd_alternative){
 	Delay(5000);
 	Send_command(CLEAN_SCREEN, set_command);
 	Delay(50000);
+	Send_command(RETURN_HOME, set_command);
+	Delay(50000);//minimum delay
 	Send_command(POSITION_CERO, set_command);
 	Delay(50000);
+//	coordinate_Y = 1;
+//	coordinate_X = 0;
 
 
 	return Success;
 }
 
-/*en esta funcion solo se podra escribir en la primera linea, cada vez que se escriba se limpiara la pantalla
- * volvera a la posicion inicial (0,0) y despues escribira nuevamente el mensaje
+/*
+ * This function will only print the data starting at position 0,1
  */
-void lcd_print(uint8_t* data, uint8_t *data_lenght){
+void lcd_print(uint8_t* data, uint8_t data_lenght){
 
 	uint8_t data_left_to_send =0;
-//	Send_command(RETURN_HOME, set_command);
 
-//	lcd_clean_screen();
-	while(data_left_to_send < (*data_lenght)){
+	while(data_left_to_send < data_lenght){
 		Send_command((*data), write_command);
-//		Delay(5000);
+//		coordinate_X++;
 		data_left_to_send++;
 		data++;
 	}
+//	coordinate_X++;
 }
 
 
 /*
- * en esta funcion se debera elegir cada vez en que posicion se quera escribir, en coordenada x y y, estara mas completa
- * en esta funcion no se borrara nada de infor, solo se sustituira, a menos que se ingrese la funcion CLENA_SCREEN
+ * In this function you must indicate the axis to start the print
+ * the printed data will not be deleted from its position
  */
-void lcd_printXY(uint8_t X_axis, uint8_t Y_axis, uint8_t* data, uint8_t *data_lenght){
-	uint8_t X_position;
-	uint8_t Y_position;
+Status_code_t lcd_printXY(uint8_t X_axis, uint8_t Y_axis, uint8_t* data, uint8_t data_lenght){
+	Status_code_t status = Success;
+	status = lcd_set_cursor_position(X_axis, Y_axis);
+	if(status!= Success){
+		return status;
+	}
+	lcd_print(data, data_lenght);
+	return Success;
+}
 
+/*
+ * this function cleans the screen and return the position to the beginning
+ */
+void lcd_clean_screen(void){
+	Send_command(CLEAN_SCREEN, set_command);
+	Delay(50000);//minimum delay
+	lcd_return_to_home();
+}
+
+/*
+ * this function moves the data in te display one position to the selected direction
+ */
+void lcd_move_display(direction_to_move_t direction){
+	if(direction == move_left){
+		Send_command(MOVE_DISPLAY_TO_LEFT, set_command);
+
+	}else{
+		Send_command(MOVE_DISPLAY_TO_RIGHT, set_command);
+	}
+	Delay(500);//minimum delay
+
+}
+
+void lcd_move_cursor(direction_to_move_t direction){
+	if(direction == move_left){
+		Send_command(MOVE_CURSOR_TO_LEFT, set_command);
+
+	}else{
+		Send_command(MOVE_CURSOR_TO_RIGHT, set_command);
+	}
+	Delay(500);//minimum delay
+}
+
+//returns to position 0,1
+void lcd_return_to_home(void){
+	Send_command(RETURN_HOME, set_command);
+	Delay(50000);//minimum delay
+
+}
+
+Status_code_t lcd_set_cursor_position(uint8_t X_axis, uint8_t Y_axis){
+	uint8_t Y_position;
+	uint8_t real_position;
 	switch(Y_axis){
-	case 1:
+	case 0:
 		Y_position = POSITION_CERO | START_AT_ROW1;
 		break;
-	case 2:
+	case 1:
 		Y_position = POSITION_CERO | START_AT_ROW2;
 		break;
 #if defined(LCD_16X4)
-	case 3:
+	case 2:
 		Y_position = POSITION_CERO | START_AT_ROW3;
 		break;
-	case 4:
+	case 3:
 		Y_position = POSITION_CERO | START_AT_ROW4;
 		break;
 #endif
 	default:
-		Y_position = POSITION_CERO | START_AT_ROW1;
+		return lcd_Wrong_Y_Axis_Value;
 		break;
 	}
+//	coordinate_Y = Y_axis;
 
-	//despues de las configuraciones imprimir
-	lcd_print(data,data_lenght);
+	real_position = Y_position | X_axis;
+	Send_command(real_position, set_command);
+	Delay(5000);//minimum delay
+	return Success;
 }
-
-//limpia la pantalla
-void lcd_clean_screen(void){
-	Send_command(CLEAN_SCREEN, set_command);
-	lcd_return_to_home();
-}
-
-//vuelve a la posicion 0,0
-void lcd_return_to_home(void){
-	Send_command(RETURN_HOME, set_command);
-}
-
 
