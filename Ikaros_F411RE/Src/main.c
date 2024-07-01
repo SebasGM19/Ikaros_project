@@ -33,25 +33,39 @@ uint8_t titulo2[] = "   BIEN HECHO   ";
 uint32_t data_key =0;
 
 
-int main(void){
-	lcd_init(lcd_PortB);
-	Init_keypad(keypad_PortA);
-	uint8_t longitude = (sizeof(titulo1)/sizeof(titulo1[0]))-1;
-	uint8_t longitude2 = (sizeof(titulo2)/sizeof(titulo2[0]))-1;
-//	uint8_t longitude3 = (sizeof(titulo3)/sizeof(titulo3[0]))-1;
+int main(void) {
+		SetPinMode(Port_A, Pin_5, Output);
 
-
+	TIM4_Init(5000);
 
 	while(1){
-		lcd_printXY(0, 0, titulo1, longitude);
-		data_key = print_keypad(keypad_PortA, 4, 0);
-		Delay(1000000);
-		lcd_printXY(0, 0, titulo2, longitude2);
-		Delay(1000000);
 
 	}
+	TIM4_Deinit();
+
 	return 0;
 }
+
+
+//int main(void){
+//	lcd_init(lcd_PortB);
+//	Init_keypad(keypad_PortA);
+//	uint8_t longitude = (sizeof(titulo1)/sizeof(titulo1[0]))-1;
+//	uint8_t longitude2 = (sizeof(titulo2)/sizeof(titulo2[0]))-1;
+////	uint8_t longitude3 = (sizeof(titulo3)/sizeof(titulo3[0]))-1;
+//
+//
+//
+//	while(1){
+//		lcd_printXY(0, 0, titulo1, longitude);
+//		data_key = print_keypad(keypad_PortA, 4, 0);
+//		Delay(1000000);
+//		lcd_printXY(0, 0, titulo2, longitude2);
+//		Delay(1000000);
+//
+//	}
+//	return 0;
+//}
 
 
 

@@ -20,7 +20,10 @@
 
 #define BOARD_CLOCK 			(16000000) //set to 16MHz
 #define PSC_TO_MICROSEC_DELAY	(uint32_t)(16) //minimum to microsecond count
+#define PSC_TO_MILLISEC_DELAY	(uint32_t)(16000) //minimum to microsecond count
 #define USEC_TO_DELAY(CLOCK_BASE,PSC,DELAY)	 (uint32_t)((((CLOCK_BASE) / (PSC)) * ((DELAY) * (0.000001))) )
+#define MILLSEC_TO_DELAY(CLOCK_BASE,PSC,DELAY)	 (uint32_t)((((CLOCK_BASE) / (PSC)) * ((DELAY) * (0.001))) )
+
 
 
 typedef enum{
