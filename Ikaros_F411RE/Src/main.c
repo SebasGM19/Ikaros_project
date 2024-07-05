@@ -33,25 +33,51 @@ uint8_t titulo2[] = "   BIEN HECHO   ";
 uint32_t data_key =0;
 
 
-int main(void){
+int main(void) {
 	lcd_init(lcd_PortB);
-	Init_keypad(keypad_PortA);
-	uint8_t longitude = (sizeof(titulo1)/sizeof(titulo1[0]))-1;
-	uint8_t longitude2 = (sizeof(titulo2)/sizeof(titulo2[0]))-1;
-//	uint8_t longitude3 = (sizeof(titulo3)/sizeof(titulo3[0]))-1;
 
+	SetPinMode(Port_A, Pin_5, Output);
+
+	TIM3_Init(100); //cada segundo
+	TIM5_Init(1000000);
 
 
 	while(1){
-		lcd_printXY(0, 0, titulo1, longitude);
-		data_key = print_keypad(keypad_PortA, 4, 0);
-		Delay(1000000);
-		lcd_printXY(0, 0, titulo2, longitude2);
-		Delay(1000000);
+//		GPIO_DigitalWrite(Port_A, Pin_5, High);
+//		Peripherial_delay(1000);
+//		GPIO_DigitalWrite(Port_A, Pin_5, Low);
+//		Peripherial_delay(1000);
+		Delay(10000000);
+		TIM5_Deinit();
+		Delay(10000000);
+		TIM3_Deinit();
+
 
 	}
+
 	return 0;
 }
+
+
+//int main(void){
+//	lcd_init(lcd_PortB);
+//	Init_keypad(keypad_PortA);
+//	uint8_t longitude = (sizeof(titulo1)/sizeof(titulo1[0]))-1;
+//	uint8_t longitude2 = (sizeof(titulo2)/sizeof(titulo2[0]))-1;
+////	uint8_t longitude3 = (sizeof(titulo3)/sizeof(titulo3[0]))-1;
+//
+//
+//
+//	while(1){
+//		lcd_printXY(0, 0, titulo1, longitude);
+//		data_key = print_keypad(keypad_PortA, 4, 0);
+//		Delay(1000000);
+//		lcd_printXY(0, 0, titulo2, longitude2);
+//		Delay(1000000);
+//
+//	}
+//	return 0;
+//}
 
 
 

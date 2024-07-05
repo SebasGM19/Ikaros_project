@@ -10,14 +10,31 @@
 
 #include "system_settings.h"
 #include "gpios.h"
+#include "lcd.h"
+#include "keypad_4x4.h"
 
+
+
+#define TIM1_HANDLER TIM1_IRQHandler
 
 #define TIM3_HANDLER TIM3_IRQHandler
 #define TIM4_HANDLER TIM4_IRQHandler
 #define TIM5_HANDLER TIM5_IRQHandler
 
+#define TIM9_HANDLER TIM9_IRQHandler
+#define TIM10_HANDLER TIM10_IRQHandler
+#define TIM11_HANDLER TIM11_IRQHandler
+
+
 /*Value in microseconds Equals to 2^32 bit count*/
 #define MAX_TIME_TIM5_AND_TIM2	(uint32_t)(4294967290)
+#define MAX_TIME_TIM3_TIM4		(uint16_t)(65530)
+#define MAX_TIME_TIM1			(uint16_t)(65530)
+#define MAX_TIME_TIM9_TO_TIM11	(uint16_t)(65530)
+
+#define MAX_DATA_BUFF			(100)
+
+
 
 typedef enum{
 	TIMER_2, //APB1
@@ -112,8 +129,14 @@ void volatile TIMER_WaitFlag(TimerMapAddr_t TIMER_addr);
 void volatile TIMER_Clock(Enabled_Disabled_t state, timers_enb_t Timer);
 void volatile TIMER_cleanCountFlag(TimerMapAddr_t TIMER_addr);
 
+void TIM5_HANDLER(void);
 Status_code_t TIM5_Init(uint32_t microseconds);
 void TIM5_Deinit(void);
-void TIM5_HANDLER(void);
+
+
+void TIM3_HANDLER(void);
+Status_code_t TIM3_Init(uint16_t milliseconds);
+void TIM3_Deinit(void);
+
 
 #endif /* TIMERS_H_ */
