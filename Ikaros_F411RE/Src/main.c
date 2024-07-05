@@ -34,14 +34,26 @@ uint32_t data_key =0;
 
 
 int main(void) {
-		SetPinMode(Port_A, Pin_5, Output);
+	lcd_init(lcd_PortB);
 
-	TIM4_Init(5000);
+	SetPinMode(Port_A, Pin_5, Output);
+
+	TIM3_Init(100); //cada segundo
+	TIM5_Init(1000000);
+
 
 	while(1){
+//		GPIO_DigitalWrite(Port_A, Pin_5, High);
+//		Peripherial_delay(1000);
+//		GPIO_DigitalWrite(Port_A, Pin_5, Low);
+//		Peripherial_delay(1000);
+		Delay(10000000);
+		TIM5_Deinit();
+		Delay(10000000);
+		TIM3_Deinit();
+
 
 	}
-	TIM4_Deinit();
 
 	return 0;
 }

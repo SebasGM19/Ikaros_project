@@ -56,9 +56,9 @@ Status_code_t Send_command(uint8_t command, command_type_t type){
 	}
 
 	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_E, High);
-	Delay(10);
+	Peripherial_delay(1);
 	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_E, Low);
-	Delay(10);
+	Peripherial_delay(1);
 
 
 	for(uint8_t i =0; i<4;i++){
@@ -66,9 +66,9 @@ Status_code_t Send_command(uint8_t command, command_type_t type){
 		LSB = LSB>>1;
 	}
 	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_E, High);
-	Delay(10);
+	Peripherial_delay(1);
 	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_E, Low);
-	Delay(10);
+	Peripherial_delay(1);
 
 	return Success;
 
@@ -110,25 +110,25 @@ Status_code_t lcd_init(lcd_alternative_t lcd_alternative){
 		GPIO_DigitalWrite(control_alternative.PORT, (control_alternative.PIN_D4+i), Low);
 	}
 
-	Delay(100000);
+	Peripherial_delay(100);
 	Send_command(SET_8_BITS_MODE, set_command);
-	Delay(5000);
+	Peripherial_delay(5);
 	Send_command(SET_8_BITS_MODE, set_command);
-	Delay(5000);
+	Peripherial_delay(5);
 	Send_command(SET_8_BITS_MODE, set_command);
-	Delay(5000);
+	Peripherial_delay(5);
 	Send_command(SET_4_BITS_CONFIGURATION, set_command);
-	Delay(5000);
+	Peripherial_delay(5);
 	Send_command(SET_2_LINES_QUALITY_5X8, set_command);
-	Delay(5000);
+	Peripherial_delay(5);
 	Send_command(START_LCD_WITHOUT_CURSOR, set_command);
-	Delay(5000);
+	Peripherial_delay(5);
 	Send_command(CLEAN_SCREEN, set_command);
-	Delay(50000);
+	Peripherial_delay(50);
 	Send_command(RETURN_HOME, set_command);
-	Delay(50000);//minimum delay
+	Peripherial_delay(50);//minimum delay
 	Send_command(POSITION_CERO, set_command);
-	Delay(50000);
+	Peripherial_delay(50);
 //	coordinate_Y = 1;
 //	coordinate_X = 0;
 
@@ -172,7 +172,7 @@ Status_code_t lcd_printXY(uint8_t X_axis, uint8_t Y_axis, uint8_t* data, uint8_t
  */
 void lcd_clean_screen(void){
 	Send_command(CLEAN_SCREEN, set_command);
-	Delay(50000);//minimum delay
+	Peripherial_delay(50);//minimum delay
 	lcd_return_to_home();
 }
 
@@ -186,7 +186,6 @@ void lcd_move_display(direction_to_move_t direction){
 	}else{
 		Send_command(MOVE_DISPLAY_TO_RIGHT, set_command);
 	}
-	Delay(500);//minimum delay
 
 }
 
@@ -197,13 +196,12 @@ void lcd_move_cursor(direction_to_move_t direction){
 	}else{
 		Send_command(MOVE_CURSOR_TO_RIGHT, set_command);
 	}
-	Delay(500);//minimum delay
 }
 
 //returns to position 0,1
 void lcd_return_to_home(void){
 	Send_command(RETURN_HOME, set_command);
-	Delay(50000);//minimum delay
+	Peripherial_delay(50);//minimum delay
 
 }
 
@@ -233,7 +231,7 @@ Status_code_t lcd_set_cursor_position(uint8_t X_axis, uint8_t Y_axis){
 
 	real_position = Y_position | X_axis;
 	Send_command(real_position, set_command);
-	Delay(5000);//minimum delay
+//	Peripherial_delay(5);//minimum delay
 	return Success;
 }
 

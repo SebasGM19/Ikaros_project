@@ -164,6 +164,8 @@ typedef enum{
 Status_code_t ClockEnable(Set_Port_t Port_define, Enabled_Disabled_t Intention);
 Status_code_t Delay(uint32_t microseconds);
 void resetDelay(TimerMapAddr_t Timer);
+Status_code_t Peripherial_delay(uint16_t miliseconds);
+
 
 
 #endif /* SYSTEM_SETTINGS_H_ */

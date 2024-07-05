@@ -10,6 +10,9 @@
 
 #include "system_settings.h"
 #include "gpios.h"
+#include "lcd.h"
+#include "keypad_4x4.h"
+
 
 
 #define TIM1_HANDLER TIM1_IRQHandler
@@ -28,6 +31,8 @@
 #define MAX_TIME_TIM3_TIM4		(uint16_t)(65530)
 #define MAX_TIME_TIM1			(uint16_t)(65530)
 #define MAX_TIME_TIM9_TO_TIM11	(uint16_t)(65530)
+
+#define MAX_DATA_BUFF			(100)
 
 
 
@@ -132,11 +137,6 @@ void TIM5_Deinit(void);
 void TIM3_HANDLER(void);
 Status_code_t TIM3_Init(uint16_t milliseconds);
 void TIM3_Deinit(void);
-
-
-void TIM4_HANDLER(void);
-Status_code_t TIM4_Init(uint16_t milliseconds);
-void TIM4_Deinit(void);
 
 
 #endif /* TIMERS_H_ */
