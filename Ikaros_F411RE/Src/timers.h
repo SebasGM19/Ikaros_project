@@ -131,12 +131,17 @@ void volatile TIMER_cleanCountFlag(TimerMapAddr_t TIMER_addr);
 
 void TIM5_HANDLER(void);
 Status_code_t TIM5_Init(uint32_t microseconds);
+void TIM5_Start(void);
+void TIM5_Stop(void);
 void TIM5_Deinit(void);
 
 
 void TIM3_HANDLER(void);
 Status_code_t TIM3_Init(uint16_t milliseconds);
+void TIM3_Start(void);
+void TIM3_Stop(void);
 void TIM3_Deinit(void);
 
+volatile void set_cuenta(uint32_t cuenta_lim);
 
 #endif /* TIMERS_H_ */

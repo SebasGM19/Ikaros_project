@@ -30,30 +30,45 @@
 uint32_t data_keypad=0;
 uint8_t titulo1[] = "NUM:          ";
 uint8_t titulo2[] = "   BIEN HECHO   ";
-uint32_t data_key =0;
-
+uint32_t data_key =1000;
+uint8_t sec_motor_UNIPOLAR[8]={1,3,2,6,4,12,8,9};
+int8_t start=7;
 
 int main(void) {
 	lcd_init(lcd_PortB);
+	Init_keypad(keypad_PortC);
+	Init_4bits_Stepper_Motor(PortB_Op1);
 
 	SetPinMode(Port_A, Pin_5, Output);
+	SetPinMode(Port_C, Pin_13, Input);
+	GPIO_DigitalWrite(Port_A, Pin_5, Low);
 
-	TIM3_Init(100); //cada segundo
+
+	lcd_printXY(0, 0, "Num a contar:   ",16);
+	data_key = print_keypad(keypad_PortC, 13, 0);
+	set_cuenta(data_key);
+	data_key =0;
+
 	TIM5_Init(1000000);
-
+	TIM3_Init(500); //cada segundo
+	TIM5_Start();
+	TIM3_Start();
 
 	while(1){
-//		GPIO_DigitalWrite(Port_A, Pin_5, High);
-//		Peripherial_delay(1000);
-//		GPIO_DigitalWrite(Port_A, Pin_5, Low);
-//		Peripherial_delay(1000);
-		Delay(10000000);
-		TIM5_Deinit();
-		Delay(10000000);
-		TIM3_Deinit();
 
+		Write_4bits_Stepper_Motor(PortB_Op1,sec_motor_UNIPOLAR[start]);
+		start++;
+		if(start>7){
+			start=0;
+		}
+		Delay(10000);
+
+
+//		if(GPIO_DigitalRead(Port_C,Pin_13) == Low){
+//	}
 
 	}
+
 
 	return 0;
 }
@@ -189,8 +204,8 @@ int main(void) {
 //	Init_4bits_Stepper_Motor(PortA_Op2);
 //
 //
-//	uint8_t sec_4bit_linea[8]={9,8,12,4,6,2,3,1};
-//	int8_t start_4bit=7;
+//	uint8_t sec_4bit_linea_UNIPOLAR[8]={1,3,2,6,4,12,8,9};
+////	int8_t start_4bit=7;
 //	int8_t start_4bit2=7;
 //
 //	uint8_t sentido =0;

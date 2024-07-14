@@ -33,10 +33,10 @@ controls_gpios_t volatile control_alternative;
  *
  */
 void set_controls_gpios(Pin_number_t RS, Pin_number_t RW, Pin_number_t E,Set_Port_t PORT){
-	control_alternative.PIN_RS = RS;
-	control_alternative.PIN_RW = RW;
-	control_alternative.PIN_E = E;
-	control_alternative.PIN_D4 = (E+1);
+	control_alternative.LCD_PIN_RS = RS;
+	control_alternative.LCD_PIN_RW = RW;
+	control_alternative.LCD_PIN_E = E;
+	control_alternative.LCD_PIN_D4 = (E+1);
 	control_alternative.PORT = PORT;
 
 }
@@ -45,29 +45,36 @@ Status_code_t Send_command(uint8_t command, command_type_t type){
 	uint8_t MSB = 0;
 	uint8_t LSB = 0;
 
-	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_RS, type);
+	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_RS, type);
 
 	MSB = (command & 0xF0)>>4;
 	LSB = (command & 0x0F); 	//keep only the first 4 bits
 
+//	uint32_t volatile *PORT_REG_OUTPUT = (uint32_t volatile*)(control_alternative.PORT + GPIOx_ODR_OFFSET); //agregamos el 0x14 par indicar output
+//	*PORT_REG_OUTPUT &= ~(Clear_four_bits<<control_alternative.LCD_PIN_D4);
+//	*PORT_REG_OUTPUT |= (MSB<<control_alternative.LCD_PIN_D4);
+
 	for(uint8_t i =0; i<4;i++){
-		GPIO_DigitalWrite(control_alternative.PORT, (control_alternative.PIN_D4 + i), (MSB&1));
+		GPIO_DigitalWrite(control_alternative.PORT, (control_alternative.LCD_PIN_D4 + i), (MSB&1));
 		MSB = MSB>>1;
 	}
 
-	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_E, High);
+	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_E, High);
 	Peripherial_delay(1);
-	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_E, Low);
+	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_E, Low);
 	Peripherial_delay(1);
 
 
+//	*PORT_REG_OUTPUT &= ~(Clear_four_bits<<control_alternative.LCD_PIN_D4);
+//	*PORT_REG_OUTPUT |= (LSB<<control_alternative.LCD_PIN_D4);
 	for(uint8_t i =0; i<4;i++){
-		GPIO_DigitalWrite(control_alternative.PORT, (control_alternative.PIN_D4 + i), (LSB&1));
+		GPIO_DigitalWrite(control_alternative.PORT, (control_alternative.LCD_PIN_D4 + i), (LSB&1));
 		LSB = LSB>>1;
 	}
-	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_E, High);
+
+	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_E, High);
 	Peripherial_delay(1);
-	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_E, Low);
+	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_E, Low);
 	Peripherial_delay(1);
 
 	return Success;
@@ -84,10 +91,11 @@ Status_code_t lcd_init(lcd_alternative_t lcd_alternative){
 
 	switch(lcd_alternative){
 	case lcd_PortB:
-		set_controls_gpios(Pin_4, Pin_5, Pin_6, Port_B);
+		set_controls_gpios((Pin_number_t)lcd_alternative, (Pin_number_t)(lcd_alternative+1), (Pin_number_t)(lcd_alternative+2), Port_B);
+
 		break;
 	case lcd_PortC:
-		set_controls_gpios(Pin_7, Pin_8, Pin_9, Port_C);
+		set_controls_gpios((Pin_number_t)lcd_alternative, (Pin_number_t)(lcd_alternative+1), (Pin_number_t)(lcd_alternative+2), Port_C);
 		break;
 	default:
 		return OptionNotSupported;
@@ -100,14 +108,14 @@ Status_code_t lcd_init(lcd_alternative_t lcd_alternative){
 	*pPort_ModeReg &= ~(clear_fourteen_bits<<PositionsOfPin);
 	*pPort_ModeReg |= (0x1555 << PositionsOfPin);// equal to : 01 0101 0101 0101 set as output
 
-	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_RW, Low); //this stay LOW in 4bit configuration
+	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_RW, Low); //this stay LOW in 4bit configuration
 
-	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_RS, Low);
-	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.PIN_E, Low);
+	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_RS, Low);
+	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_E, Low);
 
 	/*set to low all gpio*/
 	for(uint8_t i =0; i<4; i++){
-		GPIO_DigitalWrite(control_alternative.PORT, (control_alternative.PIN_D4+i), Low);
+		GPIO_DigitalWrite(control_alternative.PORT, (control_alternative.LCD_PIN_D4+i), Low);
 	}
 
 	Peripherial_delay(100);

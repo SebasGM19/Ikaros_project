@@ -146,7 +146,7 @@ Status_code_t Delay(uint32_t microseconds){
 
 Status_code_t Peripherial_delay(uint16_t miliseconds){
 
-	if(miliseconds < 5 || miliseconds > MAX_TIME_TIM3_TIM4){
+	if(miliseconds < 2 || miliseconds > MAX_TIME_TIM3_TIM4){
 		return DelayTimeNotSupported;
 	}
 		uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_PSC);
