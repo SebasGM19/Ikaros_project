@@ -74,40 +74,21 @@ void resetDelay(TimerMapAddr_t Timer){
 	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(Timer + TIMx_CR1);
 	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(Timer + TIMx_PSC);
 	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(Timer + TIMx_ARR);
-//	timers_enb_t timer_enb;
-//	switch (Timer){
-//	case TIM2_ADDRESS:
-//		timer_enb = TIMER_2;
-//		break;
-//	case TIM3_ADDRESS:
-//		timer_enb = TIMER_3;
-//		break;
-//	case TIM4_ADDRESS:
-//		timer_enb = TIMER_4;
-//		break;
-//	case TIM5_ADDRESS:
-//		timer_enb = TIMER_5;
-//		break;
-//	default:
-//		timer_enb = TIMER_2;
-//		break;
-//
-//	}//pending to all timers out of TIM2 to TIM5
 
 	if(Timer == TIM2_ADDRESS){
 		TIMER_Clock(Enabled, TIMER_2);
 		*TIM_REG_PSC = (PSC_TO_MICROSEC_DELAY);
 		*TIM_REG_ARR = (USEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MICROSEC_DELAY,2) - 1);
-		*TIM_REG_CR1 |= TIM2_TO_TIM5_CEN;
+		*TIM_REG_CR1 |= TIMx_CEN;
 		TIMER_Clock(Disabled, TIMER_2);
 
-	}else if(Timer == TIM4_ADDRESS){
-		TIMER_Clock(Enabled, TIMER_4);
-		*TIM_REG_CR1 &= ~TIM2_TO_TIM5_CEN; // Disable timer before configuration
+	}else if(Timer == TIM1_ADDRESS){
+		TIMER_Clock(Enabled, TIMER_1);
+		*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
 		*TIM_REG_PSC = (PSC_TO_MILLISEC_DELAY-1);
 		*TIM_REG_ARR = (MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,2) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
-		*TIM_REG_CR1 |= TIM2_TO_TIM5_CEN;
-		TIMER_Clock(Disabled, TIMER_4);
+		*TIM_REG_CR1 |= TIMx_CEN;
+		TIMER_Clock(Disabled, TIMER_1);
 	}else{
 
 	}
@@ -127,7 +108,7 @@ Status_code_t Delay(uint32_t microseconds){
 		resetDelay(TIM2_ADDRESS);
 		TIMER_Clock(Enabled,TIMER_2);
 
-		*TIM_REG_CR1 &= ~TIM2_TO_TIM5_CEN; // Disable timer before configuration
+		*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
 
 
 		*TIM_REG_PSC = (PSC_TO_MICROSEC_DELAY-1);
@@ -135,7 +116,7 @@ Status_code_t Delay(uint32_t microseconds){
 		TIMER_cleanCountFlag(TIM2_ADDRESS);
 
 		*TIM_REG_CNT = 0;
-		*TIM_REG_CR1 |= TIM2_TO_TIM5_CEN;
+		*TIM_REG_CR1 |= TIMx_CEN;
 		TIMER_WaitFlag(TIM2_ADDRESS);
 
 		TIMER_Clock(Disabled,TIMER_2);
@@ -146,28 +127,28 @@ Status_code_t Delay(uint32_t microseconds){
 
 Status_code_t Peripherial_delay(uint16_t miliseconds){
 
-	if(miliseconds < 2 || miliseconds > MAX_TIME_TIM3_TIM4){
+	if(miliseconds < 2 || miliseconds > MAX_TIME_TIM1){
 		return DelayTimeNotSupported;
 	}
-		uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_PSC);
-		uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_ARR);
-		uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CNT);
-		uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CR1);
+		uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM1_ADDRESS + TIMx_PSC);
+		uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM1_ADDRESS + TIMx_ARR);
+		uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM1_ADDRESS + TIMx_CNT);
+		uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM1_ADDRESS + TIMx_CR1);
 
-		resetDelay(TIM4_ADDRESS);
-		TIMER_Clock(Enabled,TIMER_4);
+		resetDelay(TIM1_ADDRESS);
+		TIMER_Clock(Enabled,TIMER_1);
 
-		*TIM_REG_CR1 &= ~TIM2_TO_TIM5_CEN; // Disable timer before configuration
+		*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
 
 		*TIM_REG_PSC = (PSC_TO_MILLISEC_DELAY-1);
 		*TIM_REG_ARR = (MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,miliseconds) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
-		TIMER_cleanCountFlag(TIM4_ADDRESS);
+		TIMER_cleanCountFlag(TIM1_ADDRESS);
 
 		*TIM_REG_CNT = 0;
-		*TIM_REG_CR1 |= TIM2_TO_TIM5_CEN;
-		TIMER_WaitFlag(TIM4_ADDRESS);
+		*TIM_REG_CR1 |= TIMx_CEN;
+		TIMER_WaitFlag(TIM1_ADDRESS);
 
-		TIMER_Clock(Disabled,TIMER_4);
+		TIMER_Clock(Disabled,TIMER_1);
 
 		return Success;
 

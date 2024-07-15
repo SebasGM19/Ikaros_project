@@ -86,17 +86,38 @@ typedef enum{
 
 }TIMx_preescaler_t;
 
-typedef enum{
-	 TIM2_TO_TIM5_CEN= 		(1u<<0),
-	 TIM2_TO_TIM5_UDIS=		(1u<<1),
-	 TIM2_TO_TIM5_URS=		(1u<<2),
-	 TIM2_TO_TIM5_OPM=		(1u<<3),
-	 TIM2_TO_TIM5_DIR=		(1u<<4)
- //faltan los demas bits //pendiente
-}TIM2_TIM5_CR1_t;
+/*_____________________________________TIMx_CR1 BITS____________________________________________*/
 
 typedef enum{
-	 TIM2_TO_TIM5_UIF= 		(1u<<0),
+	 TIMx_CEN= 					(1u<<0),
+	 TIMx_UDIS=					(1u<<1),
+	 TIMx_URS=					(1u<<2),
+	 TIMx_OPM=					(1u<<3),
+	 TIM1_TIM2_TO_TIM5_DIR=		(1u<<4),
+	 TIM1_TIM2_TO_TIM5_CMS=		(1u<<5),
+	 TIMx_ARPE=					(1u<<7),
+	 TIMx_CKD=					(1u<<8) //2 bits set
+
+}global_timers_CR1_t;
+
+/*_____________________________________TIMx_SR BITS____________________________________________*/
+
+typedef enum{
+	 TIM1_CC1F=		(1u<<1),
+	 TIM1_CC2IF=	(1u<<2),
+	 TIM1_CC3IF=	(1u<<3),
+	 TIM1_CC4IF=	(1u<<4),
+	 TIM1_COMIF=	(1u<<5),
+	 TIM1_TIF=		(1u<<6),
+	 TIM1_BIF=		(1u<<7),
+	 TIM1_CC10F=	(1u<<9),
+	 TIM1_CC20F=	(1u<<10),
+	 TIM1_CC30F=	(1u<<11),
+	 TIM1_CC40F=	(1u<<12)
+
+}TIM1_SR_status_t;
+
+typedef enum{
 	 TIM2_TO_TIM5_CC1F=		(1u<<1),
 	 TIM2_TO_TIM5_CC2IF=	(1u<<2),
 	 TIM2_TO_TIM5_CC3IF=	(1u<<3),
@@ -105,13 +126,51 @@ typedef enum{
 	 TIM2_TO_TIM5_CC10F=	(1u<<9),
 	 TIM2_TO_TIM5_CC20F=	(1u<<10),
 	 TIM2_TO_TIM5_CC30F=	(1u<<11),
-	 TIM2_TO_TIM5_CC40F=	(1u<<12),
+	 TIM2_TO_TIM5_CC40F=	(1u<<12)
 
 }TIM2_TIM5_SR_status_t;
 
+
 typedef enum{
-	 TIM2_TO_TIM5_UIE= 		(1u<<0),
-	 TIM2_TO_TIM5_CC1IE=	(1u<<1),
+	 TIM9_CC1F=		(1u<<1),
+	 TIM9_CC2IF=	(1u<<2),
+	 TIM9_TIF=		(1u<<6),
+	 TIM9_CC10F=	(1u<<9),
+	 TIM9_CC20F=	(1u<<10)
+
+}TIM9_SR_status_t;
+
+typedef enum{
+	 TIM10_TIM11_CC1IF=		(1u<<1),
+	 TIM10_TIM11_CC10F=		(1u<<9)
+
+}TIM10_TIM10_SR_status_t;
+
+
+typedef enum{
+	TIMx_UIF = (1u<<0),
+}Global_timers_SR_t;
+
+
+/*_____________________________________TIMx_DIER BITS____________________________________________*/
+
+typedef enum{
+	 TIM1_CC2IE=	(1u<<2),
+	 TIM1_CC3IE=	(1u<<3),
+	 TIM1_CC4IE=	(1u<<4),
+	 TIM1_COMIE=	(1u<<5),
+	 TIM1_TIE=		(1u<<6),
+	 TIM1_BIE=		(1u<<7),
+	 TIM1_UDE=		(1u<<8),
+	 TIM1_CC1DE=	(1u<<9),
+	 TIM1_CC2DE=	(1u<<10),
+	 TIM1_CC3DE=	(1u<<11),
+	 TIM1_CC4DE=	(1u<<12),
+	 TIM1_COMDE=	(1u<<13),
+	 TIM1_TDE=		(1u<<14)
+}TIM1_DIER_t;
+
+typedef enum{
 	 TIM2_TO_TIM5_CC2IE=	(1u<<2),
 	 TIM2_TO_TIM5_CC3IE=	(1u<<3),
 	 TIM2_TO_TIM5_CC4IE=	(1u<<4),
@@ -124,10 +183,34 @@ typedef enum{
 	 TIM2_TO_TIM5_TDE=		(1u<<14)
 }TIM2_TIM5_DIER_t;
 
+typedef enum{
+	 TIM9_CC2IE=	(1u<<2),
+	 TIM9_TIE=		(1u<<6),
+}TIM9_DIER_t;
+
+typedef enum{
+	 TIMx_UIE= 		(1u<<0),
+	 TIMx_CC1IE=	(1u<<1),
+}global_timers_DIER_t;
+
+
+volatile void set_cuenta(uint32_t cuenta_lim);
 
 void volatile TIMER_WaitFlag(TimerMapAddr_t TIMER_addr);
 void volatile TIMER_Clock(Enabled_Disabled_t state, timers_enb_t Timer);
 void volatile TIMER_cleanCountFlag(TimerMapAddr_t TIMER_addr);
+
+void TIM3_HANDLER(void);
+Status_code_t TIM3_Init(uint16_t milliseconds);
+void TIM3_Start(void);
+void TIM3_Stop(void);
+void TIM3_Deinit(void);
+
+void TIM4_HANDLER(void);
+Status_code_t TIM4_Init(uint16_t milliseconds);
+void TIM4_Start(void);
+void TIM4_Stop(void);
+void TIM4_Deinit(void);
 
 void TIM5_HANDLER(void);
 Status_code_t TIM5_Init(uint32_t microseconds);
@@ -136,12 +219,6 @@ void TIM5_Stop(void);
 void TIM5_Deinit(void);
 
 
-void TIM3_HANDLER(void);
-Status_code_t TIM3_Init(uint16_t milliseconds);
-void TIM3_Start(void);
-void TIM3_Stop(void);
-void TIM3_Deinit(void);
 
-volatile void set_cuenta(uint32_t cuenta_lim);
 
 #endif /* TIMERS_H_ */

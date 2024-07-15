@@ -28,11 +28,12 @@
 #endif
 
 uint32_t data_keypad=0;
-uint8_t titulo1[] = "NUM:          ";
-uint8_t titulo2[] = "   BIEN HECHO   ";
+//uint8_t titulo1[] = "NUM:          ";
+//uint8_t titulo2[] = "   BIEN HECHO   ";
 uint32_t data_key =1000;
 uint8_t sec_motor_UNIPOLAR[8]={1,3,2,6,4,12,8,9};
 int8_t start=7;
+uint32_t volatile sentido_giro =true;
 
 int main(void) {
 	lcd_init(lcd_PortB);
@@ -44,10 +45,14 @@ int main(void) {
 	GPIO_DigitalWrite(Port_A, Pin_5, Low);
 
 
-	lcd_printXY(0, 0, "Num a contar:   ",16);
-	data_key = print_keypad(keypad_PortC, 13, 0);
+	lcd_printXY(0, 0, "COUNT TO:       ",16);
+	data_key = print_keypad(keypad_PortC, 10, 0);
 	set_cuenta(data_key);
 	data_key =0;
+
+	lcd_printXY(0, 0, "ROTATION:       ",16);
+	lcd_printXY(0, 1, "LEFT=1   RIGHT=2",16);
+	sentido_giro = print_keypad(keypad_PortC, 10, 0);
 
 	TIM5_Init(1000000);
 	TIM3_Init(500); //cada segundo
@@ -56,16 +61,37 @@ int main(void) {
 
 	while(1){
 
-		Write_4bits_Stepper_Motor(PortB_Op1,sec_motor_UNIPOLAR[start]);
-		start++;
-		if(start>7){
-			start=0;
+		while(GPIO_DigitalRead(Port_C,Pin_13)){
+			if(sentido_giro){//1 to right
+				Write_4bits_Stepper_Motor(PortB_Op1,sec_motor_UNIPOLAR[start]);
+				start++;
+				if(start>7){
+					start=0;
+				}
+			}else{
+				Write_4bits_Stepper_Motor(PortB_Op1,sec_motor_UNIPOLAR[start]);
+				start--;
+				if(start<0){
+					start=7;
+				}
+			}
+
+			Delay(3000);
 		}
-		Delay(10000);
 
+		TIM5_Stop();
+		TIM3_Stop();
+		lcd_printXY(0, 0, "Num a contar:   ",16);
+		data_key = print_keypad(keypad_PortC, 13, 0);
+		set_cuenta(data_key);
+		data_key =0;
 
-//		if(GPIO_DigitalRead(Port_C,Pin_13) == Low){
-//	}
+		lcd_printXY(0, 0, "ROTATION:       ",16);
+		lcd_printXY(0, 1, "LEFT=1   RIGHT=2",16);
+
+		sentido_giro = print_keypad(keypad_PortC, 10, 0);
+		TIM5_Start();
+		TIM3_Start();
 
 	}
 
