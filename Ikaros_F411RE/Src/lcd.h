@@ -56,10 +56,10 @@
 
 
 typedef struct{
-	Pin_number_t PIN_RS;
-	Pin_number_t PIN_RW;
-	Pin_number_t PIN_E;
-	Pin_number_t PIN_D4;
+	Pin_number_t LCD_PIN_RS;
+	Pin_number_t LCD_PIN_RW;
+	Pin_number_t LCD_PIN_E;
+	Pin_number_t LCD_PIN_D4;
 	Set_Port_t PORT;
 }controls_gpios_t;
 
@@ -67,7 +67,7 @@ typedef struct{
 typedef enum {
 
 	lcd_PortB=4,
-	lcd_PortC=7
+	lcd_PortC=6
 
 }lcd_alternative_t;
 

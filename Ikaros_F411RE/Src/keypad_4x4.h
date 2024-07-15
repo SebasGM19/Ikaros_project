@@ -25,7 +25,7 @@
 
 typedef enum{
 	keypad_PortA = 4,	//start with the first GPIO of the alternative corresponding to the R1
-	keypad_PortC = 6,
+	keypad_PortC = 5,
 }keypad_alternatives_t;
 
 typedef enum{
