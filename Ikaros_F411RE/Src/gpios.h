@@ -12,6 +12,8 @@
 
 #include "system_settings.h"
 
+
+
 typedef enum{
 	Low,
 	High
@@ -59,7 +61,6 @@ typedef enum{
 
 }GPIO_register_offset_t;
 
-
 typedef enum{
 	No_pull_No_Down,
 	Pull_Up,
@@ -72,6 +73,7 @@ Gpio_State_Control_t GPIO_DigitalRead(Set_Port_t Port_define, Pin_number_t Pin_d
 Gpio_State_Control_t GPIO_DigitalWrite(Set_Port_t Port_define, Pin_number_t Pin_defined, Gpio_State_Control_t State);
 Status_code_t SetPinMode(Set_Port_t Port_define, Pin_number_t Pin_defined, PinMode_t Mode);
 Status_code_t GpioPullUpDownState(Set_Port_t Port_define, Pin_number_t Pin_defined, GPIO_UP_DOWN_STATE_t GPIO_State);
+
 
 
 #endif /* BASIC_SETTINGS_H_ */

@@ -36,7 +36,9 @@ typedef enum{
 	TimeSetNotSuported,
 
 	lcd_Wrong_X_Axis_Value,
-	lcd_Wrong_Y_Axis_Value
+	lcd_Wrong_Y_Axis_Value,
+
+	ADC_channel_not_available,
 
 }Status_code_t;
 
@@ -166,6 +168,6 @@ Status_code_t Delay(uint32_t microseconds);
 void resetDelay(TimerMapAddr_t Timer);
 Status_code_t Peripherial_delay(uint16_t miliseconds);
 
-
+void ftoa(float decimalData, uint8_t* cadena, uint8_t decimales);
 
 #endif /* SYSTEM_SETTINGS_H_ */

@@ -50,7 +50,7 @@ Status_code_t Send_command(uint8_t command, command_type_t type){
 	MSB = (command & 0xF0)>>4;
 	LSB = (command & 0x0F); 	//keep only the first 4 bits
 
-//	uint32_t volatile *PORT_REG_OUTPUT = (uint32_t volatile*)(control_alternative.PORT + GPIOx_ODR_OFFSET); //agregamos el 0x14 par indicar output
+	uint32_t volatile *PORT_REG_OUTPUT = (uint32_t volatile*)(control_alternative.PORT + GPIOx_ODR_OFFSET); //agregamos el 0x14 par indicar output
 //	*PORT_REG_OUTPUT &= ~(Clear_four_bits<<control_alternative.LCD_PIN_D4);
 //	*PORT_REG_OUTPUT |= (MSB<<control_alternative.LCD_PIN_D4);
 
@@ -65,12 +65,12 @@ Status_code_t Send_command(uint8_t command, command_type_t type){
 	Peripherial_delay(1);
 
 
-//	*PORT_REG_OUTPUT &= ~(Clear_four_bits<<control_alternative.LCD_PIN_D4);
-//	*PORT_REG_OUTPUT |= (LSB<<control_alternative.LCD_PIN_D4);
-	for(uint8_t i =0; i<4;i++){
-		GPIO_DigitalWrite(control_alternative.PORT, (control_alternative.LCD_PIN_D4 + i), (LSB&1));
-		LSB = LSB>>1;
-	}
+	*PORT_REG_OUTPUT &= ~(Clear_four_bits<<control_alternative.LCD_PIN_D4);
+	*PORT_REG_OUTPUT |= (LSB<<control_alternative.LCD_PIN_D4);
+//	for(uint8_t i =0; i<4;i++){
+//		GPIO_DigitalWrite(control_alternative.PORT, (control_alternative.LCD_PIN_D4 + i), (LSB&1));
+//		LSB = LSB>>1;
+//	}
 
 	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_E, High);
 	Peripherial_delay(1);
@@ -109,7 +109,6 @@ Status_code_t lcd_init(lcd_alternative_t lcd_alternative){
 	*pPort_ModeReg |= (0x1555 << PositionsOfPin);// equal to : 01 0101 0101 0101 set as output
 
 	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_RW, Low); //this stay LOW in 4bit configuration
-
 	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_RS, Low);
 	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_E, Low);
 
@@ -180,7 +179,7 @@ Status_code_t lcd_printXY(uint8_t X_axis, uint8_t Y_axis, uint8_t* data, uint8_t
  */
 void lcd_clean_screen(void){
 	Send_command(CLEAN_SCREEN, set_command);
-	Peripherial_delay(50);//minimum delay
+	Peripherial_delay(2);//minimum delay
 	lcd_return_to_home();
 }
 
@@ -209,7 +208,7 @@ void lcd_move_cursor(direction_to_move_t direction){
 //returns to position 0,1
 void lcd_return_to_home(void){
 	Send_command(RETURN_HOME, set_command);
-	Peripherial_delay(50);//minimum delay
+	Peripherial_delay(2);//minimum delay
 
 }
 

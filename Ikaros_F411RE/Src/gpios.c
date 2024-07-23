@@ -54,18 +54,25 @@ Status_code_t SetPinMode(Set_Port_t Port_define, Pin_number_t Pin_defined, PinMo
 	PositionsOfPin = (uint16_t volatile)Pin_defined*2;
 	*pPort_ModeReg &= ~(Clear_two_bits<<PositionsOfPin);
 
-	if(Mode == Output){
-		*pPort_ModeReg |= (Output<<PositionsOfPin);
+	switch(Mode){
 
-	}else if(Mode==Input) {
-		*pPort_ModeReg &= ~(Clear_two_bits<<PositionsOfPin); //si es input simplemente limpiara esas posiciones a 00
+		case Output:
+			*pPort_ModeReg |= (Output<<PositionsOfPin);
+			break;
+		case Input:
+			*pPort_ModeReg &= ~(Clear_two_bits<<PositionsOfPin); //si es input simplemente limpiara esas posiciones a 00
 
-	}else if(Mode == Alt_func_mode){
-		*pPort_ModeReg |= (Alt_func_mode<<PositionsOfPin);
+			break;
+		case Alt_func_mode:
+			*pPort_ModeReg |= (Alt_func_mode<<PositionsOfPin);
 
-	}else{
-		*pPort_ModeReg |= (Analog_mode<<PositionsOfPin);
-
+			break;
+		case Analog_mode:
+			*pPort_ModeReg |= (Analog_mode<<PositionsOfPin);
+			break;
+		default:
+			status = OptionNotSupported;
+			break;
 	}
 
 	return status;
@@ -82,4 +89,3 @@ Status_code_t GpioPullUpDownState(Set_Port_t Port_define, Pin_number_t Pin_defin
 	return Success;
 
 }
-
