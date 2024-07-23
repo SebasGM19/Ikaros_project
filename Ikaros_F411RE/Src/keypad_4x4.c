@@ -119,6 +119,7 @@ uint32_t print_keypad(keypad_alternatives_t keypad_alternative, uint8_t X_axis, 
 		break;
 	default:
 		return OptionNotSupported;
+		break;
 	}
 
 	status = lcd_set_cursor_position(X_axis,Y_axis);

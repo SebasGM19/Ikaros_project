@@ -155,4 +155,58 @@ Status_code_t Peripherial_delay(uint16_t miliseconds){
 }
 
 
+void ftoa(float decimalData, uint8_t* cadena, uint8_t decimales){
+
+        uint8_t DATA_BUFF_MAX_SIZE = 8;
+        uint8_t string_dot[]={"."};
+        uint8_t string_cero[]={"0"};
+        uint8_t string_menos[]={"-"};
+        uint16_t entero;
+        uint32_t parte_decimal;
+        uint32_t multiplicador=1;
+        uint8_t cuenta_ceros=0;
+        uint8_t bandera=0;
+
+        uint8_t buff[DATA_BUFF_MAX_SIZE];
+        memset(buff, '\0', DATA_BUFF_MAX_SIZE);
+
+        if(decimalData<0){
+            strcpy((char *)cadena, (const char *)(string_menos));
+            decimalData=decimalData*-1;
+            bandera=1;
+        }
+
+        entero=decimalData;// ejemplo es el 23.44 guardara el 23 -0.00220
+        utoa(entero, (char *)(buff), 10);//pasamos a entero la parte antes del punto
+
+        if(bandera==0){
+            strcpy((char*)cadena, (const char *)buff);//guardamos el entero en cadena
+        }else{
+            strncat((char*)cadena, (const char *)buff, strlen((const char *)buff));
+        }
+
+        memset(buff, '\0', DATA_BUFF_MAX_SIZE);
+        strcat((char *)cadena, (const char *)(string_dot)); //hasta aqui conectamos el 23.
+
+        for(uint8_t i=0; i<decimales;i++){
+
+            multiplicador*=10;
+            parte_decimal = (decimalData-entero)*(multiplicador);
+
+            if(parte_decimal==0){
+                strcat((char*)cadena, (const char *)(string_cero)); //agrega cero
+                cuenta_ceros++;
+            }
+        }
+
+        if(cuenta_ceros!=decimales){
+            utoa(parte_decimal, (char *)(buff), 10);
+            strncat((char *)cadena, (const char *)(buff), strlen((const char *)buff));
+            memset(buff, '\0', DATA_BUFF_MAX_SIZE);
+        }
+
+        cuenta_ceros=0;
+        bandera=0;
+}
+
 

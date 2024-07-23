@@ -21,21 +21,23 @@
 #include "keypad_4x4.h"
 #include "timers.h"
 #include "lcd.h"
+#include "adc.h"
 
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
-uint32_t data_keypad=0;
-//uint8_t titulo1[] = "NUM:          ";
-//uint8_t titulo2[] = "   BIEN HECHO   ";
-uint32_t data_key =1000;
-uint8_t sec_motor_UNIPOLAR[8]={1,3,2,6,4,12,8,9};
+
+
+uint8_t seq_motor_UNIPOLAR[8]={1,3,2,6,4,12,8,9};
 int8_t start=7;
-uint32_t volatile sentido_giro =true;
 
 int main(void) {
+
+	uint32_t data_key =0;
+	uint32_t volatile sentido_giro =0;
+
 	lcd_init(lcd_PortB);
 	Init_keypad(keypad_PortC);
 	Init_4bits_Stepper_Motor(PortB_Op1);
@@ -48,56 +50,64 @@ int main(void) {
 	lcd_printXY(0, 0, "COUNT TO:       ",16);
 	data_key = print_keypad(keypad_PortC, 10, 0);
 	set_cuenta(data_key);
-	data_key =0;
-
+	Delay(15000);
 	lcd_printXY(0, 0, "ROTATION:       ",16);
-	lcd_printXY(0, 1, "LEFT=1   RIGHT=2",16);
+	lcd_printXY(0, 1, "LEFT=0   RIGHT=1",16);
 	sentido_giro = print_keypad(keypad_PortC, 10, 0);
+	lcd_clean_screen();
 
 	TIM5_Init(1000000);
-	TIM3_Init(500); //cada segundo
+	TIM3_Init(500);
 	TIM5_Start();
 	TIM3_Start();
+	lcd_printXY(0, 0, "COUNT: 0        ",16);
 
 	while(1){
-
 		while(GPIO_DigitalRead(Port_C,Pin_13)){
-			if(sentido_giro){//1 to right
-				Write_4bits_Stepper_Motor(PortB_Op1,sec_motor_UNIPOLAR[start]);
+			if(sentido_giro){					//1 to Right
+				Write_4bits_Stepper_Motor(PortB_Op1,seq_motor_UNIPOLAR[start]);
 				start++;
 				if(start>7){
 					start=0;
 				}
-			}else{
-				Write_4bits_Stepper_Motor(PortB_Op1,sec_motor_UNIPOLAR[start]);
+			}else{								//0 to Left
+				Write_4bits_Stepper_Motor(PortB_Op1,seq_motor_UNIPOLAR[start]);
 				start--;
 				if(start<0){
 					start=7;
 				}
 			}
 
-			Delay(3000);
+			Delay(2000);
 		}
 
 		TIM5_Stop();
 		TIM3_Stop();
-		lcd_printXY(0, 0, "Num a contar:   ",16);
-		data_key = print_keypad(keypad_PortC, 13, 0);
+		lcd_clean_screen();
+		lcd_printXY(0, 0, "COUNT TO:       ",16);
+		data_key = print_keypad(keypad_PortC, 10, 0);
 		set_cuenta(data_key);
-		data_key =0;
-
+		Delay(15000);
 		lcd_printXY(0, 0, "ROTATION:       ",16);
-		lcd_printXY(0, 1, "LEFT=1   RIGHT=2",16);
+		lcd_printXY(0, 1, "LEFT=0   RIGHT=1",16);
 
 		sentido_giro = print_keypad(keypad_PortC, 10, 0);
+
+		lcd_clean_screen();
 		TIM5_Start();
 		TIM3_Start();
+		lcd_printXY(0, 0, "COUNT: 0        ",16);
 
 	}
 
+	TIM5_Deinit();
+	TIM3_Deinit();
 
 	return 0;
 }
+
+
+
 
 
 //int main(void){
