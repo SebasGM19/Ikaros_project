@@ -61,11 +61,9 @@ Status_code_t SetPinMode(Set_Port_t Port_define, Pin_number_t Pin_defined, PinMo
 			break;
 		case Input:
 			*pPort_ModeReg &= ~(Clear_two_bits<<PositionsOfPin); //si es input simplemente limpiara esas posiciones a 00
-
 			break;
 		case Alt_func_mode:
 			*pPort_ModeReg |= (Alt_func_mode<<PositionsOfPin);
-
 			break;
 		case Analog_mode:
 			*pPort_ModeReg |= (Analog_mode<<PositionsOfPin);
