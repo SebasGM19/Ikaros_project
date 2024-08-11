@@ -94,9 +94,9 @@ typedef enum{
 	 TIMx_URS=					(1u<<2),
 	 TIMx_OPM=					(1u<<3),
 	 TIM1_TIM2_TO_TIM5_DIR=		(1u<<4),
-	 TIM1_TIM2_TO_TIM5_CMS=		(1u<<5),
+	 TIM1_TIM2_TO_TIM5_CMS=		(5),
 	 TIMx_ARPE=					(1u<<7),
-	 TIMx_CKD=					(1u<<8) //2 bits set
+	 TIMx_CKD=					(8) //2 bits set
 
 }global_timers_CR1_t;
 

@@ -28,8 +28,35 @@
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
+uint32_t adc_value =0;
+
+int main(void){
 
 
+	ADC_Init();
+	ADC_Configure_Channel(Channel_1);
+	ADC_Configure_Channel(Channel_0);
+
+
+	while(1){
+		adc_value = ADC_Read(Channel_1);
+
+		adc_value=0;
+
+		adc_value = ADC_Read(Channel_0);
+
+		adc_value=0;
+
+	}
+
+
+
+	return 0;
+
+}
+
+//example 1
+/*
 uint8_t seq_motor_UNIPOLAR[8]={1,3,2,6,4,12,8,9};
 int8_t start=7;
 
@@ -106,7 +133,7 @@ int main(void) {
 	return 0;
 }
 
-
+*/
 
 
 
