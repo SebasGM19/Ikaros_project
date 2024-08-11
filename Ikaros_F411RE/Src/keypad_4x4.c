@@ -78,7 +78,7 @@ uint32_t Read_keypad(keypad_alternatives_t keypad_alternative){
 
 	do{
 		rowSequence(Port_option, keypad_alternative, (first_row +positionXY));
-		columnSequence(Port_option,keypad_alternative,(first_row + positionXY),dataArray,&array_position,disabled);
+		columnSequence(Port_option,keypad_alternative,(first_row + positionXY),dataArray,&array_position,print_disabled);
 		positionXY++;
 		if(positionXY>3){
 			positionXY=0;
@@ -129,7 +129,7 @@ uint32_t print_keypad(keypad_alternatives_t keypad_alternative, uint8_t X_axis, 
 
 	do{
 		rowSequence(Port_option, keypad_alternative, (first_row +positionXY));
-		columnSequence(Port_option,keypad_alternative,(first_row + positionXY),dataArray,&array_position,enable);
+		columnSequence(Port_option,keypad_alternative,(first_row + positionXY),dataArray,&array_position,print_enabled);
 		positionXY++;
 		if(positionXY>3){
 			positionXY=0;

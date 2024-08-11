@@ -39,6 +39,11 @@ typedef enum{
 	lcd_Wrong_Y_Axis_Value,
 
 	ADC_channel_not_available,
+	ADC_No_More_conversion_space,
+	ADC_channel_already_initialized,
+	ADC_channel_not_initialized,
+	ADC_channel_already_deinitialized,
+	ADC_ADConverterd_off,
 
 }Status_code_t;
 
@@ -98,7 +103,7 @@ typedef enum{
 //	TIM1_ADDRESS = 			0x40010000, //APB2 BUS
 	USART1_ADDRESS = 		0x40011000,
 	USART6_ADDRESS = 		0x40011400,
-	ADC1_ADDRESS = 			0x40011000,
+	ADC1_ADDRESS = 			0x40012000,
 	SDIO_ADDRESS = 			0x40012C00,
 	SPI1_I2C1_ADDRESS =		0x40013000,
 	SPI4_I2C4_ADDRESS = 	0x40013400,

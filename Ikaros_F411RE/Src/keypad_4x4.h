@@ -43,8 +43,8 @@ typedef enum{
 }columns_states_t;
 
 typedef enum{
-	disabled,
-	enable,
+	print_disabled,
+	print_enabled,
 
 }print_activate_t;
 
