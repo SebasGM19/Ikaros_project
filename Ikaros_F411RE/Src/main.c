@@ -28,32 +28,60 @@
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
-uint32_t adc_value =0;
+
 
 int main(void){
-
-
-	ADC_Init();
-	ADC_Configure_Channel(Channel_1);
-	ADC_Configure_Channel(Channel_0);
+	Init_Board();
+	lcd_init(lcd_PortB);
+	GPIO_Init_EXTI15_To_EXTI10(EXTI_Port_C, Pin_13, Rising_edge);
 
 
 	while(1){
-		adc_value = ADC_Read(Channel_1);
-
-		adc_value=0;
-
-		adc_value = ADC_Read(Channel_0);
-
-		adc_value=0;
 
 	}
-
-
-
 	return 0;
-
 }
+
+
+
+//uint32_t adc_value =0;
+//
+//int main(void){
+//
+//	Init_Board();
+//
+////	SetPinMode(Port_A, Pin_1, Output);
+////	GPIO_DigitalWrite(Port_A, Pin_1, 1);
+//	uint32_t prioridad = NVIC_GetPriority(EXTI0_IRQn);
+//
+//	lcd_init(lcd_PortB);
+//	ADC_Init(RES_12_bits);
+//	TIM3_Init(500);
+//	ADC_Configure_Channel(Channel_1);
+//	ADC_Configure_Channel(Channel_0);
+//	TIM3_Start();
+//
+//		uint32_t adc_value=0;
+//		float voltaje_0=0.0f;
+//		uint8_t str_save_data[6]={};
+//
+//	while(1){
+//		Delay(500000);
+//		adc_value = ADC_Read(Channel_0);
+//		voltaje_0 = (float)((3.3f*adc_value)/4096.0f);
+//
+//		ftoa(voltaje_0, str_save_data, 5);
+//		lcd_printXY(0, 0,"CHN0: ", strlen((const char *)"CHN0: "));
+//
+//		lcd_printXY(6, 0,str_save_data, strlen((const char *)str_save_data));
+//
+//	}
+//
+//
+//
+//	return 0;
+//
+//}
 
 //example 1
 /*

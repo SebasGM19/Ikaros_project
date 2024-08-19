@@ -101,10 +101,12 @@ void ADC_Clock(Enabled_Disabled_t state){
 }
 
 
-Status_code_t ADC_Init(void){
+Status_code_t ADC_Init(ADC_resolution_t resolution){
 
 	ADC_Clock(Enabled);
-//	ADC_conversion_state(Disabled);
+	ADC_conversion_state(Disabled);
+	ADC_Set_Resolution(resolution);
+
 	return Success;
 
 }
@@ -121,6 +123,7 @@ Status_code_t ADC_Configure_Channel(ADC_channel_t Channel){
 
 	SetPinMode(ADC_PORT_MAP[Channel], ADC_PIN_MAP[Channel], Analog_mode);
 	ADC_channel_ocupped[Channel] = 1;
+
 
 	return Success;
 }
@@ -232,11 +235,14 @@ void ADC_start_conversion(ADC_conversion_start_t state){
 
 
 void ADC_Set_Resolution(ADC_resolution_t resolution){
+	uint32_t volatile *ADC_REG_CR1 = (uint32_t volatile*)(ADC1_ADDRESS + ADC_CR1);
+
+	*ADC_REG_CR1 &= ~(Clear_two_bits<<ADC_RES);
+
+	*ADC_REG_CR1 |= (resolution<<ADC_RES);
+
 
 }
 
 
-void ADC_set_Operation_Mode(ADC_operation_mode_t Mode){
-
-}
 

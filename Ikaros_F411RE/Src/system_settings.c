@@ -9,6 +9,13 @@
 #include "system_settings.h"
 #include "timers.h"
 
+void Init_Board(void){//see if this is good
+	__disable_irq();
+	Delay(500000);
+	__enable_irq();
+
+}
+
 
 Status_code_t ClockEnable(Set_Port_t Port_define, Enabled_Disabled_t Intention){
 	Status_code_t status = Success;
@@ -209,4 +216,15 @@ void ftoa(float decimalData, uint8_t* cadena, uint8_t decimales){
         bandera=0;
 }
 
+
+void SYS_ClockEnable(Enabled_Disabled_t Intention){
+	uint32_t volatile *pClockControlReg = (uint32_t volatile *)(RCC_ADDRESS + RCC_OFFSET_APB2ENR);
+
+	if(Intention){
+		*pClockControlReg |= RCC_SYSCFG_ENABLE;
+
+	}else{
+		*pClockControlReg &= ~(RCC_SYSCFG_ENABLE);
+	}
+}
 

@@ -12,6 +12,7 @@
 #include "gpios.h"
 #include "lcd.h"
 #include "keypad_4x4.h"
+#include "adc.h"
 
 
 
@@ -21,10 +22,9 @@
 #define TIM4_HANDLER TIM4_IRQHandler
 #define TIM5_HANDLER TIM5_IRQHandler
 
-#define TIM9_HANDLER TIM9_IRQHandler
-#define TIM10_HANDLER TIM10_IRQHandler
-#define TIM11_HANDLER TIM11_IRQHandler
-
+//#define TIM9_HANDLER TIM9_IRQHandler //usar como delay para protocolos y timeout
+//#define TIM10_HANDLER TIM10_IRQHandler //usar como delay
+//#define TIM11_HANDLER TIM11_IRQHandler //usar como delay
 
 /*Value in microseconds Equals to 2^32 bit count*/
 #define MAX_TIME_TIM5_AND_TIM2	(uint32_t)(4294967290)

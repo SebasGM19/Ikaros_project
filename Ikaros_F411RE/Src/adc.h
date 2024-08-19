@@ -230,7 +230,7 @@ typedef enum{
 	injected,
 }ADC_operation_mode_t;
 
-Status_code_t ADC_Init(void);
+Status_code_t ADC_Init(ADC_resolution_t resolution);
 uint32_t ADC_Read(ADC_channel_t Channel);
 Status_code_t ADC_Deinit(void);
 
@@ -246,6 +246,7 @@ Status_code_t ADC_start_convertion_regular_channel(void);
 void ADC_cleanConversionFlag(void);
 void ADC_wait_conversion_flag(void);
 void ADC_start_conversion(ADC_conversion_start_t state);
+void ADC_Set_Resolution(ADC_resolution_t resolution);
 
 
 #endif /* ADC_H_ */

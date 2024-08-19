@@ -62,8 +62,19 @@ void TIM3_HANDLER(void){
 	TIMER_cleanCountFlag(TIM3_ADDRESS);
 	/*Develop all the code to be executed in a second thread down here*/
 	if(reset_tim3_flag){
-	toggle_led = !toggle_led;
-	GPIO_DigitalWrite(Port_A, Pin_5, toggle_led);
+//	toggle_led = !toggle_led;
+//	GPIO_DigitalWrite(Port_A, Pin_5, toggle_led);
+		uint32_t adc_value_tim3=0;
+		float voltaje=0.0f;
+		uint8_t str_save_data[6]={};
+		adc_value_tim3 = ADC_Read(Channel_1);
+		voltaje = (float)((3.3f*adc_value_tim3)/4096.0f);
+
+		ftoa(voltaje, str_save_data, 5);
+		lcd_printXY(0, 1,"CHN1: ", strlen((const char *)"CHN1: "));
+
+		lcd_printXY(6, 1,str_save_data, strlen((const char *)str_save_data));
+
 
 	}else{reset_tim3_flag=!reset_tim3_flag;}
 

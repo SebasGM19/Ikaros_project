@@ -45,6 +45,8 @@ typedef enum{
 	ADC_channel_already_deinitialized,
 	ADC_ADConverterd_off,
 
+	EXTI_Line_already_use,
+
 }Status_code_t;
 
 typedef enum{
@@ -56,9 +58,11 @@ typedef enum{
 	Clean_one_bit =			0x01, 	//to clean 1 bit
 	Clear_two_bits=			0x03, 	//to clean 1 GPIOS
 	Clear_four_bits = 		0xF, 	//to clean 2 GPIOS
+	Clear_five_bits = 		0x1F,
+	Clear_six_bits =		0x3F,
 	Clear_eight_bits =		0xFF, 	//to clean 4 GPIOS
-	clear_fourteen_bits = 	0x3FFF, 	//to clean 7 GPIOS
-	Clear_sixteen_bits =	0xFFFF 	//to clean 8 GPIOS
+	clear_fourteen_bits = 	0x3FFF, //to clean 7 GPIOS
+	Clear_sixteen_bits =	0xFFFF 	//to cslean 8 GPIOS
 }RegAuxClean_t;
 
 
@@ -164,15 +168,90 @@ typedef enum{
 }RCC_offset_t;
 
 typedef enum{
+	RCC_SYSCFG_ENABLE = (1u<<14)
+}RCC_SYSCFG_CLOCK_EN_t;
+
+
+typedef enum{
 	OFFSET_PORTS =	0x00,
 }peripherial_offset_t;
+
+
+
+typedef enum{
+	SYSCFG_MEMRMP = 	0x00,
+	SYSCFG_PMC = 		0x04,
+	SYSCFG_EXTICR1 = 	0x08,
+	SYSCFG_EXTICR2 = 	0x0C,
+	SYSCFG_EXTICR3 = 	0x10,
+	SYSCFG_EXTICR4 = 	0x14,
+	SYSCFG_CMPCR = 		0x20
+
+}SYSCFG_register_offset_t;
+
+//typedef enum{
+//	 SYS_EXTI0 = (0),
+//	 SYS_EXTI1 = (4),
+//	 SYS_EXTI2 = (8),
+//	 SYS_EXTI3 = (12)
+//
+//}SYSCFG_EXTICR1_t;
+//
+//typedef enum{
+//	 SYS_EXTI4 = (0),
+//	 SYS_EXTI5 = (4),
+//	 SYS_EXTI6 = (8),
+//	 SYS_EXTI7 = (12)
+//
+//}SYSCFG_EXTICR2_t;
+//
+//typedef enum{
+//	 SYS_EXTI8 = 	(0),
+//	 SYS_EXTI9 = 	(4),
+//	 SYS_EXTI10 = 	(8),
+//	 SYS_EXTI11 = 	(12)
+//
+//}SYSCFG_EXTICR3_t;
+//
+//typedef enum{
+//	 SYS_EXTI12 = (0),
+//	 SYS_EXTI13 = (4),
+//	 SYS_EXTI14 = (8),
+//	 SYS_EXTI15 = (12)
+//
+//}SYSCFG_EXTICR4_t;
+
+typedef enum{
+	 SYS_MEM_MODE= 0,
+}SYSCFG_MEMRMP_t;
+
+typedef enum{
+	 SYS_ADC1DC2= (1u<<16),
+}SYSCFG_PMC_t;
+
+typedef enum{
+	 SYS_CMP_PD= (1u<<0),
+	 SYS_READY = (1u<<8),
+}SYSCFG_CMPCR_t;
+
+
+typedef enum{
+	EXTI_IMR = 		0x00,
+	EXTI_EMR = 		0x04,
+	EXTI_RTSR = 	0x08,
+	EXTI_FTSR = 	0x0C,
+	EXTI_SWIER = 	0x10,
+	EXTI_PR = 		0x14,
+
+}EXTI_registers_offset_t;
 
 
 Status_code_t ClockEnable(Set_Port_t Port_define, Enabled_Disabled_t Intention);
 Status_code_t Delay(uint32_t microseconds);
 void resetDelay(TimerMapAddr_t Timer);
 Status_code_t Peripherial_delay(uint16_t miliseconds);
-
+void Init_Board(void);
 void ftoa(float decimalData, uint8_t* cadena, uint8_t decimales);
 
+void SYS_ClockEnable(Enabled_Disabled_t Intention);
 #endif /* SYSTEM_SETTINGS_H_ */

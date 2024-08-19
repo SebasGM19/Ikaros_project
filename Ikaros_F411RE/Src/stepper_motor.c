@@ -73,7 +73,7 @@ Status_code_t Init_4bits_Stepper_Motor(Stepper_option_t Stepper_alternative){
 	PositionsOfPin = (uint16_t volatile)starting_gpio*2;
 	*pPort_ModeReg &= ~(Clear_eight_bits<<PositionsOfPin);
 
-	while(output_count<=found_bits && output_count<=MAX_GPIOS){
+	while(output_count<=found_bits && output_count<MAX_GPIOS){ //antes <=MAXGPIOS
 		PositionsOfPin=(set_to_output[output_count]*2);
 		*pPort_ModeReg |= (Output<<PositionsOfPin);
 		output_count++;
@@ -126,7 +126,7 @@ uint8_t *search_bits(Stepper_option_t Stepper_alternative, uint8_t* found_bits){
 	uint8_t GPIO_position_count = 0;
 	uint8_t position_high_state =0;
 
-	while(GPIO_position_count <= MAX_GPIOS){
+	while(GPIO_position_count < MAX_GPIOS){ //antes <=
 
 		if((Stepper_alternative>>GPIO_position_count) & 1){
 			high_state_positions[position_high_state] = GPIO_position_count;
