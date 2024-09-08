@@ -38,9 +38,9 @@ uint8_t str_save_data[6]={};
 
 int main(void){
 	Init_Board();
-	uint32_t adc_value =0;
-	float voltaje_0 = 0.0f;
-	uint8_t str_save_data[6]={};
+//	uint32_t adc_value =0;
+//	float voltaje_0 = 0.0f;
+//	uint8_t str_save_data[6]={};
 
 
 	lcd_init(lcd_PortB);
