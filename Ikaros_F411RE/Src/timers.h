@@ -9,22 +9,20 @@
 #define TIMERS_H_
 
 #include "system_settings.h"
-#include "gpios.h"
-#include "lcd.h"
-#include "keypad_4x4.h"
-#include "adc.h"
 
 
 
-#define TIM1_HANDLER TIM1_IRQHandler
+
+//#define TIM1  usado para delay periphericos
+//#define TIM2  usado para delay  general
 
 #define TIM3_HANDLER TIM3_IRQHandler
 #define TIM4_HANDLER TIM4_IRQHandler
 #define TIM5_HANDLER TIM5_IRQHandler
 
-//#define TIM9_HANDLER TIM9_IRQHandler //usar como delay para protocolos y timeout
-//#define TIM10_HANDLER TIM10_IRQHandler //usar como delay
-//#define TIM11_HANDLER TIM11_IRQHandler //usar como delay
+#define TIM9_HANDLER TIM1_BRK_TIM9_IRQHandler //si tiene handler como el TIM3, 4 y 5
+#define TIM10_HANDLER TIM1_UP_TIM10_IRQHandler //si tiene handler como el TIM3, 4 y 5
+//#define TIM11_HANDLER TIM11_IRQHandler //usar como delay para protocolos y timeout
 
 /*Value in microseconds Equals to 2^32 bit count*/
 #define MAX_TIME_TIM5_AND_TIM2	(uint32_t)(4294967290)
@@ -144,13 +142,103 @@ typedef enum{
 	 TIM10_TIM11_CC1IF=		(1u<<1),
 	 TIM10_TIM11_CC10F=		(1u<<9)
 
-}TIM10_TIM10_SR_status_t;
+}TIM10_TIM11_SR_status_t;
 
 
 typedef enum{
 	TIMx_UIF = (1u<<0),
 }Global_timers_SR_t;
 
+
+typedef enum{
+	TIM1_TO_TIM5_CC1S_and_CC3S  = 	(0),
+	TIM1_TO_TIM5_OC1FE_and_OC3FE = 	(1u<<2),
+	TIM1_TO_TIM5_OC1PE_and_OC3PE = 	(1u<<3),
+	TIM1_TO_TIM5_OC1M_and_OC3M  = 	(4),
+	TIM1_TO_TIM5_OC1CE_and_OC3CE = 	(1u<<7),
+	TIM1_TO_TIM5_CC2S_and_CC4S  = 	(8),
+	TIM1_TO_TIM5_OC2FE_and_OC4FE = 	(1u<<10),
+	TIM1_TO_TIM5_OC2PE_and_OC4PE = 	(1u<<11),
+	TIM1_TO_TIM5_OC2M_and_OC4M = 	(12),
+	TIM1_TO_TIM5_OC2CE_and_OC4CE = 	(1u<<15)
+}TIM1_to_TIM5_CCMR1_CCMR2_t;
+
+typedef enum{
+	TIM9_CC1S  = (0),
+	TIM9_OC1FE = (1u<<2),
+	TIM9_OC1PE = (1u<<3),
+	TIM9_OC1M  = (4),
+	TIM9_CC2S  = (8),
+	TIM9_OC2FE = (1u<<10),
+	TIM9_OC2PE = (1u<<11),
+	TIM9_OC2M  = (12),
+}TIM9_CCMR1_t;
+
+typedef enum{
+	TIM10_TO_TIM11_CC1S  = (0),
+	TIM10_TO_TIM11_OC1FE = (1u<<2),
+	TIM10_TO_TIM11_OC1PE = (1u<<3),
+	TIM10_TO_TIM11_OC1M  = (4),
+
+}TIM10_TO_TIM11_CCMR1_t;
+
+
+
+typedef enum{
+	TIM1_CC1E = (1u<<0),
+	TIM1_CC1P = (1u<<1),
+	TIM1_CC1NE = (1u<<2),
+	TIM1_CC1NP = (1u<<3),
+
+	TIM1_CC2E = (1u<<4),
+	TIM1_CC2P = (1u<<5),
+	TIM1_CC2NE = (1u<<6),
+	TIM1_CC2NP = (1u<<7),
+
+	TIM1_CC3E = (1u<<8),
+	TIM1_CC3P = (1u<<9),
+	TIM1_CC3NE = (1u<<10),
+	TIM1_CC3NP = (1u<<11),
+
+	TIM1_CC4E = (1u<<12),
+	TIM1_CC4P = (1u<<13),
+}TIM1_CCER_t;
+
+typedef enum{
+	TIM2_TO_TIM5_CC1E = (1u<<0),
+	TIM2_TO_TIM5_CC1P = (1u<<1),
+	TIM2_TO_TIM5_CC1NP = (1u<<3),
+
+	TIM2_TO_TIM5_CC2E = (1u<<4),
+	TIM2_TO_TIM5_CC2P = (1u<<5),
+	TIM2_TO_TIM5_CC2NP = (1u<<7),
+
+	TIM2_TO_TIM5_CC3E = (1u<<8),
+	TIM2_TO_TIM5_CC3P = (1u<<9),
+	TIM2_TO_TIM5_CC3NP = (1u<<11),
+
+	TIM2_TO_TIM5_CC4E = (1u<<12),
+	TIM2_TO_TIM5_CC4P = (1u<<13),
+	TIM2_TO_TIM5_CC4NP = (1u<<15),
+
+}TIM2_to_TIM5_CCER_t;
+
+typedef enum{
+	TIM9_CC1E = (1u<<0),
+	TIM9_CC1P = (1u<<1),
+	TIM9_CC1NP = (1u<<3),
+
+	TIM9_CC2E = (1u<<4),
+	TIM9_CC2P = (1u<<5),
+	TIM9_CC2NP = (1u<<7),
+
+}TIM9_CCER_t;
+
+typedef enum{
+	TIM10_TO_TIM11_CC1E = (1u<<0),
+	TIM10_TO_TIM11_CC1P = (1u<<1),
+	TIM10_TO_TIM11_CC1NP = (1u<<3),
+}TIM10_to_TIM11_CCER_t;
 
 /*_____________________________________TIMx_DIER BITS____________________________________________*/
 
@@ -194,6 +282,53 @@ typedef enum{
 }global_timers_DIER_t;
 
 
+
+typedef enum{
+	Frozen,
+	active_level,
+	inactive_level,
+	toggle,
+	force_inactive_level,
+	force_active_level,
+	PWM_mode_1,
+	PWM_mode_2,
+
+}TIM_output_compare_mode_t;
+
+
+typedef enum{
+	Clean_pwm_channel_1_and_3 =	(0x7B),
+	Clean_pwm_channel_2_and_4 = (0x7B << 8),
+
+}Clean_PWM_channel_t;
+
+
+typedef enum{//channel and PIN
+
+	TIM3_CH3= 0,//PORTB
+	TIM3_CH4= 1,//PORTB
+	TIM3_CH1= 4,//PORTB
+	TIM3_CH2= 5,//PORTB
+
+}TIM3_PWM_channel_select_t;
+
+typedef enum{//channel and PIN
+
+	TIM4_CH1= 6,//PORTB
+	TIM4_CH2= 7,//PORTB
+	TIM4_CH3= 8,//PORTB
+	TIM4_CH4= 9,//PORTB
+
+}TIM4_PWM_channel_select_t;
+
+typedef enum{//channel and PIN
+
+	TIM5_CH1= 0,//PORT A
+	TIM5_CH2= 1,//PORT A
+
+}TIM5_PWM_channel_select_t;
+
+
 volatile void set_cuenta(uint32_t cuenta_lim);
 
 void volatile TIMER_WaitFlag(TimerMapAddr_t TIMER_addr);
@@ -218,6 +353,12 @@ void TIM5_Start(void);
 void TIM5_Stop(void);
 void TIM5_Deinit(void);
 
+
+Status_code_t TIM3_PWM_Init(TIM3_PWM_channel_select_t Channel);
+Status_code_t TIM3_PWM_start_channel(uint32_t miliseconds_duty, TIM3_PWM_channel_select_t Channel);
+Status_code_t TIM3_PWM_start_channel_duty_porcent(uint8_t porcent_duty, TIM3_PWM_channel_select_t Channel);
+Status_code_t TIM3_PWM_stop_channel(TIM3_PWM_channel_select_t Channel);
+Status_code_t TIM3_PWM_Deinit(void);
 
 
 

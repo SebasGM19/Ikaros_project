@@ -51,6 +51,23 @@ typedef enum{
 	Pin_15
 }Pin_number_t;
 
+
+typedef enum{
+	SYS_AF,
+	TIM1_TIM2,
+	TIM3_TIM4_TIM5,
+	TIM9_TIM10_TIM11,
+	I2C1_I2C2_I2C3,
+	SPI1_I2S1_SPI2_I2S2_SPI3_12S3,
+	SPI2_I2S2_SPI3_I2S3_SPI4_I2S4_SPI5_I2S5,
+	SPI3_I2S3_USART1_USART2,
+	USART_6,
+	I2C2_I2C3,
+	OTG1_F1,
+	SDIO_ = 12,
+
+}Alternate_function_map_t;
+
 typedef enum{
 	Input,
 	Output,
@@ -102,6 +119,7 @@ typedef enum{
 Gpio_State_Control_t GPIO_DigitalRead(Set_Port_t Port_define, Pin_number_t Pin_defined);
 Gpio_State_Control_t GPIO_DigitalWrite(Set_Port_t Port_define, Pin_number_t Pin_defined, Gpio_State_Control_t State);
 Status_code_t SetPinMode(Set_Port_t Port_define, Pin_number_t Pin_defined, PinMode_t Mode);
+void GpioSetAlternativeFunction(Set_Port_t Port_define, Pin_number_t Pin_defined, Alternate_function_map_t AF);
 Status_code_t GpioPullUpDownState(Set_Port_t Port_define, Pin_number_t Pin_defined, GPIO_UP_DOWN_STATE_t GPIO_State);
 
 

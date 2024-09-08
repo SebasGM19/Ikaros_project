@@ -6,6 +6,10 @@
  */
 
 #include "timers.h"
+#include "gpios.h"
+#include "lcd.h"
+#include "keypad_4x4.h"
+#include "adc.h"
 
 
 bool static reset_tim3_flag =false;
@@ -62,18 +66,18 @@ void TIM3_HANDLER(void){
 	TIMER_cleanCountFlag(TIM3_ADDRESS);
 	/*Develop all the code to be executed in a second thread down here*/
 	if(reset_tim3_flag){
-//	toggle_led = !toggle_led;
-//	GPIO_DigitalWrite(Port_A, Pin_5, toggle_led);
-		uint32_t adc_value_tim3=0;
-		float voltaje=0.0f;
-		uint8_t str_save_data[6]={};
-		adc_value_tim3 = ADC_Read(Channel_1);
-		voltaje = (float)((3.3f*adc_value_tim3)/4096.0f);
-
-		ftoa(voltaje, str_save_data, 5);
-		lcd_printXY(0, 1,"CHN1: ", strlen((const char *)"CHN1: "));
-
-		lcd_printXY(6, 1,str_save_data, strlen((const char *)str_save_data));
+////	toggle_led = !toggle_led;
+////	GPIO_DigitalWrite(Port_A, Pin_5, toggle_led);
+//		uint32_t adc_value_tim3=0;
+//		float voltaje=0.0f;
+//		uint8_t str_save_data[6]={};
+//		adc_value_tim3 = ADC_Read(Channel_1);
+//		voltaje = (float)((3.3f*adc_value_tim3)/4096.0f);
+//
+//		ftoa(voltaje, str_save_data, 5);
+////		lcd_printXY(0, 1,"CHN1: ", strlen((const char *)"CHN1: "));
+//
+//		lcd_printXY(6, 1,str_save_data, strlen((const char *)str_save_data));
 
 
 	}else{reset_tim3_flag=!reset_tim3_flag;}
@@ -228,24 +232,297 @@ void TIM5_HANDLER(void){
 	TIMER_cleanCountFlag(TIM5_ADDRESS);
 	if(reset_tim5_flag){
 
-		uint8_t buff[MAX_DATA_BUFF]={};
-		memset(buff, '\0', MAX_DATA_BUFF);
-//		lcd_printXY(0, 0, "COUNT:          ",16);
-		if(cuenta_sec>cuenta_limite){
-			cuenta_sec=0;
-			lcd_printXY(0, 0, "COUNT: 0        ",16);
+//		uint8_t buff[MAX_DATA_BUFF]={};
+//		memset(buff, '\0', MAX_DATA_BUFF);
+////		lcd_printXY(0, 0, "COUNT:          ",16);
+//		if(cuenta_sec>cuenta_limite){
+//			cuenta_sec=0;
+//			lcd_printXY(0, 0, "COUNT: 0        ",16);
+//
+//		}
+//		itoa(cuenta_sec, (char *)(buff), 10);
+//
+//		lcd_printXY(7, 0, buff, strlen((const char *)buff));
+//		cuenta_sec++;
 
-		}
-		itoa(cuenta_sec, (char *)(buff), 10);
 
-		lcd_printXY(7, 0, buff, strlen((const char *)buff));
-		cuenta_sec++;
 
 
 
 	}else{reset_tim5_flag=!reset_tim5_flag;}
 }
 
+
+
+	    //se define el tiempo del ciclo de trabajo en base al ARR colocado
+	    //si se pone un ARR de 1000 ms, y CCR1 de 250 el ciclo de trabajo va a ser de 25% y la frecuencia la señal estara en alto un 50%
+
+Status_code_t TIM3_PWM_Init(TIM3_PWM_channel_select_t Channel){
+
+	Status_code_t status = Success;
+	TIMx_register_offset_t capture_compare_mode_reg = TIMx_CCMR1;
+	Clean_PWM_channel_t clean_channel = Clean_pwm_channel_1_and_3;
+	TIM2_to_TIM5_CCER_t CCx_enable = TIM2_TO_TIM5_CC1E;
+	TIM2_to_TIM5_CCER_t CCx_polarity = TIM2_TO_TIM5_CC1P;
+	TIM1_to_TIM5_CCMR1_CCMR2_t CCMRx_selecction = TIM1_TO_TIM5_CC1S_and_CC3S;
+	TIM1_to_TIM5_CCMR1_CCMR2_t CCMRx_mode = TIM1_TO_TIM5_OC1M_and_OC3M;
+
+
+
+	switch(Channel){
+	case TIM3_CH1:
+		 capture_compare_mode_reg = TIMx_CCMR1;
+		 clean_channel = Clean_pwm_channel_1_and_3;
+		 CCx_enable = TIM2_TO_TIM5_CC1E;
+		 CCx_polarity = TIM2_TO_TIM5_CC1P;
+		 CCMRx_selecction = TIM1_TO_TIM5_CC1S_and_CC3S;
+		 CCMRx_mode = TIM1_TO_TIM5_OC1M_and_OC3M;
+		break;
+	case TIM3_CH2:
+		 capture_compare_mode_reg = TIMx_CCMR1;
+		 clean_channel = Clean_pwm_channel_2_and_4;
+		 CCx_enable = TIM2_TO_TIM5_CC2E;
+		 CCx_polarity = TIM2_TO_TIM5_CC2P;
+		 CCMRx_selecction = TIM1_TO_TIM5_CC2S_and_CC4S;
+		 CCMRx_mode = TIM1_TO_TIM5_OC2M_and_OC4M;
+
+		break;
+	case TIM3_CH3:
+		 capture_compare_mode_reg = TIMx_CCMR2;
+		 clean_channel = Clean_pwm_channel_1_and_3;
+		 CCx_enable = TIM2_TO_TIM5_CC3E;
+		 CCx_polarity = TIM2_TO_TIM5_CC3P;
+		 CCMRx_selecction = TIM1_TO_TIM5_CC1S_and_CC3S;
+		 CCMRx_mode = TIM1_TO_TIM5_OC1M_and_OC3M;
+
+		break;
+	case TIM3_CH4:
+		 capture_compare_mode_reg = TIMx_CCMR2;
+		 clean_channel = Clean_pwm_channel_2_and_4;
+		 CCx_enable = TIM2_TO_TIM5_CC4E;
+		 CCx_polarity = TIM2_TO_TIM5_CC4P;
+		 CCMRx_selecction = TIM1_TO_TIM5_CC2S_and_CC4S;
+		 CCMRx_mode = TIM1_TO_TIM5_OC2M_and_OC4M;
+
+
+		break;
+	default:
+		return TIMx_incorrect;
+		break;
+	}
+
+
+	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
+	uint32_t volatile *TIM_REG_CCMR1 = (uint32_t volatile*)(TIM3_ADDRESS + capture_compare_mode_reg);//depende el canal elegido se elige
+	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CCER);
+
+
+
+	status = SetPinMode(Port_B, Channel, Alt_func_mode); //always his timer for PORT B defined
+
+	if(status!=Success){
+		return status;
+	}
+
+	TIMER_Clock(Enabled,TIMER_3);
+	GpioSetAlternativeFunction(Port_B, Channel, TIM3_TIM4_TIM5); //alt 2 para GPIO_A6
+
+	*TIM_REG_CCMR1 &= ~(clean_channel); 					// solo limpiamos los primero 8 bits correspondientes al canal 1
+
+	*TIM_REG_CCMR1 &= ~(Clear_two_bits<<CCMRx_selecction); 	//dejamos en cero para indicar que sera output dejamos en 00
+
+	*TIM_REG_CCER &= ~CCx_polarity; 					// configuramos para que sea en polaridad alta se deja en 0
+
+	*TIM_REG_CCMR1 |= (PWM_mode_1<<CCMRx_mode); 			// Configurar canal 1 en modo PWM1
+
+
+//	*TIM_REG_CR1 &= ~TIMx_CEN; 								// Disable timer before configuration not the best configuration
+	*TIM_REG_CCER &= ~CCx_enable; 							// deshabilitamos el comienzo del comparador del canal del timer 3
+
+//	*TIM_REG_CCMR1 &= ~TIM1_TO_TIM5_OC1PE;//Output compare 1 preload disabled
+//	*TIM_REG_CR1 &= ~TIMx_ARPE; //la cuenta del comprador no se guarda
+//	*TIM_REG_PSC = 16-1;//(PSC_TO_MILLISEC_DELAY-1);//se requiere definri el prescaler en esta situacion aprender los calculos necesarios
+//	*TIM_REG_ARR =(MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,miliseconds) - 1);//este va a ser el periodos, el tiempo entre estados alto y alto
+//	*TIM_REG_CNT = 0;//cuenta la seteamos a 0
+//	*TIM_REG_CCR1= (MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,duty_cicle_miliseconds) - 1);//si se quiere definir uno nuevo se coloca aqui, primero pararlo y despues configurarlo
+
+
+	*TIM_REG_CCMR1 |= TIM1_TO_TIM5_OC1PE_and_OC3PE;//Output compare 1 preload enable
+	*TIM_REG_CR1 |= TIMx_ARPE; //la cuenta del comparador se guarda
+
+
+	//opcionales
+//	    *TIM_REG_CR1 &= ~(Clear_two_bits<<TIM1_TIM2_TO_TIM5_CMS); // Disable timer before configuration //only for TIM1_TI2 to TIM5
+//	    *TIM_REG_CR1 &= ~TIM1_TIM2_TO_TIM5_DIR; // Direction of the count to count UP that why is setr to 0
+	//fin opcionales
+
+
+
+//	*TIM_REG_CR1 |= TIMx_CEN; // Disable timer before configuration
+//	*TIM_REG_CCER |= TIM2_TO_TIM5_CC1E; // Habilitar la salida del canal 1
+
+
+	return status;
+
+}
+
+
+Status_code_t TIM3_PWM_start_channel(uint32_t miliseconds_duty, TIM3_PWM_channel_select_t Channel){
+
+
+	TIMx_register_offset_t capture_compare_reg = TIMx_CCR1;
+	TIM2_to_TIM5_CCER_t capture_compare_enb_reg = TIM2_TO_TIM5_CC1E;
+
+	switch(Channel){
+	case TIM3_CH1:
+		 capture_compare_reg=TIMx_CCR1;
+		 capture_compare_enb_reg = TIM2_TO_TIM5_CC1E;
+		break;
+	case TIM3_CH2:
+		 capture_compare_reg=TIMx_CCR2;
+		 capture_compare_enb_reg = TIM2_TO_TIM5_CC2E;
+		break;
+	case TIM3_CH3:
+		 capture_compare_reg=TIMx_CCR3;
+		 capture_compare_enb_reg = TIM2_TO_TIM5_CC3E;
+		break;
+	case TIM3_CH4:
+		 capture_compare_reg=TIMx_CCR4;
+		 capture_compare_enb_reg = TIM2_TO_TIM5_CC4E;
+		break;
+	default:
+		return TIMx_incorrect;
+		break;
+	}
+	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_PSC);
+	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_ARR);
+	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CNT);
+	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
+	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CCER);
+	uint32_t volatile *TIM_REG_CCR1 = (uint32_t volatile*)(TIM3_ADDRESS + capture_compare_reg);
+
+	if(miliseconds_duty==0){
+		miliseconds_duty=1;
+	}
+
+	*TIM_REG_CCER &= ~capture_compare_enb_reg; 		// deshabilitamos el comienzo del comparador
+
+
+	*TIM_REG_PSC = TIMx_DIV_BY_16-1;				//(PSC_TO_MILLISEC_DELAY-1);
+	*TIM_REG_ARR = MAX_TIME_TIM3_TIM4-1;			//(MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,miliseconds) - 1);
+	*TIM_REG_CNT = 0;								//cuenta la seteamos a 0
+	*TIM_REG_CCR1= (MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,miliseconds_duty) - 1);//si se quiere definir uno nuevo se coloca aqui, primero pararlo y despues configurarlo
+
+	*TIM_REG_CR1 |= TIMx_CEN; 						// Disable timer before configuration
+	*TIM_REG_CCER |= capture_compare_enb_reg; 		// Habilitar la salida del canal 1
+
+
+	return Success;
+
+}
+
+
+Status_code_t TIM3_PWM_start_channel_duty_porcent(uint8_t porcent_duty, TIM3_PWM_channel_select_t Channel){
+
+
+	TIMx_register_offset_t capture_compare_reg = TIMx_CCR1;
+	TIM2_to_TIM5_CCER_t capture_compare_enb_reg = TIM2_TO_TIM5_CC1E;
+
+	uint32_t miliseconds_duty = 1;
+
+	switch(Channel){
+	case TIM3_CH1:
+		 capture_compare_reg=TIMx_CCR1;
+		 capture_compare_enb_reg = TIM2_TO_TIM5_CC1E;
+		break;
+	case TIM3_CH2:
+		 capture_compare_reg=TIMx_CCR2;
+		 capture_compare_enb_reg = TIM2_TO_TIM5_CC2E;
+		break;
+	case TIM3_CH3:
+		 capture_compare_reg=TIMx_CCR3;
+		 capture_compare_enb_reg = TIM2_TO_TIM5_CC3E;
+		break;
+	case TIM3_CH4:
+		 capture_compare_reg=TIMx_CCR4;
+		 capture_compare_enb_reg = TIM2_TO_TIM5_CC4E;
+		break;
+	default:
+		return TIMx_incorrect;
+		break;
+	}
+	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_PSC);
+	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_ARR);
+	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CNT);
+	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
+	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CCER);
+	uint32_t volatile *TIM_REG_CCR1 = (uint32_t volatile*)(TIM3_ADDRESS + capture_compare_reg);
+
+
+	if(porcent_duty<=0){
+		miliseconds_duty=1;
+	}else if(porcent_duty>100){
+		miliseconds_duty = MAX_TIME_TIM3_TIM4 - 1;
+	}else{
+		miliseconds_duty = (uint32_t)((porcent_duty*MAX_TIME_TIM3_TIM4)/100.0f);
+	}
+
+	*TIM_REG_CCER &= ~capture_compare_enb_reg; 		// deshabilitamos el comienzo del comparador
+
+
+	*TIM_REG_PSC = TIMx_DIV_BY_16-1;				//(PSC_TO_MILLISEC_DELAY-1);
+	*TIM_REG_ARR = MAX_TIME_TIM3_TIM4-1;			//(MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,miliseconds) - 1);
+	*TIM_REG_CNT = 0;								//cuenta la seteamos a 0
+	*TIM_REG_CCR1= (MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,miliseconds_duty) - 1);//si se quiere definir uno nuevo se coloca aqui, primero pararlo y despues configurarlo
+
+	*TIM_REG_CR1 |= TIMx_CEN; 						// Disable timer before configuration
+	*TIM_REG_CCER |= capture_compare_enb_reg; 		// Habilitar la salida del canal 1
+
+
+	return Success;
+
+}
+
+Status_code_t TIM3_PWM_stop_channel(TIM3_PWM_channel_select_t Channel){
+
+	TIM2_to_TIM5_CCER_t CCx_enable = TIM2_TO_TIM5_CC1E;
+
+	switch(Channel){
+	case TIM3_CH1:
+		 CCx_enable = TIM2_TO_TIM5_CC1E;
+		break;
+	case TIM3_CH2:
+		 CCx_enable = TIM2_TO_TIM5_CC2E;
+		break;
+	case TIM3_CH3:
+		 CCx_enable = TIM2_TO_TIM5_CC3E;
+		break;
+	case TIM3_CH4:
+		 CCx_enable = TIM2_TO_TIM5_CC4E;
+		break;
+	default:
+		return TIMx_incorrect;
+		break;
+	}
+
+
+	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CCER);
+
+	*TIM_REG_CCER &= ~CCx_enable; 				// deshabilitamos el comienzo del comparador del canal del timer 3
+
+
+	    return Success;
+
+}
+
+Status_code_t TIM3_PWM_Deinit(void){ //deinit all the TIM3 for PWM
+	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
+
+	*TIM_REG_CR1 &= ~TIMx_CEN; 								// Disable timer before configuration
+	TIMER_Clock(Disabled,TIMER_3);
+
+	return Success;
+}
 
 Status_code_t TIM5_Init(uint32_t microseconds){
 

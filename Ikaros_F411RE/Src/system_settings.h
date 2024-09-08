@@ -46,6 +46,9 @@ typedef enum{
 	ADC_ADConverterd_off,
 
 	EXTI_Line_already_use,
+	EXTI_Pin_Not_Allowed,
+
+	TIMx_incorrect,
 
 }Status_code_t;
 
@@ -57,6 +60,7 @@ typedef enum{
 typedef enum{
 	Clean_one_bit =			0x01, 	//to clean 1 bit
 	Clear_two_bits=			0x03, 	//to clean 1 GPIOS
+	Clear_three_bits = 		0x07, 	//to clena 3 bits
 	Clear_four_bits = 		0xF, 	//to clean 2 GPIOS
 	Clear_five_bits = 		0x1F,
 	Clear_six_bits =		0x3F,
@@ -64,6 +68,8 @@ typedef enum{
 	clear_fourteen_bits = 	0x3FFF, //to clean 7 GPIOS
 	Clear_sixteen_bits =	0xFFFF 	//to cslean 8 GPIOS
 }RegAuxClean_t;
+
+
 
 
 typedef enum{

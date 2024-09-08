@@ -11,7 +11,7 @@
 
 void Init_Board(void){//see if this is good
 	__disable_irq();
-	Delay(500000);
+	Delay(100000);
 	__enable_irq();
 
 }

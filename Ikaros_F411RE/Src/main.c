@@ -22,21 +22,89 @@
 #include "timers.h"
 #include "lcd.h"
 #include "adc.h"
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdio.h>
 
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
+ADC_channel_t chan_to_read = Channel_0;
+uint32_t count =0;
+uint8_t str_save_data[6]={};
 
 
 int main(void){
 	Init_Board();
-	lcd_init(lcd_PortB);
-	GPIO_Init_EXTI15_To_EXTI10(EXTI_Port_C, Pin_13, Rising_edge);
+//	uint32_t adc_value =0;
+//	float voltaje_0 = 0.0f;
+//	uint8_t str_save_data[6]={};
 
+
+	lcd_init(lcd_PortB);
+//	ADC_Init(RES_12_bits);
+//	ADC_Configure_Channel(Channel_1);
+//	ADC_Configure_Channel(Channel_0);
+//	GPIO_Init_EXTI15_To_EXTI10(EXTI_Port_C, Pin_13, 0);
+//
+//	GPIO_Enable_EXTI15_To_EXTI10(Pin_13);
+//    SetPinMode(Port_C, Pin_6, Output);
+//    GPIO_DigitalWrite(Port_C, Pin_6, High);
+//    GPIO_DigitalWrite(Port_C, Pin_6, Low);
+
+
+	uint32_t count =0;
+	TIM3_PWM_Init(TIM3_CH3);
+
+bool To_on =true;
 
 	while(1){
+
+		TIM3_PWM_start_channel_duty_porcent(count, TIM3_CH3);
+		Delay(50000);
+		if(To_on){
+			count++;
+			if(count>=100){
+				To_on=false;
+			}
+		}else{
+			count--;
+			if(count<=0){
+				To_on=true;
+			}
+		}
+		lcd_printXY(0, 0,"PWM Test:       ", strlen((const char *)"PWM Test:       "));
+		memset(str_save_data,'\0',6);
+
+		itoa(count, str_save_data, 10);
+		lcd_printXY(10, 0,str_save_data, strlen((const char *)str_save_data));
+
+
+
+//		Delay(250000);
+//		memset(str_save_data,'\0',6);
+//		chan_to_read = get_channel();
+//		adc_value = ADC_Read(chan_to_read);
+//		voltaje_0 = (float)((3.3f*adc_value)/4096.0f);
+//
+//		ftoa(voltaje_0, str_save_data, 2);
+//		if(chan_to_read){
+//			lcd_printXY(0, 0,"CHN1: ", strlen((const char *)"CHN1: "));
+//		}else{
+//			lcd_printXY(0, 0,"CHN0: ", strlen((const char *)"CHN0: "));
+//		}
+//
+//		lcd_printXY(0, 1,"EXT Count: ", strlen((const char *)"EXT Count: "));
+//
+//		lcd_printXY(6, 0,str_save_data, strlen((const char *)str_save_data));
+//
+//		memset(str_save_data,'\0',6);
+//		count = get_EXT_count();
+//		itoa(count, str_save_data, 10);
+//
+//		lcd_printXY(11, 1,str_save_data, strlen((const char *)str_save_data));
 
 	}
 	return 0;
@@ -52,7 +120,6 @@ int main(void){
 //
 ////	SetPinMode(Port_A, Pin_1, Output);
 ////	GPIO_DigitalWrite(Port_A, Pin_1, 1);
-//	uint32_t prioridad = NVIC_GetPriority(EXTI0_IRQn);
 //
 //	lcd_init(lcd_PortB);
 //	ADC_Init(RES_12_bits);

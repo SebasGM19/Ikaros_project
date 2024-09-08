@@ -6,6 +6,7 @@
  */
 
 #include "gpios.h"
+#include "adc.h"
 
 uint8_t static GPIO_EXT_Pin_ocupped[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
@@ -79,6 +80,26 @@ Status_code_t SetPinMode(Set_Port_t Port_define, Pin_number_t Pin_defined, PinMo
 	return status;
 }
 
+void GpioSetAlternativeFunction(Set_Port_t Port_define, Pin_number_t Pin_defined, Alternate_function_map_t AF){
+
+	GPIO_register_offset_t GPIO_AFRx_Offset=GPIOx_AFRL_OFFSET;
+	uint8_t Pin_offset_to_substract =0;
+	uint32_t real_register_position =0;
+
+	if(Pin_defined >= 8){
+		GPIO_AFRx_Offset=GPIOx_AFRH_OFFSET;
+		Pin_offset_to_substract = 32;//to adjust for AFRH and PIN position
+	}
+
+	uint32_t volatile *pGpio_alt_func_reg = (uint32_t volatile *)((Port_define)+ GPIO_AFRx_Offset);
+
+	real_register_position = (Pin_defined*4) - Pin_offset_to_substract;
+
+	*pGpio_alt_func_reg &= ~(Clear_four_bits<<real_register_position);
+
+	*pGpio_alt_func_reg |= (AF<<real_register_position);//hacer un enum con funciones alternativas
+
+}
 
 Status_code_t GpioPullUpDownState(Set_Port_t Port_define, Pin_number_t Pin_defined, GPIO_UP_DOWN_STATE_t GPIO_State){
 	uint32_t volatile *REG_PULL_UPdown = (uint32_t volatile*)(Port_define + GPIOx_PUPDR_OFFSET); //add 0x0C for offset to pull up or pull down
@@ -136,7 +157,7 @@ void GPIO_EXTI_Trigger_seleccion(Pin_number_t Pin_defined,GPIO_Exti_Config_t EXT
 
 	EXTI_registers_offset_t trigger_offset = EXTI_FTSR;
 
-	trigger_offset = EXTI_mode ? EXTI_FTSR : EXTI_RTSR; 	//if EXTI_mode = falling_edge(0) iquals FTSR offset
+	trigger_offset = EXTI_mode ? EXTI_RTSR : EXTI_FTSR; 	//if EXTI_mode = falling_edge(0) iquals FTSR offset
 
 	uint32_t volatile *EXTI_trigger_reg = (uint32_t volatile *)(EXT1_ADDRESS + trigger_offset);
 	*EXTI_trigger_reg|= (1u<<Pin_defined);
@@ -225,6 +246,7 @@ Status_code_t GPIO_Init_EXTI0(GPIO_Exti_Port_t EXTI_Port,GPIO_Exti_Config_t EXTI
 	}
 	SYS_ClockEnable(Enabled);
 	GPIO_Set_EXTI_Line(EXTI_Port,Pin_0);
+	GPIO_EXTI_Trigger_seleccion(Pin_0,EXTI_mode);
 	GPIO_EXTI_Mask(Pin_0,Disabled);
 	NVIC_EnableIRQ(EXTI0_IRQn);
 	return Success;
@@ -292,6 +314,7 @@ Status_code_t GPIO_Init_EXTI1(GPIO_Exti_Port_t EXTI_Port,GPIO_Exti_Config_t EXTI
 	SYS_ClockEnable(Enabled);
 	GPIO_Set_EXTI_Line(EXTI_Port,Pin_1);
 	GPIO_EXTI_Mask(Pin_1,Disabled);
+	GPIO_EXTI_Trigger_seleccion(Pin_1,EXTI_mode);
 	NVIC_EnableIRQ(EXTI1_IRQn);
 
 	return Success;
@@ -362,6 +385,8 @@ Status_code_t GPIO_Init_EXTI2(GPIO_Exti_Port_t EXTI_Port,GPIO_Exti_Config_t EXTI
 	SYS_ClockEnable(Enabled);
 	GPIO_Set_EXTI_Line(EXTI_Port,Pin_2);
 	GPIO_EXTI_Mask(Pin_2,Disabled);
+	GPIO_EXTI_Trigger_seleccion(Pin_2,EXTI_mode);
+
 	NVIC_EnableIRQ(EXTI2_IRQn);
 
 	return Success;
@@ -429,6 +454,8 @@ Status_code_t GPIO_Init_EXTI3(GPIO_Exti_Port_t EXTI_Port,GPIO_Exti_Config_t EXTI
 	SYS_ClockEnable(Enabled);
 	GPIO_Set_EXTI_Line(EXTI_Port,Pin_3);
 	GPIO_EXTI_Mask(Pin_3,Disabled);
+	GPIO_EXTI_Trigger_seleccion(Pin_3,EXTI_mode);
+
 	NVIC_EnableIRQ(EXTI3_IRQn);
 
 	return Success;
@@ -495,6 +522,8 @@ Status_code_t GPIO_Init_EXTI4(GPIO_Exti_Port_t EXTI_Port,GPIO_Exti_Config_t EXTI
 	SYS_ClockEnable(Enabled);
 	GPIO_Set_EXTI_Line(EXTI_Port,Pin_4);
 	GPIO_EXTI_Mask(Pin_4,Disabled);
+	GPIO_EXTI_Trigger_seleccion(Pin_4,EXTI_mode);
+
 	NVIC_EnableIRQ(EXTI4_IRQn);
 
 	return Success;
@@ -530,9 +559,15 @@ Status_code_t GPIO_Init_EXTI9_To_EXTI5(GPIO_Exti_Port_t EXTI_Port, Pin_number_t 
 	Status_code_t status =Success;
 	Set_Port_t Port_define=Port_A;
 
-	status = GPIO_Save_EXTI_PIN(Pin_defined);
-	if(status!= Success){
-		return status;
+	if(Pin_defined>9 || Pin_defined<5){
+		return EXTI_Pin_Not_Allowed;
+	}
+
+	for(uint8_t i = 5;i<10;i++){
+		status = GPIO_Save_EXTI_PIN(i);
+		if(status!= Success){
+			return status;
+		}
 	}
 
 	switch(EXTI_Port){
@@ -549,19 +584,24 @@ Status_code_t GPIO_Init_EXTI9_To_EXTI5(GPIO_Exti_Port_t EXTI_Port, Pin_number_t 
 		 Port_define = Port_D;
 		break;
 	default:
-		GPIO_Delete_EXTI_PIN(Pin_defined);
+		for(uint8_t i = 5;i<10;i++){
+			GPIO_Delete_EXTI_PIN(i);
+		}
 		return OptionNotSupported;
 		break;
 	}
 
 	status =  SetPinMode(Port_define, Pin_defined, Input);
 	if(status!=Success){
-		GPIO_Delete_EXTI_PIN(Pin_defined);
+		for(uint8_t i = 5;i<10;i++){
+			GPIO_Delete_EXTI_PIN(i);
+		}
 		return status;
 	}
 	SYS_ClockEnable(Enabled);
 	GPIO_Set_EXTI_Line(EXTI_Port,Pin_defined);
 	GPIO_EXTI_Mask(Pin_defined,Disabled);
+	GPIO_EXTI_Trigger_seleccion(Pin_defined,EXTI_mode);
 	NVIC_EnableIRQ(EXTI9_5_IRQn);
 
 	return Success;
@@ -576,18 +616,47 @@ void GPIO_Disable_EXTI9_To_EXTI5(Pin_number_t Pin_defined){
 }
 void GPIO_Deinit_EXTI9_To_EXTI5(Pin_number_t Pin_defined){
 	GPIO_EXTI_Mask(Pin_defined, Disabled);
-	GPIO_Delete_EXTI_PIN(Pin_defined);
+	for(uint8_t i = 5;i<10;i++){
+		GPIO_Delete_EXTI_PIN(i);
+	}
 	NVIC_DisableIRQ(EXTI9_5_IRQn);
 }
 
 
 ////////////////////////////////ONLY 1 PIN FROM PIN_10 TO PIN_15 OF ALL PORTS/////////////////////////////
+
+ADC_channel_t volatile glob_chan = Channel_0;
+void set_channel(ADC_channel_t const chann){
+	glob_chan = chann;
+}
+
+ADC_channel_t const get_channel(void){
+
+	return glob_chan;
+}
+
+uint32_t count_ext =0;
+
+bool change= true;
+uint32_t const get_EXT_count(void){
+
+	return count_ext;
+}
+
 void EXTI15_10_HANDLER(void){
 	/*Develop your interruption code from here*/
 
 
+	count_ext++;
+	//debouncing need
+	set_channel(change);
+	change = !change;
+//	if(change){
+//	}else{
+//		set_channel(Channel_0);
+//	}
 
-
+//	Peripherial_delay(200);
 	/*To here*/
 	GPIO_EXTI_Clean_Group_Of_Flag(Pin_10,Clear_six_bits);
 
@@ -597,9 +666,14 @@ Status_code_t GPIO_Init_EXTI15_To_EXTI10(GPIO_Exti_Port_t EXTI_Port, Pin_number_
 	Status_code_t status =Success;
 	Set_Port_t Port_define=Port_A;
 
-	status = GPIO_Save_EXTI_PIN(Pin_defined);
-	if(status!= Success){
-		return status;
+	if(Pin_defined>15 || Pin_defined<10){
+		return EXTI_Pin_Not_Allowed;
+	}
+	for(uint8_t i = 10;i<16;i++){
+		status = GPIO_Save_EXTI_PIN(i);
+		if(status!= Success){
+			return status;
+		}
 	}
 
 	switch(EXTI_Port){
@@ -616,19 +690,26 @@ Status_code_t GPIO_Init_EXTI15_To_EXTI10(GPIO_Exti_Port_t EXTI_Port, Pin_number_
 		 Port_define = Port_D;
 		break;
 	default:
-		GPIO_Delete_EXTI_PIN(Pin_defined);
+		for(uint8_t i = 10;i<16;i++){
+			GPIO_Delete_EXTI_PIN(i);
+		}
 		return OptionNotSupported;
 		break;
 	}
 
 	status =  SetPinMode(Port_define, Pin_defined, Input);
+
 	if(status!=Success){
-		GPIO_Delete_EXTI_PIN(Pin_defined);
+		for(uint8_t i = 10;i<16;i++){
+			GPIO_Delete_EXTI_PIN(i);
+		}
 		return status;
 	}
+
 	SYS_ClockEnable(Enabled);
 	GPIO_Set_EXTI_Line(EXTI_Port,Pin_defined);
 	GPIO_EXTI_Mask(Pin_defined,Disabled);
+	GPIO_EXTI_Trigger_seleccion(Pin_defined,EXTI_mode);
 	NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 	return Success;
@@ -644,7 +725,9 @@ void GPIO_Disable_EXTI15_To_EXTI10(Pin_number_t Pin_defined){
 
 void GPIO_Deinit_EXTI15_To_EXTI10(Pin_number_t Pin_defined){
 	GPIO_EXTI_Mask(Pin_defined, Disabled);
-	GPIO_Delete_EXTI_PIN(Pin_defined);
+	for(uint8_t i = 10;i<16;i++){
+		GPIO_Delete_EXTI_PIN(i);
+	}
 	NVIC_DisableIRQ(EXTI15_10_IRQn);
 }
 
