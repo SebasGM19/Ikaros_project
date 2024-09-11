@@ -290,11 +290,17 @@ typedef enum{
 	toggle,
 	force_inactive_level,
 	force_active_level,
-	PWM_mode_1,
-	PWM_mode_2,
 
-}TIM_output_compare_mode_t;
 
+}TIMx_global_OCxM_t;
+
+
+typedef enum{
+
+	PWM_mode_1 = 6,
+	PWM_mode_2 = 7,
+
+}PWM_mode_OCxM_t;
 
 typedef enum{
 	Clean_pwm_channel_1_and_3 =	(0x7B),
@@ -329,6 +335,16 @@ typedef enum{//channel and PIN
 }TIM5_PWM_channel_select_t;
 
 
+
+typedef struct{
+	TIM3_PWM_channel_select_t channel;
+	PWM_mode_OCxM_t PWM_mode;
+	uint8_t duty_cycle_porcent;
+	uint32_t frequency;
+	uint32_t prescaler;
+
+}pwm_parameters_t;
+
 volatile void set_cuenta(uint32_t cuenta_lim);
 
 void volatile TIMER_WaitFlag(TimerMapAddr_t TIMER_addr);
@@ -354,10 +370,11 @@ void TIM5_Stop(void);
 void TIM5_Deinit(void);
 
 
-Status_code_t TIM3_PWM_Init(TIM3_PWM_channel_select_t Channel);
-Status_code_t TIM3_PWM_start_channel(uint32_t miliseconds_duty, TIM3_PWM_channel_select_t Channel);
-Status_code_t TIM3_PWM_start_channel_duty_porcent(uint8_t porcent_duty, TIM3_PWM_channel_select_t Channel);
-Status_code_t TIM3_PWM_stop_channel(TIM3_PWM_channel_select_t Channel);
+void PWM_set_global_ARR(uint32_t new_arr_value);
+Status_code_t TIM3_PWM_Init(pwm_parameters_t const PWM);
+Status_code_t TIM3_PWM_start_channel(pwm_parameters_t const PWM,uint32_t miliseconds_duty);
+Status_code_t TIM3_PWM_start_channel_duty_porcent(pwm_parameters_t const PWM);
+Status_code_t TIM3_PWM_stop_channel(pwm_parameters_t const PWM);
 Status_code_t TIM3_PWM_Deinit(void);
 
 

@@ -35,8 +35,11 @@ ADC_channel_t chan_to_read = Channel_0;
 uint32_t count =0;
 uint8_t str_save_data[6]={};
 
+pwm_parameters_t PWM1= {TIM3_CH3,PWM_mode_1,70,50,16};
 
 int main(void){
+	PWM1.duty_cycle_porcent = count;
+
 	Init_Board();
 //	uint32_t adc_value =0;
 //	float voltaje_0 = 0.0f;
@@ -55,30 +58,40 @@ int main(void){
 //    GPIO_DigitalWrite(Port_C, Pin_6, Low);
 
 
-	uint32_t count =0;
-	TIM3_PWM_Init(TIM3_CH3);
+//	uint32_t count =0;
+	TIM3_PWM_Init(PWM1);
 
 bool To_on =true;
 
 	while(1){
+//		TIM3_PWM_start_channel_duty_porcent(50, TIM3_CH3);
+//		Delay(10000);
+//		TIM3_PWM_start_channel_duty_porcent(10, TIM3_CH3);
+//		Delay(10000);
+//		TIM3_PWM_start_channel_duty_porcent(90, TIM3_CH3);
+//		Delay(10000);
+//		TIM3_PWM_start_channel_duty_porcent(100, TIM3_CH3);
+//		Delay(10000);
+//		TIM3_PWM_start_channel_duty_porcent(0, TIM3_CH3);
+//		Delay(10000);
 
-		TIM3_PWM_start_channel_duty_porcent(count, TIM3_CH3);
+		TIM3_PWM_start_channel_duty_porcent(PWM1);
 		Delay(50000);
 		if(To_on){
-			count++;
-			if(count>=100){
+			PWM1.duty_cycle_porcent++;
+			if(PWM1.duty_cycle_porcent>=100){
 				To_on=false;
 			}
 		}else{
-			count--;
-			if(count<=0){
+			PWM1.duty_cycle_porcent--;
+			if(PWM1.duty_cycle_porcent<=0){
 				To_on=true;
 			}
 		}
 		lcd_printXY(0, 0,"PWM Test:       ", strlen((const char *)"PWM Test:       "));
 		memset(str_save_data,'\0',6);
 
-		itoa(count, str_save_data, 10);
+		itoa(PWM1.duty_cycle_porcent, str_save_data, 10);
 		lcd_printXY(10, 0,str_save_data, strlen((const char *)str_save_data));
 
 
