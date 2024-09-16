@@ -22,9 +22,6 @@
 #include "timers.h"
 #include "lcd.h"
 #include "adc.h"
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdio.h>
 
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
@@ -32,13 +29,11 @@
 #endif
 
 ADC_channel_t chan_to_read = Channel_0;
-uint32_t count =0;
 uint8_t str_save_data[6]={};
 
-pwm_parameters_t PWM1= {TIM3_CH3,PWM_mode_1,70,50,16};
+pwm_auto_parameters_t PWM1= {TIM3_CH3,70,50};
 
 int main(void){
-	PWM1.duty_cycle_porcent = count;
 
 	Init_Board();
 //	uint32_t adc_value =0;
@@ -59,40 +54,57 @@ int main(void){
 
 
 //	uint32_t count =0;
-	TIM3_PWM_Init(PWM1);
+	TIM3_PWM_Init(TIM3_CH3,PWM_mode_1);
 
 bool To_on =true;
 
 	while(1){
-//		TIM3_PWM_start_channel_duty_porcent(50, TIM3_CH3);
-//		Delay(10000);
-//		TIM3_PWM_start_channel_duty_porcent(10, TIM3_CH3);
-//		Delay(10000);
-//		TIM3_PWM_start_channel_duty_porcent(90, TIM3_CH3);
-//		Delay(10000);
-//		TIM3_PWM_start_channel_duty_porcent(100, TIM3_CH3);
-//		Delay(10000);
-//		TIM3_PWM_start_channel_duty_porcent(0, TIM3_CH3);
-//		Delay(10000);
 
-		TIM3_PWM_start_channel_duty_porcent(PWM1);
-		Delay(50000);
-		if(To_on){
-			PWM1.duty_cycle_porcent++;
-			if(PWM1.duty_cycle_porcent>=100){
-				To_on=false;
-			}
-		}else{
-			PWM1.duty_cycle_porcent--;
-			if(PWM1.duty_cycle_porcent<=0){
-				To_on=true;
-			}
-		}
-		lcd_printXY(0, 0,"PWM Test:       ", strlen((const char *)"PWM Test:       "));
-		memset(str_save_data,'\0',6);
+		PWM1.duty_cycle_porcent = 50;
+		PWM1.frequency = 30;
+		TIM3_PWM_start_channel(PWM1); //duty PWM1
+		Delay(1000000);
 
-		itoa(PWM1.duty_cycle_porcent, str_save_data, 10);
-		lcd_printXY(10, 0,str_save_data, strlen((const char *)str_save_data));
+		PWM1.duty_cycle_porcent = 50;
+		PWM1.frequency = 60;
+		TIM3_PWM_start_channel(PWM1);
+		Delay(1000000);
+
+		PWM1.duty_cycle_porcent = 50;
+		PWM1.frequency = 70;
+		TIM3_PWM_start_channel(PWM1);
+		Delay(1000000);
+
+		PWM1.duty_cycle_porcent = 50;
+		PWM1.frequency =100;
+		TIM3_PWM_start_channel(PWM1);
+		Delay(1000000);
+
+		PWM1.duty_cycle_porcent = 50;
+		PWM1.frequency = 200;
+		TIM3_PWM_start_channel(PWM1);
+		Delay(1000000);
+
+
+//		TIM3_PWM_start_channel_duty_porcent(PWM1);
+//		Delay(50000);
+//		if(To_on){
+//			PWM1.duty_cycle_porcent++;
+//			if(PWM1.duty_cycle_porcent>=100){
+//				To_on=false;
+//			}
+//		}else{
+//			PWM1.duty_cycle_porcent--;
+//			if(PWM1.duty_cycle_porcent<=0){
+//				To_on=true;
+//			}
+//		}
+
+//		lcd_printXY(0, 0,"PWM Test:       ", strlen((const char *)"PWM Test:       "));
+//		memset(str_save_data,'\0',6);
+//
+//		itoa(PWM1.duty_cycle_porcent, (char *)str_save_data, 10);
+//		lcd_printXY(10, 0,str_save_data, strlen((const char *)str_save_data));
 
 
 

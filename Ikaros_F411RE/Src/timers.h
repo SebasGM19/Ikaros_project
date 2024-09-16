@@ -297,8 +297,8 @@ typedef enum{
 
 typedef enum{
 
-	PWM_mode_1 = 6,
-	PWM_mode_2 = 7,
+	PWM_mode_1 = 6, //to use time on
+	PWM_mode_2 = 7, //to set time off
 
 }PWM_mode_OCxM_t;
 
@@ -338,12 +338,19 @@ typedef enum{//channel and PIN
 
 typedef struct{
 	TIM3_PWM_channel_select_t channel;
-	PWM_mode_OCxM_t PWM_mode;
 	uint8_t duty_cycle_porcent;
 	uint32_t frequency;
+
+}pwm_auto_parameters_t;
+
+
+typedef struct{
+	TIM3_PWM_channel_select_t channel;
+	uint32_t Total_count_ARR;
+	uint32_t miliseconds_duty;
 	uint32_t prescaler;
 
-}pwm_parameters_t;
+}pwm_custom_parameters_t;
 
 volatile void set_cuenta(uint32_t cuenta_lim);
 
@@ -371,10 +378,12 @@ void TIM5_Deinit(void);
 
 
 void PWM_set_global_ARR(uint32_t new_arr_value);
-Status_code_t TIM3_PWM_Init(pwm_parameters_t const PWM);
-Status_code_t TIM3_PWM_start_channel(pwm_parameters_t const PWM,uint32_t miliseconds_duty);
-Status_code_t TIM3_PWM_start_channel_duty_porcent(pwm_parameters_t const PWM);
-Status_code_t TIM3_PWM_stop_channel(pwm_parameters_t const PWM);
+
+Status_code_t TIM3_PWM_Init(TIM3_PWM_channel_select_t channel,PWM_mode_OCxM_t mode);
+Status_code_t TIM3_PWM_start_channel_custom(pwm_custom_parameters_t const PWM_Custom);
+Status_code_t TIM3_PWM_start_channel(pwm_auto_parameters_t const PWM);
+
+Status_code_t TIM3_PWM_stop_channel(TIM3_PWM_channel_select_t channel);
 Status_code_t TIM3_PWM_Deinit(void);
 
 

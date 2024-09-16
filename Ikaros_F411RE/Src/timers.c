@@ -11,7 +11,7 @@
 #include "keypad_4x4.h"
 #include "adc.h"
 
-uint32_t volatile global_ARR_reg = 2048; //set as 256 to default
+uint32_t volatile global_ARR_reg = 1024; //set as 2048 to default
 
 bool static reset_tim3_flag =false;
 bool static reset_tim4_flag =false;
@@ -325,7 +325,7 @@ void PWM_set_global_ARR(uint32_t new_arr_value){
 }
 
 
-Status_code_t TIM3_PWM_Init(pwm_parameters_t const PWM){
+Status_code_t TIM3_PWM_Init(TIM3_PWM_channel_select_t channel,PWM_mode_OCxM_t mode){
 
 	Status_code_t status = Success;
 	TIMx_register_offset_t capture_compare_mode_reg = TIMx_CCMR1;
@@ -336,7 +336,7 @@ Status_code_t TIM3_PWM_Init(pwm_parameters_t const PWM){
 	TIM1_to_TIM5_CCMR1_CCMR2_t CCMRx_mode = TIM1_TO_TIM5_OC1M_and_OC3M;
 
 
-	switch(PWM.channel){
+	switch(channel){
 	case TIM3_CH1:
 		 capture_compare_mode_reg = TIMx_CCMR1;
 		 clean_channel = Clean_pwm_channel_1_and_3;
@@ -385,14 +385,14 @@ Status_code_t TIM3_PWM_Init(pwm_parameters_t const PWM){
 
 
 
-	status = SetPinMode(Port_B, PWM.channel, Alt_func_mode); //always timer for PORT B defined
+	status = SetPinMode(Port_B, channel, Alt_func_mode); //always timer for PORT B defined
 
 	if(status!=Success){
 		return status;
 	}
 
 	TIMER_Clock(Enabled,TIMER_3);
-	GpioSetAlternativeFunction(Port_B, PWM.channel, TIM3_TIM4_TIM5); //alt 2 para GPIO_A6
+	GpioSetAlternativeFunction(Port_B, channel, TIM3_TIM4_TIM5); //alt 2 para GPIO_A6
 
 	*TIM_REG_CCMRx &= ~(clean_channel); 					// solo limpiamos los primero 8 bits correspondientes al canal 1
 
@@ -400,7 +400,7 @@ Status_code_t TIM3_PWM_Init(pwm_parameters_t const PWM){
 
 	*TIM_REG_CCER &= ~CCx_polarity; 						// configuramos para que sea en polaridad alta se deja en 0
 
-	*TIM_REG_CCMRx |= (PWM.PWM_mode<<CCMRx_mode); 			// Configurar canal a modo de pwm
+	*TIM_REG_CCMRx |= (mode<<CCMRx_mode); 			// Configurar canal a modo de pwm
 
 	*TIM_REG_CCER &= ~CCx_enable; 							// deshabilitamos el comienzo del comparador del canal del timer 3
 
@@ -414,13 +414,14 @@ Status_code_t TIM3_PWM_Init(pwm_parameters_t const PWM){
 }
 
 
-Status_code_t TIM3_PWM_start_channel(pwm_parameters_t const PWM,uint32_t miliseconds_duty){
+Status_code_t TIM3_PWM_start_channel_custom(pwm_custom_parameters_t const PWM_Custom){
 
 
 	TIMx_register_offset_t capture_compare_reg = TIMx_CCR1;
 	TIM2_to_TIM5_CCER_t capture_compare_enb_reg = TIM2_TO_TIM5_CC1E;
 
-	switch(PWM.channel){
+
+	switch(PWM_Custom.channel){
 	case TIM3_CH1:
 		 capture_compare_reg = TIMx_CCR1;
 		 capture_compare_enb_reg = TIM2_TO_TIM5_CC1E;
@@ -443,16 +444,15 @@ Status_code_t TIM3_PWM_start_channel(pwm_parameters_t const PWM,uint32_t milisec
 	}
 	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_PSC);
 	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_ARR);
-	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CNT);
 	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
 	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CCER);
 	uint32_t volatile *TIM_REG_CCRx = (uint32_t volatile*)(TIM3_ADDRESS + capture_compare_reg);
 
 
-	*TIM_REG_PSC = (PWM.prescaler-1);
-	*TIM_REG_ARR = (global_ARR_reg - 1);
-	*TIM_REG_CNT = 0;								//cuenta la seteamos a 0 se necesita?
-	*TIM_REG_CCRx= miliseconds_duty;
+
+	*TIM_REG_PSC = (PWM_Custom.prescaler-1);
+	*TIM_REG_ARR = (PWM_Custom.Total_count_ARR - 1);
+	*TIM_REG_CCRx= PWM_Custom.miliseconds_duty;
 
 	*TIM_REG_CR1 |= TIMx_CEN;
 	*TIM_REG_CCER |= capture_compare_enb_reg; 		// Habilitar la salida del canal 1
@@ -463,13 +463,23 @@ Status_code_t TIM3_PWM_start_channel(pwm_parameters_t const PWM,uint32_t milisec
 }
 
 
-Status_code_t TIM3_PWM_start_channel_duty_porcent(pwm_parameters_t const PWM){
+/*
+  NOTE:
+  MAX frecuency in this startup configuration 7Khz
+  to reach higher frecuency modify the variable global_ARR_reg using the funcion PWM_set_global_ARR
+
+  or use the funftion TIM3_PWM_start_channel_custom to personalizes the frecuency and duty cicle
+ */
+Status_code_t TIM3_PWM_start_channel(pwm_auto_parameters_t const PWM){
 
 
 	TIMx_register_offset_t capture_compare_reg = TIMx_CCR1;
 	TIM2_to_TIM5_CCER_t capture_compare_enb_reg = TIM2_TO_TIM5_CC1E;
 
 	uint32_t miliseconds_duty = 0;
+
+	int32_t preescaler=0;
+
 
 	switch(PWM.channel){
 	case TIM3_CH1:
@@ -494,7 +504,6 @@ Status_code_t TIM3_PWM_start_channel_duty_porcent(pwm_parameters_t const PWM){
 	}
 	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_PSC);
 	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_ARR);
-	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CNT);
 	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
 	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CCER);
 	uint32_t volatile *TIM_REG_CCRx = (uint32_t volatile*)(TIM3_ADDRESS + capture_compare_reg);
@@ -505,13 +514,17 @@ Status_code_t TIM3_PWM_start_channel_duty_porcent(pwm_parameters_t const PWM){
 	}else if(PWM.duty_cycle_porcent>=100){
 		miliseconds_duty = global_ARR_reg;
 	}else{
-		miliseconds_duty = (uint32_t)((PWM.duty_cycle_porcent*global_ARR_reg)/100.0f);
+		miliseconds_duty = (uint32_t)((PWM.duty_cycle_porcent * global_ARR_reg) / 100.0f);
 	}
 
+	preescaler = (int32_t)round((float)((BOARD_CLOCK / ((global_ARR_reg + 1) * PWM.frequency)) - 1));
+	if(preescaler<=0){
+		/*NOTE: if this happend try change the global_ARR_reg to a lower value*/
+		return PWM_frecuency_not_suported_in_this_mode;
+	}
 
-	*TIM_REG_PSC = (PWM.prescaler-1);
+	*TIM_REG_PSC = preescaler;
 	*TIM_REG_ARR = (global_ARR_reg-1);				//(MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,miliseconds) - 1); //solve why this problem
-	*TIM_REG_CNT = 0;								//cuenta la seteamos a 0
 	*TIM_REG_CCRx = miliseconds_duty;
 
 	*TIM_REG_CR1 |= TIMx_CEN; 						// Disable timer before configuration
@@ -522,11 +535,11 @@ Status_code_t TIM3_PWM_start_channel_duty_porcent(pwm_parameters_t const PWM){
 
 }
 
-Status_code_t TIM3_PWM_stop_channel(pwm_parameters_t const PWM){
+Status_code_t TIM3_PWM_stop_channel(TIM3_PWM_channel_select_t channel){
 
 	TIM2_to_TIM5_CCER_t CCx_enable = TIM2_TO_TIM5_CC1E;
 
-	switch(PWM.channel){
+	switch(channel){
 	case TIM3_CH1:
 		 CCx_enable = TIM2_TO_TIM5_CC1E;
 		break;
