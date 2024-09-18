@@ -20,8 +20,8 @@
 #define TIM4_HANDLER TIM4_IRQHandler
 #define TIM5_HANDLER TIM5_IRQHandler
 
-#define TIM9_HANDLER TIM1_BRK_TIM9_IRQHandler //si tiene handler como el TIM3, 4 y 5
-#define TIM10_HANDLER TIM1_UP_TIM10_IRQHandler //si tiene handler como el TIM3, 4 y 5
+#define TIM9_HANDLER TIM1_BRK_TIM9_IRQHandler
+#define TIM10_HANDLER TIM1_UP_TIM10_IRQHandler
 //#define TIM11_HANDLER TIM11_IRQHandler //usar como delay para protocolos y timeout
 
 /*Value in microseconds Equals to 2^32 bit count*/
@@ -338,7 +338,7 @@ typedef enum{//channel and PIN
 
 typedef struct{
 	TIM3_PWM_channel_select_t channel;
-	uint8_t duty_cycle_porcent;
+	uint8_t duty_cycle_percent;
 	uint32_t frequency;
 
 }pwm_auto_parameters_t;
@@ -347,7 +347,7 @@ typedef struct{
 typedef struct{
 	TIM3_PWM_channel_select_t channel;
 	uint32_t Total_count_ARR;
-	uint32_t miliseconds_duty;
+	uint32_t duty_count;
 	uint32_t prescaler;
 
 }pwm_custom_parameters_t;
@@ -380,7 +380,7 @@ void TIM5_Deinit(void);
 void PWM_set_global_ARR(uint32_t new_arr_value);
 
 Status_code_t TIM3_PWM_Init(TIM3_PWM_channel_select_t channel,PWM_mode_OCxM_t mode);
-Status_code_t TIM3_PWM_start_channel_custom(pwm_custom_parameters_t const PWM_Custom);
+Status_code_t TIM3_PWM_start_custom_channel(pwm_custom_parameters_t const PWM_Custom);
 Status_code_t TIM3_PWM_start_channel(pwm_auto_parameters_t const PWM);
 
 Status_code_t TIM3_PWM_stop_channel(TIM3_PWM_channel_select_t channel);

@@ -150,14 +150,31 @@ void TIM3_Deinit(void){
 
 
 /*////////////////////////////////// TIMER 4 HANDLER AND CONTROL FUNCTIONS/////////////////////////////////////*/
+pwm_custom_parameters_t PWM_custom ={TIM3_CH3,1024,0,311};
+
 void TIM4_HANDLER(void){
 	TIMER_cleanCountFlag(TIM4_ADDRESS);
 	if(reset_tim4_flag){
-
 	/*Develop all the code to be executed in a second thread down here*/
-//	toggle_led = !toggle_led;
-//	GPIO_DigitalWrite(Port_A, Pin_5, toggle_led);
-//
+
+		uint32_t adc_value =0;
+		float voltaje_0 = 0.0f;
+		uint8_t str_save_data[3]={};
+
+		adc_value = ADC_Read(Channel_0);
+		voltaje_0 = (float)((3.3f*adc_value)/1024.0f);
+
+		PWM_custom.duty_count=(uint32_t)(((voltaje_0 * 90.0f) / 3.3f) + 30.0f);
+
+		TIM3_PWM_start_custom_channel(PWM_custom);
+
+		lcd_printXY(0, 0,"ServoDuty:      ", strlen((const char *)"ServoDuty:      "));
+		memset(str_save_data,'\0',3);
+
+		itoa(PWM_custom.duty_count, (char *)str_save_data, 10);
+		lcd_printXY(11, 0,str_save_data, strlen((const char *)str_save_data));
+
+
 
 	}else{reset_tim4_flag=!reset_tim4_flag;}
 }
@@ -187,6 +204,7 @@ Status_code_t TIM4_Init(uint16_t milliseconds){
 	return Success;
 
 }
+
 void TIM4_Start(void){
 	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CR1);
 	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_DIER);
@@ -324,7 +342,6 @@ void PWM_set_global_ARR(uint32_t new_arr_value){
 	global_ARR_reg = new_arr_value;
 }
 
-
 Status_code_t TIM3_PWM_Init(TIM3_PWM_channel_select_t channel,PWM_mode_OCxM_t mode){
 
 	Status_code_t status = Success;
@@ -414,7 +431,7 @@ Status_code_t TIM3_PWM_Init(TIM3_PWM_channel_select_t channel,PWM_mode_OCxM_t mo
 }
 
 
-Status_code_t TIM3_PWM_start_channel_custom(pwm_custom_parameters_t const PWM_Custom){
+Status_code_t TIM3_PWM_start_custom_channel(pwm_custom_parameters_t const PWM_Custom){
 
 
 	TIMx_register_offset_t capture_compare_reg = TIMx_CCR1;
@@ -450,9 +467,9 @@ Status_code_t TIM3_PWM_start_channel_custom(pwm_custom_parameters_t const PWM_Cu
 
 
 
-	*TIM_REG_PSC = (PWM_Custom.prescaler-1);
-	*TIM_REG_ARR = (PWM_Custom.Total_count_ARR - 1);
-	*TIM_REG_CCRx= PWM_Custom.miliseconds_duty;
+	*TIM_REG_PSC = (PWM_Custom.prescaler);
+	*TIM_REG_ARR = (PWM_Custom.Total_count_ARR - 1); 	//total count
+	*TIM_REG_CCRx= PWM_Custom.duty_count;  		//start count
 
 	*TIM_REG_CR1 |= TIMx_CEN;
 	*TIM_REG_CCER |= capture_compare_enb_reg; 		// Habilitar la salida del canal 1
@@ -509,12 +526,12 @@ Status_code_t TIM3_PWM_start_channel(pwm_auto_parameters_t const PWM){
 	uint32_t volatile *TIM_REG_CCRx = (uint32_t volatile*)(TIM3_ADDRESS + capture_compare_reg);
 
 
-	if(PWM.duty_cycle_porcent<=0){
+	if(PWM.duty_cycle_percent<=0){
 		miliseconds_duty=0;
-	}else if(PWM.duty_cycle_porcent>=100){
+	}else if(PWM.duty_cycle_percent>=100){
 		miliseconds_duty = global_ARR_reg;
 	}else{
-		miliseconds_duty = (uint32_t)((PWM.duty_cycle_porcent * global_ARR_reg) / 100.0f);
+		miliseconds_duty = (uint32_t)((PWM.duty_cycle_percent * global_ARR_reg) / 100.0f);
 	}
 
 	preescaler = (int32_t)round((float)((BOARD_CLOCK / ((global_ARR_reg + 1) * PWM.frequency)) - 1));
