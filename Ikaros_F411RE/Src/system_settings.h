@@ -15,6 +15,7 @@
 #include "stdbool.h"
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 
 
@@ -49,6 +50,7 @@ typedef enum{
 	EXTI_Pin_Not_Allowed,
 
 	TIMx_incorrect,
+	PWM_frecuency_not_suported_in_this_mode,
 
 }Status_code_t;
 

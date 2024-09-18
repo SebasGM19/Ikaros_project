@@ -157,7 +157,10 @@ void GPIO_EXTI_Trigger_seleccion(Pin_number_t Pin_defined,GPIO_Exti_Config_t EXT
 
 	EXTI_registers_offset_t trigger_offset = EXTI_FTSR;
 
-	trigger_offset = EXTI_mode ? EXTI_RTSR : EXTI_FTSR; 	//if EXTI_mode = falling_edge(0) iquals FTSR offset
+//	trigger_offset = EXTI_mode ? EXTI_RTSR : EXTI_FTSR; 	//if EXTI_mode = falling_edge(0) iquals FTSR offset
+	if(EXTI_mode){
+		trigger_offset = EXTI_RTSR;
+	}
 
 	uint32_t volatile *EXTI_trigger_reg = (uint32_t volatile *)(EXT1_ADDRESS + trigger_offset);
 	*EXTI_trigger_reg|= (1u<<Pin_defined);
@@ -625,38 +628,24 @@ void GPIO_Deinit_EXTI9_To_EXTI5(Pin_number_t Pin_defined){
 
 ////////////////////////////////ONLY 1 PIN FROM PIN_10 TO PIN_15 OF ALL PORTS/////////////////////////////
 
-ADC_channel_t volatile glob_chan = Channel_0;
-void set_channel(ADC_channel_t const chann){
-	glob_chan = chann;
-}
 
-ADC_channel_t const get_channel(void){
+uint8_t global_duty_percent =0;
 
-	return glob_chan;
-}
-
-uint32_t count_ext =0;
-
-bool change= true;
-uint32_t const get_EXT_count(void){
-
-	return count_ext;
+uint8_t return_global_duty(void){
+	return global_duty_percent;
 }
 
 void EXTI15_10_HANDLER(void){
 	/*Develop your interruption code from here*/
+	uint32_t hw_count_dummy=0;
+
+	global_duty_percent +=25;
+	if(global_duty_percent>100){
+		global_duty_percent=0;
+	}
+	while(hw_count_dummy<40000){hw_count_dummy++;} //dummy count to avoid debouncing
 
 
-	count_ext++;
-	//debouncing need
-	set_channel(change);
-	change = !change;
-//	if(change){
-//	}else{
-//		set_channel(Channel_0);
-//	}
-
-//	Peripherial_delay(200);
 	/*To here*/
 	GPIO_EXTI_Clean_Group_Of_Flag(Pin_10,Clear_six_bits);
 

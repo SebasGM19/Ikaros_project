@@ -20,8 +20,8 @@
 #define TIM4_HANDLER TIM4_IRQHandler
 #define TIM5_HANDLER TIM5_IRQHandler
 
-#define TIM9_HANDLER TIM1_BRK_TIM9_IRQHandler //si tiene handler como el TIM3, 4 y 5
-#define TIM10_HANDLER TIM1_UP_TIM10_IRQHandler //si tiene handler como el TIM3, 4 y 5
+#define TIM9_HANDLER TIM1_BRK_TIM9_IRQHandler
+#define TIM10_HANDLER TIM1_UP_TIM10_IRQHandler
 //#define TIM11_HANDLER TIM11_IRQHandler //usar como delay para protocolos y timeout
 
 /*Value in microseconds Equals to 2^32 bit count*/
@@ -290,11 +290,17 @@ typedef enum{
 	toggle,
 	force_inactive_level,
 	force_active_level,
-	PWM_mode_1,
-	PWM_mode_2,
 
-}TIM_output_compare_mode_t;
 
+}TIMx_global_OCxM_t;
+
+
+typedef enum{
+
+	PWM_mode_1 = 6, //to use time on
+	PWM_mode_2 = 7, //to set time off
+
+}PWM_mode_OCxM_t;
 
 typedef enum{
 	Clean_pwm_channel_1_and_3 =	(0x7B),
@@ -329,6 +335,23 @@ typedef enum{//channel and PIN
 }TIM5_PWM_channel_select_t;
 
 
+
+typedef struct{
+	TIM3_PWM_channel_select_t channel;
+	uint8_t duty_cycle_percent;
+	uint32_t frequency;
+
+}pwm_auto_parameters_t;
+
+
+typedef struct{
+	TIM3_PWM_channel_select_t channel;
+	uint32_t Total_count_ARR;
+	uint32_t duty_count;
+	uint32_t prescaler;
+
+}pwm_custom_parameters_t;
+
 volatile void set_cuenta(uint32_t cuenta_lim);
 
 void volatile TIMER_WaitFlag(TimerMapAddr_t TIMER_addr);
@@ -354,10 +377,13 @@ void TIM5_Stop(void);
 void TIM5_Deinit(void);
 
 
-Status_code_t TIM3_PWM_Init(TIM3_PWM_channel_select_t Channel);
-Status_code_t TIM3_PWM_start_channel(uint32_t miliseconds_duty, TIM3_PWM_channel_select_t Channel);
-Status_code_t TIM3_PWM_start_channel_duty_porcent(uint8_t porcent_duty, TIM3_PWM_channel_select_t Channel);
-Status_code_t TIM3_PWM_stop_channel(TIM3_PWM_channel_select_t Channel);
+void PWM_set_global_ARR(uint32_t new_arr_value);
+
+Status_code_t TIM3_PWM_Init(TIM3_PWM_channel_select_t channel,PWM_mode_OCxM_t mode);
+Status_code_t TIM3_PWM_start_custom_channel(pwm_custom_parameters_t const PWM_Custom);
+Status_code_t TIM3_PWM_start_channel(pwm_auto_parameters_t const PWM);
+
+Status_code_t TIM3_PWM_stop_channel(TIM3_PWM_channel_select_t channel);
 Status_code_t TIM3_PWM_Deinit(void);
 
 

@@ -22,64 +22,103 @@
 #include "timers.h"
 #include "lcd.h"
 #include "adc.h"
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdio.h>
+
+
+
+#define GPIO_Output_Input_test 		(0)
+#define stepper_motor_test 			(0)
+#define Keypad_test					(0)
+#define LCD_test 					(0)
+#define ADC_test 					(0)
+#define EXT_interrupt_test 			(0)
+#define TIM4_TIM5_interrupt_test 	(0)
+#define PWM_test 					(0)
+
 
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
-ADC_channel_t chan_to_read = Channel_0;
-uint32_t count =0;
-uint8_t str_save_data[6]={};
 
+
+pwm_auto_parameters_t PWM_auto= {TIM3_CH4,0,50};
 
 int main(void){
+	uint8_t str_save_data[3]={};
+
 	Init_Board();
-//	uint32_t adc_value =0;
-//	float voltaje_0 = 0.0f;
-//	uint8_t str_save_data[6]={};
-
-
 	lcd_init(lcd_PortB);
-//	ADC_Init(RES_12_bits);
-//	ADC_Configure_Channel(Channel_1);
-//	ADC_Configure_Channel(Channel_0);
-//	GPIO_Init_EXTI15_To_EXTI10(EXTI_Port_C, Pin_13, 0);
-//
-//	GPIO_Enable_EXTI15_To_EXTI10(Pin_13);
-//    SetPinMode(Port_C, Pin_6, Output);
-//    GPIO_DigitalWrite(Port_C, Pin_6, High);
-//    GPIO_DigitalWrite(Port_C, Pin_6, Low);
 
+	ADC_Init(RES_10_bits);
+	ADC_Configure_Channel(Channel_0);
 
-	uint32_t count =0;
-	TIM3_PWM_Init(TIM3_CH3);
+	TIM3_PWM_Init(TIM3_CH3,PWM_mode_1);
+	TIM3_PWM_Init(TIM3_CH4,PWM_mode_1);
 
-bool To_on =true;
+	GPIO_Init_EXTI15_To_EXTI10(EXTI_Port_C, Pin_13, Falling_edge);
+	GPIO_Enable_EXTI15_To_EXTI10(Pin_13);
+
+	TIM4_Init(8);
+	TIM4_Start();
+
 
 	while(1){
 
-		TIM3_PWM_start_channel_duty_porcent(count, TIM3_CH3);
-		Delay(50000);
-		if(To_on){
-			count++;
-			if(count>=100){
-				To_on=false;
-			}
-		}else{
-			count--;
-			if(count<=0){
-				To_on=true;
-			}
-		}
-		lcd_printXY(0, 0,"PWM Test:       ", strlen((const char *)"PWM Test:       "));
-		memset(str_save_data,'\0',6);
+		PWM_auto.duty_cycle_percent = return_global_duty();
+		TIM3_PWM_start_channel(PWM_auto);
 
-		itoa(count, str_save_data, 10);
-		lcd_printXY(10, 0,str_save_data, strlen((const char *)str_save_data));
+		lcd_printXY(0, 1,"PWM %:          ", strlen((const char *)"PWM %:          "));
+		memset(str_save_data,'\0',3);
+
+		itoa(PWM_auto.duty_cycle_percent, (char *)str_save_data, 10);
+		lcd_printXY(7, 1,str_save_data, strlen((const char *)str_save_data));
+
+
+		Delay(8000);
+
+	}
+
+	return 0;
+
+}
+
+
+
+
+//		TIM3_PWM_start_channel(PWM1);
+//		Delay(25000);
+//		if(To_on){
+//			PWM1.duty_cycle_porcent++;
+//			if(PWM1.duty_cycle_porcent>=100){
+//				To_on=false;
+//			}
+//		}else{
+//			PWM1.duty_cycle_porcent--;
+//			if(PWM1.duty_cycle_porcent<=0){
+//				To_on=true;
+//			}
+//		}
+//
+//		TIM3_PWM_start_channel(PWM2);
+//		Delay(25000);
+//		if(To_on2){
+//			PWM2.duty_cycle_porcent++;
+//			if(PWM2.duty_cycle_porcent>=100){
+//				To_on2=false;
+//			}
+//		}else{
+//			PWM2.duty_cycle_porcent--;
+//			if(PWM2.duty_cycle_porcent<=0){
+//				To_on2=true;
+//			}
+//		}
+
+//		lcd_printXY(0, 0,"PWM Test:       ", strlen((const char *)"PWM Test:       "));
+//		memset(str_save_data,'\0',6);
+//
+//		itoa(PWM1.duty_cycle_porcent, (char *)str_save_data, 10);
+//		lcd_printXY(10, 0,str_save_data, strlen((const char *)str_save_data));
 
 
 
@@ -106,9 +145,7 @@ bool To_on =true;
 //
 //		lcd_printXY(11, 1,str_save_data, strlen((const char *)str_save_data));
 
-	}
-	return 0;
-}
+
 
 
 
@@ -342,8 +379,6 @@ int main(void) {
 //}
 
 
-
-
 //example for GPIOS and stepper_motor
 
 //int main(void)
@@ -413,3 +448,65 @@ int main(void) {
 //}
 //
 //
+
+
+
+//test cases
+#if (PWM_test)
+
+
+
+#endif
+
+#if (TIM4_TIM5_interrupt_test)
+		TIM4_Init(100);
+
+
+#endif
+
+#if (EXT_interrupt_test)
+
+//	GPIO_Init_EXTI15_To_EXTI10(EXTI_Port_C, Pin_13, 0);
+//	GPIO_Enable_EXTI15_To_EXTI10(Pin_13);
+
+
+#endif
+
+
+#if (ADC_test)
+
+
+
+#endif
+
+#if (LCD_test)
+
+
+
+#endif
+
+#if (Keypad_test)
+
+
+
+#endif
+
+
+#if (stepper_motor_test)
+
+
+
+#endif
+
+
+#if (GPIO_Output_Input_test)
+
+	SetPinMode(Port_C, Pin_6, Output);
+	GPIO_DigitalWrite(Port_C, Pin_6, High);
+	Delay(1000000);
+	GPIO_DigitalWrite(Port_C, Pin_6, Low);
+	Delay(1000000);
+
+
+#endif
+
