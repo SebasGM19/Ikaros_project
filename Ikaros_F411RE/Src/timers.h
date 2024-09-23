@@ -341,7 +341,7 @@ typedef struct{
 	uint8_t duty_cycle_percent;
 	uint32_t frequency;
 
-}pwm_auto_parameters_t;
+}TIM3_pwm_auto_parameters_t;
 
 
 typedef struct{
@@ -350,7 +350,43 @@ typedef struct{
 	uint32_t duty_count;
 	uint32_t prescaler;
 
-}pwm_custom_parameters_t;
+}TIM3_pwm_custom_parameters_t;
+
+
+
+typedef struct{
+	TIM4_PWM_channel_select_t channel;
+	uint8_t duty_cycle_percent;
+	uint32_t frequency;
+
+}TIM4_pwm_auto_parameters_t;
+
+
+typedef struct{
+	TIM4_PWM_channel_select_t channel;
+	uint32_t Total_count_ARR;
+	uint32_t duty_count;
+	uint32_t prescaler;
+
+}TIM4_pwm_custom_parameters_t;
+
+
+
+typedef struct{
+	TIM5_PWM_channel_select_t channel;
+	uint8_t duty_cycle_percent;
+	uint32_t frequency;
+
+}TIM5_pwm_auto_parameters_t;
+
+
+typedef struct{
+	TIM5_PWM_channel_select_t channel;
+	uint32_t Total_count_ARR;
+	uint32_t duty_count;
+	uint32_t prescaler;
+
+}TIM5_pwm_custom_parameters_t;
 
 volatile void set_cuenta(uint32_t cuenta_lim);
 
@@ -377,14 +413,34 @@ void TIM5_Stop(void);
 void TIM5_Deinit(void);
 
 
-void PWM_set_global_ARR(uint32_t new_arr_value);
+
+
+void TIM3_set_global_PWM_ARR(uint32_t new_arr_value);
 
 Status_code_t TIM3_PWM_Init(TIM3_PWM_channel_select_t channel,PWM_mode_OCxM_t mode);
-Status_code_t TIM3_PWM_start_custom_channel(pwm_custom_parameters_t const PWM_Custom);
-Status_code_t TIM3_PWM_start_channel(pwm_auto_parameters_t const PWM);
-
+Status_code_t TIM3_PWM_start_custom_channel(TIM3_pwm_custom_parameters_t const PWM_Custom);
+Status_code_t TIM3_PWM_start_channel(TIM3_pwm_auto_parameters_t const PWM);
 Status_code_t TIM3_PWM_stop_channel(TIM3_PWM_channel_select_t channel);
 Status_code_t TIM3_PWM_Deinit(void);
+
+
+void TIM4_set_global_PWM_ARR(uint32_t new_arr_value);
+
+Status_code_t TIM4_PWM_Init(TIM4_PWM_channel_select_t channel,PWM_mode_OCxM_t mode);
+Status_code_t TIM4_PWM_start_custom_channel(TIM4_pwm_custom_parameters_t const PWM_Custom);
+Status_code_t TIM4_PWM_start_channel(TIM4_pwm_auto_parameters_t const PWM);
+Status_code_t TIM4_PWM_stop_channel(TIM4_PWM_channel_select_t channel);
+Status_code_t TIM4_PWM_Deinit(void);
+
+
+void TIM5_set_global_PWM_ARR(uint32_t new_arr_value);
+
+Status_code_t TIM5_PWM_Init(TIM5_PWM_channel_select_t channel,PWM_mode_OCxM_t mode);
+Status_code_t TIM5_PWM_start_custom_channel(TIM5_pwm_custom_parameters_t const PWM_Custom);
+Status_code_t TIM5_PWM_start_channel(TIM5_pwm_auto_parameters_t const PWM);
+Status_code_t TIM5_PWM_stop_channel(TIM5_PWM_channel_select_t channel);
+Status_code_t TIM5_PWM_Deinit(void);
+
 
 
 

@@ -42,46 +42,56 @@
 
 
 
-pwm_auto_parameters_t PWM_auto= {TIM3_CH4,0,50};
+
 
 int main(void){
-	uint8_t str_save_data[3]={};
-
-	Init_Board();
-	lcd_init(lcd_PortB);
-
-	ADC_Init(RES_10_bits);
-	ADC_Configure_Channel(Channel_0);
-
-	TIM3_PWM_Init(TIM3_CH3,PWM_mode_1);
-	TIM3_PWM_Init(TIM3_CH4,PWM_mode_1);
-
-	GPIO_Init_EXTI15_To_EXTI10(EXTI_Port_C, Pin_13, Falling_edge);
-	GPIO_Enable_EXTI15_To_EXTI10(Pin_13);
-
-	TIM4_Init(8);
-	TIM4_Start();
-
-
-	while(1){
-
-		PWM_auto.duty_cycle_percent = return_global_duty();
-		TIM3_PWM_start_channel(PWM_auto);
-
-		lcd_printXY(0, 1,"PWM %:          ", strlen((const char *)"PWM %:          "));
-		memset(str_save_data,'\0',3);
-
-		itoa(PWM_auto.duty_cycle_percent, (char *)str_save_data, 10);
-		lcd_printXY(7, 1,str_save_data, strlen((const char *)str_save_data));
-
-
-		Delay(8000);
-
-	}
-
-	return 0;
 
 }
+
+
+
+ // second publish
+
+
+//pwm_auto_parameters_t PWM_auto= {TIM3_CH4,0,50};
+//int main(void){
+//	uint8_t str_save_data[3]={};
+//
+//	Init_Board();
+//	lcd_init(lcd_PortB);
+//
+//	ADC_Init(RES_10_bits);
+//	ADC_Configure_Channel(Channel_0);
+//
+//	TIM3_PWM_Init(TIM3_CH3,PWM_mode_1);
+//	TIM3_PWM_Init(TIM3_CH4,PWM_mode_1);
+//
+//	GPIO_Init_EXTI15_To_EXTI10(EXTI_Port_C, Pin_13, Falling_edge);
+//	GPIO_Enable_EXTI15_To_EXTI10(Pin_13);
+//
+//	TIM4_Init(8);
+//	TIM4_Start();
+//
+//
+//	while(1){
+//
+//		PWM_auto.duty_cycle_percent = return_global_duty();
+//		TIM3_PWM_start_channel(PWM_auto);
+//
+//		lcd_printXY(0, 1,"PWM %:          ", strlen((const char *)"PWM %:          "));
+//		memset(str_save_data,'\0',3);
+//
+//		itoa(PWM_auto.duty_cycle_percent, (char *)str_save_data, 10);
+//		lcd_printXY(7, 1,str_save_data, strlen((const char *)str_save_data));
+//
+//
+//		Delay(8000);
+//
+//	}
+//
+//	return 0;
+//
+//}
 
 
 
