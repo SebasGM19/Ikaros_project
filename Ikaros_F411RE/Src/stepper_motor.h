@@ -30,7 +30,7 @@ typedef enum{
  */
 Status_code_t Init_8bits_Stepper_Motor(void);
 /*____________________________________________________________________________________________*/
-
+void Deinit_8bits_Stepper_Motor(void);
 
 /*_____________________________________________________________________________________________
  *this function change the logic state of the first 8 GPIO of the Port_C
@@ -44,7 +44,7 @@ Status_code_t Write_8bits_Stepper_Motor(uint8_t secuence);
 
 Status_code_t Init_4bits_Stepper_Motor(Stepper_option_t Stepper_alternative);
 /*____________________________________________________________________________________________*/
-
+Status_code_t Deinit_4bits_Stepper_Motor(Stepper_option_t Stepper_alternative);
 
 /*_____________________________________________________________________________________________
  * this function is use to activate the sequence of 4 bit from the user request

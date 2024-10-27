@@ -86,6 +86,8 @@ typedef enum{
 void set_controls_gpios(Pin_number_t RS, Pin_number_t RW, Pin_number_t E,Set_Port_t PORT);
 Status_code_t Send_command(uint8_t command, command_type_t type);
 Status_code_t lcd_init(lcd_alternative_t lcd_option);
+Status_code_t lcd_deinit(lcd_alternative_t lcd_alternative);
+
 void lcd_print(uint8_t* data, uint8_t data_lenght);
 Status_code_t lcd_printXY(uint8_t X_axis, uint8_t Y_axis, uint8_t* data, uint8_t data_lenght);
 void lcd_clean_screen(void);

@@ -22,6 +22,14 @@ Status_code_t Init_8bits_Stepper_Motor(void){
 
 }
 
+void Deinit_8bits_Stepper_Motor(void){
+
+	uint32_t volatile *pPort_ModeReg = (uint32_t volatile *)(Port_C + OFFSET_PORTS);
+
+	*pPort_ModeReg &= ~(Clear_sixteen_bits); //clean those 16 bits only for this funtion is ok by this way
+
+}
+
 
 Status_code_t Write_8bits_Stepper_Motor(uint8_t secuence){
 
@@ -83,6 +91,42 @@ Status_code_t Init_4bits_Stepper_Motor(Stepper_option_t Stepper_alternative){
 	return Success;
 }
 
+Status_code_t Deinit_4bits_Stepper_Motor(Stepper_option_t Stepper_alternative){
+
+	uint8_t starting_gpio =0;
+	uint16_t volatile PositionsOfPin =0;
+	Set_Port_t Port_option = Port_A; //set as a default
+
+	switch(Stepper_alternative){
+	case PortA_Op1:
+		Port_option = Port_A;
+		starting_gpio =Pin_4;
+		break;
+	case PortA_Op2:
+		starting_gpio = Pin_8;
+		Port_option = Port_A;
+		break;
+	case PortB_Op1:
+		starting_gpio =Pin_12;
+
+		Port_option = Port_B;
+		break;
+	case PortC_Op1:
+		starting_gpio =Pin_0;
+		Port_option = Port_C;
+		break;
+	default:
+		return OptionNotSupported;
+	}
+
+	uint32_t volatile *pPort_ModeReg = (uint32_t volatile *)(Port_option+ OFFSET_PORTS);
+
+	PositionsOfPin = (uint16_t volatile)starting_gpio*2;
+	*pPort_ModeReg &= ~(Clear_eight_bits<<PositionsOfPin);
+
+	return Success;
+}
+
 
 Status_code_t Write_4bits_Stepper_Motor(Stepper_option_t Stepper_alternative, uint32_t secuence){
 
@@ -126,7 +170,7 @@ uint8_t *search_bits(Stepper_option_t Stepper_alternative, uint8_t* found_bits){
 	uint8_t GPIO_position_count = 0;
 	uint8_t position_high_state =0;
 
-	while(GPIO_position_count < MAX_GPIOS){ //antes <=
+	while(GPIO_position_count < MAX_GPIOS){
 
 		if((Stepper_alternative>>GPIO_position_count) & 1){
 			high_state_positions[position_high_state] = GPIO_position_count;

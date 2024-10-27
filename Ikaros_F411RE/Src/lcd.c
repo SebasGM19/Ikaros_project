@@ -143,6 +143,39 @@ Status_code_t lcd_init(lcd_alternative_t lcd_alternative){
 	return Success;
 }
 
+Status_code_t lcd_deinit(lcd_alternative_t lcd_alternative){
+
+	uint16_t volatile PositionsOfPin =0;
+
+	switch(lcd_alternative){
+	case lcd_PortB:
+		set_controls_gpios((Pin_number_t)lcd_alternative, (Pin_number_t)(lcd_alternative+1), (Pin_number_t)(lcd_alternative+2), Port_B);
+
+		break;
+	case lcd_PortC:
+		set_controls_gpios((Pin_number_t)lcd_alternative, (Pin_number_t)(lcd_alternative+1), (Pin_number_t)(lcd_alternative+2), Port_C);
+		break;
+	default:
+		return OptionNotSupported;
+	}
+
+	uint32_t volatile *pPort_ModeReg = (uint32_t volatile *)(control_alternative.PORT+ OFFSET_PORTS);
+
+	PositionsOfPin = (uint16_t volatile)(lcd_alternative * 2);
+	*pPort_ModeReg &= ~(clear_fourteen_bits<<PositionsOfPin);
+	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_RW, Low); //this stay LOW in 4bit configuration
+	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_RS, Low);
+	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_E, Low);
+
+	/*set to low all gpio*/
+	for(uint8_t i =0; i<4; i++){
+		GPIO_DigitalWrite(control_alternative.PORT, (control_alternative.LCD_PIN_D4+i), Low);
+	}
+
+
+	return Success;
+}
+
 /*
  * This function will only print the data starting at position 0,1
  */

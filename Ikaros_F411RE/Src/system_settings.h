@@ -25,7 +25,10 @@
 #define USEC_TO_DELAY(CLOCK_BASE,PSC,DELAY)	 (uint32_t)((((CLOCK_BASE) / (PSC)) * ((DELAY) * (0.000001))) )
 #define MILLSEC_TO_DELAY(CLOCK_BASE,PSC,DELAY)	 (uint32_t)((((CLOCK_BASE) / (PSC)) * ((DELAY) * (0.001))) )
 
-
+#define BINARY_BASE			(2)
+#define OCTAL_BASE			(8)
+#define DECIMAL_BASE		(10)
+#define HEXADECIMAL_BASE	(16)
 
 typedef enum{
 	Success,
@@ -51,6 +54,8 @@ typedef enum{
 
 	TIMx_incorrect,
 	PWM_frecuency_not_suported_in_this_mode,
+
+	USART_alternative_not_suported,
 
 }Status_code_t;
 
