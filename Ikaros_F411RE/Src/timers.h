@@ -433,13 +433,13 @@ Status_code_t TIM4_PWM_stop_channel(TIM4_PWM_channel_select_t channel);
 Status_code_t TIM4_PWM_Deinit(void);
 
 
-void TIM5_set_global_PWM_ARR(uint32_t new_arr_value);
-
-Status_code_t TIM5_PWM_Init(TIM5_PWM_channel_select_t channel,PWM_mode_OCxM_t mode);
-Status_code_t TIM5_PWM_start_custom_channel(TIM5_pwm_custom_parameters_t const PWM_Custom);
-Status_code_t TIM5_PWM_start_channel(TIM5_pwm_auto_parameters_t const PWM);
-Status_code_t TIM5_PWM_stop_channel(TIM5_PWM_channel_select_t channel);
-Status_code_t TIM5_PWM_Deinit(void);
+//void TIM5_set_global_PWM_ARR(uint32_t new_arr_value);
+//
+//Status_code_t TIM5_PWM_Init(TIM5_PWM_channel_select_t channel,PWM_mode_OCxM_t mode);
+//Status_code_t TIM5_PWM_start_custom_channel(TIM5_pwm_custom_parameters_t const PWM_Custom);
+//Status_code_t TIM5_PWM_start_channel(TIM5_pwm_auto_parameters_t const PWM);
+//Status_code_t TIM5_PWM_stop_channel(TIM5_PWM_channel_select_t channel);
+//Status_code_t TIM5_PWM_Deinit(void);
 
 
 

@@ -54,6 +54,7 @@ typedef enum{
  */
 Status_code_t Init_keypad(keypad_alternatives_t keypad_alternative);
 /*____________________________________________________________________________________________*/
+Status_code_t Deinit_keypad(keypad_alternatives_t keypad_alternative);
 
 
 uint32_t Read_keypad(keypad_alternatives_t keypad_alternative);
