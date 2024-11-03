@@ -56,6 +56,7 @@ typedef enum{
 	PWM_frecuency_not_suported_in_this_mode,
 
 	USART_alternative_not_suported,
+	USART_baud_rate_out_of_limit,
 
 }Status_code_t;
 
