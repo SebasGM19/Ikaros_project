@@ -10,7 +10,8 @@
 
 #include "system_settings.h"
 
-
+#define RX_ENABLE_BIT_POS	(2U)
+#define DR_MAX_VALUE		(0xFF)
 
 typedef enum{
 	Usart_1 = 4U, //TX:(B6)  RX:(B7)
@@ -27,6 +28,13 @@ typedef enum{
 }usart_mode_t;
 
 typedef enum{
+	not_TX_and_RX = 	(0U<<2U),
+	only_RX = 			(1U<<2U),
+	only_TX = 			(2U<<2U),
+	enable_TX_and_RX = 	(3U<<2U),
+}usart_data_direction_t;
+
+typedef enum{
 	None,
 	Even,
 	Odd,
@@ -40,17 +48,15 @@ typedef enum{
 	Slash_O = 		248U,
 }usart_parity_error_char_t;
 
-
-
 typedef enum{
-	Data_5_bits,
-	Data_6_bits,
-	Data_7_bits,
+
 	Data_8_bits,
+	Data_9_bits,
 }usart_data_bits_t;
 
 typedef enum{
 	Stop_1_bits,
+	Stop_0_5_bits,
 	Stop_2_bits,
 }usart_stop_bits_t;
 
@@ -68,6 +74,7 @@ typedef enum{
 typedef struct{
 	uint32_t baud_rate;
 	usart_mode_t mode;
+	usart_data_direction_t data_direction;
 	usart_parity_t parity;
 	usart_parity_error_char_t parity_char;
 	usart_data_bits_t data_bits;
@@ -167,14 +174,28 @@ typedef enum{
 Status_code_t USART_Clock(Enabled_Disabled_t state, usart_alternative_t USART);
 
 Status_code_t Init_UART1(usart_config_t USART_config);
+Status_code_t UART1_Write(uint8_t *data,uint32_t data_lenght);
+Status_code_t UART1_Read(uint8_t *data_buff, uint8_t data_buff_lenght);
 
 
 Status_code_t Init_UART2(usart_config_t USART_config);
-
+Status_code_t UART2_Write(uint8_t *data,uint32_t data_lenght);
+Status_code_t UART2_Read(uint8_t *data_buff, uint8_t data_buff_lenght);
 
 Status_code_t Init_UART6(usart_config_t USART_config);
+Status_code_t UART6_Write(uint8_t *data,uint32_t data_lenght);
+Status_code_t UART6_Read(uint8_t *data_buff, uint8_t data_buff_lenght);
 
-Status_code_t set_baud_rate(usart_alternative_t USART, uint32_t baudrate);
 
+Status_code_t USART_set_baud_rate(USARTMapAddr_t USART_Addr, uint32_t baudrate);
+void USART_configDirection(USARTMapAddr_t USART_Addr,usart_data_direction_t data_direction);
+void USART_CR1_config_bit(USARTMapAddr_t USART_Addr, USART_CR1_t USAR_CR1_bit, Enabled_Disabled_t state);
+void USART_set_data_bits(USARTMapAddr_t USART_Addr, usart_data_bits_t data_lenght);
+void USART_set_stop_bits(USARTMapAddr_t USART_Addr, usart_stop_bits_t stop_bits);
+void USART_set_parity(USARTMapAddr_t USART_Addr, usart_parity_t parity);
+
+
+void USART_enable(USARTMapAddr_t USART_Addr);
+void USART_disabled(USARTMapAddr_t USART_Addr);
 
 #endif /* UART_H_ */

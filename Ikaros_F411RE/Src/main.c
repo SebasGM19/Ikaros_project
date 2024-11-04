@@ -32,9 +32,23 @@
 
 
 
+usart_config_t usart_config={
+		115200,
+		Asynchronous, //pendiente  y las demas configuraciones
+		enable_TX_and_RX,
+		None,
+		Ignore,//pendiente
+		Data_8_bits,
+		Stop_1_bits
+};
+
+
 
 int main(void){
 	Init_Board();
+
+
+	Init_UART2(usart_config);
 
 	while(1){
 
