@@ -45,7 +45,7 @@ Status_code_t SetPinMode(Set_Port_t Port_define, Pin_number_t Pin_defined, PinMo
 	Status_code_t status=Success;
 
 	/*DO NOT MODIFY THIS IF STATEMENT, IMPLEMENTED TO AVOID TROUBLES WITH THE BOARD!!!*/
-	if((Port_define == Port_A && (Pin_defined ==Pin_13 || Pin_defined ==Pin_14 || Pin_defined ==Pin_2|| Pin_defined ==Pin_3))
+	if((Port_define == Port_A && (Pin_defined ==Pin_13 || Pin_defined ==Pin_14))
 	|| (Port_define == Port_C && (Pin_defined ==Pin_14 || Pin_defined == Pin_15))
 	|| (Port_define == Port_D && Pin_defined != Pin_2)
 	|| (Port_define == Port_B && (Pin_defined == Pin_11 || Pin_defined == Pin_3))){
@@ -97,7 +97,7 @@ void GpioSetAlternativeFunction(Set_Port_t Port_define, Pin_number_t Pin_defined
 
 	*pGpio_alt_func_reg &= ~(Clear_four_bits<<real_register_position);
 
-	*pGpio_alt_func_reg |= (AF<<real_register_position);//hacer un enum con funciones alternativas
+	*pGpio_alt_func_reg |= (AF<<real_register_position);
 
 }
 

@@ -60,8 +60,7 @@ void TIM3_HANDLER(void){
 	/*Develop all the code to be executed in a second thread down here*/
 	if(reset_tim3_flag){
 
-	toggle_led = !toggle_led;
-	GPIO_DigitalWrite(Port_A, Pin_5, toggle_led);
+
 
 	}else{reset_tim3_flag=!reset_tim3_flag;}
 

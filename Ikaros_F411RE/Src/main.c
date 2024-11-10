@@ -32,11 +32,35 @@
 
 
 
+usart_config_t usart_config={
+		115200,
+		Asynchronous, //pendiente  y las demas configuraciones
+		enable_TX_and_RX,
+		None,
+		Ignore,//pendiente
+		Data_8_bits,
+		Stop_1_bits
+};
+
+
 
 int main(void){
 	Init_Board();
+	uint8_t data_arr[100] = {0};
+	uint32_t data_size =0;
+
+	Init_UART2(usart_config);
+
+
 
 	while(1){
+		UART2_Read(data_arr, &data_size);
+
+		UART2_Write((uint8_t const *)"recibido\r\n", 10);
+
+
+		Delay(500000);
+
 
 	}
 

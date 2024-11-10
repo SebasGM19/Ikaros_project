@@ -56,6 +56,7 @@ typedef enum{
 	PWM_frecuency_not_suported_in_this_mode,
 
 	USART_alternative_not_suported,
+	USART_baud_rate_out_of_limit,
 
 }Status_code_t;
 
@@ -111,15 +112,15 @@ typedef enum{
 	SPI2_I2S2_ADDRESS =		0x40003800,
 	SPI3_I2S3_ADDRESS = 	0x40003C00,
 	I2S3ext_ADDRESS = 		0x40004000,
-	USART2_ADDRESS = 		0x40004400,
+//	USART2_ADDRESS = 		0x40004400,
 	I2C1_ADDRESS = 			0x40005400,
 	I2C2_ADDRESS = 			0x40005800,
 	I2C3_ADDRESS = 			0x40005C00,
 	PWR_ADDRESS = 			0x40007000, //APB1
 
 //	TIM1_ADDRESS = 			0x40010000, //APB2 BUS
-	USART1_ADDRESS = 		0x40011000,
-	USART6_ADDRESS = 		0x40011400,
+//	USART1_ADDRESS = 		0x40011000,
+//	USART6_ADDRESS = 		0x40011400,
 	ADC1_ADDRESS = 			0x40012000,
 	SDIO_ADDRESS = 			0x40012C00,
 	SPI1_I2C1_ADDRESS =		0x40013000,
@@ -141,6 +142,12 @@ typedef enum{
 
 }memoryMapAddress_t;
 
+typedef enum{
+	USART2_ADDRESS = 		0x40004400,
+	USART1_ADDRESS = 		0x40011000,
+	USART6_ADDRESS = 		0x40011400,
+
+}USARTMapAddr_t;
 
 typedef enum{
 	TIM2_ADDRESS = 	0x40000000, //APB1 BUS
