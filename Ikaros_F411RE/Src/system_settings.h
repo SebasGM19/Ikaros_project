@@ -57,6 +57,7 @@ typedef enum{
 
 	USART_alternative_not_suported,
 	USART_baud_rate_out_of_limit,
+	Timeout,
 
 }Status_code_t;
 

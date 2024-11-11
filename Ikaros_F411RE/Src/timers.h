@@ -22,7 +22,7 @@
 
 #define TIM9_HANDLER TIM1_BRK_TIM9_IRQHandler
 #define TIM10_HANDLER TIM1_UP_TIM10_IRQHandler
-//#define TIM11_HANDLER TIM11_IRQHandler //usar como delay para protocolos y timeout
+#define TIM11_HANDLER TIM1_TRG_COM_TIM11_IRQHandler //usar como delay para protocolos y timeout
 
 /*Value in microseconds Equals to 2^32 bit count*/
 #define MAX_TIME_TIM5_AND_TIM2	(uint32_t)(4294967290)
@@ -411,6 +411,16 @@ Status_code_t TIM5_Init(uint32_t microseconds);
 void TIM5_Start(void);
 void TIM5_Stop(void);
 void TIM5_Deinit(void);
+
+
+void TIM11_HANDLER(void);
+Status_code_t TIM11_Init(uint32_t milliseconds);
+void TIM11_Start(void);
+void TIM11_Stop(void);
+void TIM11_Deinit(void);
+bool TIM11_GET_interrupt_flag_status(void);
+
+void TIM11_clear_interrupt_flag(void);
 
 
 

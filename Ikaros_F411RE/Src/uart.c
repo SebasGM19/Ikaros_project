@@ -7,6 +7,7 @@
 
 #include "uart.h"
 #include "gpios.h"
+#include "timers.h"
 
 
 uint8_t static string_end[STRING_END_MAX_LENGHT];
@@ -67,7 +68,7 @@ Status_code_t Init_UART1(usart_config_t USART_config){
 
 Status_code_t UART1_Write(uint8_t *data, uint32_t data_lenght){
 	__I uint32_t * const USART_SR_Reg = (__I uint32_t * const)(USART1_ADDRESS + USART_SR);
-	__IO uint32_t *USART_DR_Reg = (uint32_t volatile*)(USART1_ADDRESS + USART_DR);
+	__IO uint32_t *USART_DR_Reg = (__IO uint32_t *)(USART1_ADDRESS + USART_DR);
 
 	for(uint32_t i =0; i<data_lenght; i++){
 		while(!(USART_TXE & (*USART_SR_Reg))){}
@@ -121,30 +122,59 @@ Status_code_t Init_UART2(usart_config_t USART_config){
 	return Success;
 }
 
-Status_code_t UART2_Write(uint8_t const *data, uint32_t data_lenght){
-	__I uint32_t * const USART_SR_Reg = (__I uint32_t * const)(USART2_ADDRESS + USART_SR);
-	__IO uint32_t *USART_DR_Reg = (uint32_t volatile*)(USART2_ADDRESS + USART_DR);
+Status_code_t UART2_Write(uint8_t const *data, uint32_t data_lenght, uint16_t timeout){
 
-	for(uint32_t i =0; i<data_lenght; i++){
-		while(!(USART_TXE & (*USART_SR_Reg))){}
+	Status_code_t status = Success;
+	__I uint32_t * const USART_SR_Reg = (__I uint32_t * const)(USART2_ADDRESS + USART_SR);
+	__IO uint32_t *USART_DR_Reg = (__IO uint32_t *)(USART2_ADDRESS + USART_DR);
+
+	status = TIM11_Init(timeout);
+	if(status != Success){
+		return status;
+	}
+
+	for(uint32_t i = 0; i<data_lenght; i++){
+
+		while( (!(USART_TXE & (*USART_SR_Reg))) && !TIM11_GET_interrupt_flag_status() ){}
+
+		if( TIM11_GET_interrupt_flag_status() ){
+			TIM11_Deinit();
+			TIM11_clear_interrupt_flag();
+			return Timeout;
+		}
+
 		*USART_DR_Reg = (data[i] & DR_MAX_VALUE);
 	}
+
+	TIM11_Deinit();
+	TIM11_clear_interrupt_flag();
 
 	return Success;
 }
 
-Status_code_t UART2_Read(uint8_t *data_buff, uint32_t *data_buff_lenght){
+Status_code_t UART2_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_t timeout){
 
+	Status_code_t status = Success;
 	uint32_t data_arrive_count = 0;
 	uint8_t exit_count = 0;
 
 	__I uint32_t * const USART_SR_Reg = (__I uint32_t * const)(USART2_ADDRESS + USART_SR);
-	__IO uint32_t *USART_DR_Reg = (uint32_t volatile*)(USART2_ADDRESS + USART_DR);
+	__IO uint32_t *USART_DR_Reg = (__IO uint32_t *)(USART2_ADDRESS + USART_DR);
 
+	status = TIM11_Init(timeout);
+	if(status != Success){
+		return status;
+	}
 
 	do{
 
-		while(!(USART_RXNE & (*USART_SR_Reg))){} //need to develop the timeout validation
+		while( (!(USART_RXNE & (*USART_SR_Reg))) && !TIM11_GET_interrupt_flag_status() ){} //need to develop the timeout validation
+
+		if( TIM11_GET_interrupt_flag_status() ){
+			TIM11_Deinit();
+			TIM11_clear_interrupt_flag();
+			return Timeout;
+		}
 
 		usart_global_buffer[global_data_count] =(uint8_t)(*USART_DR_Reg);
 		if(global_data_count == MAX_LENGHT_GLOBAL_BUFFER-1){
@@ -164,8 +194,10 @@ Status_code_t UART2_Read(uint8_t *data_buff, uint32_t *data_buff_lenght){
 
 	}while(exit_count != string_end_lenght);
 
-	(*data_buff_lenght) = data_arrive_count;
+	TIM11_Deinit();
+	TIM11_clear_interrupt_flag();
 
+	(*data_buff_lenght) = data_arrive_count;
 
 	return Success;
 
@@ -209,7 +241,7 @@ Status_code_t Init_UART6(usart_config_t USART_config){
 
 Status_code_t UART6_Write(uint8_t *data, uint32_t data_lenght){
 	__I uint32_t * const USART_SR_Reg = (__I uint32_t * const)(USART6_ADDRESS + USART_SR);
-	__IO uint32_t *USART_DR_Reg = (uint32_t volatile*)(USART6_ADDRESS + USART_DR);
+	__IO uint32_t *USART_DR_Reg = (__IO uint32_t *)(USART6_ADDRESS + USART_DR);
 
 	for(uint32_t i =0; i<data_lenght; i++){
 		while(!(USART_TXE & (*USART_SR_Reg))){}
