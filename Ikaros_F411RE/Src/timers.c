@@ -16,13 +16,16 @@ uint32_t volatile global_TIM4_ARR_count = 1024; //set as 2048 to default
 //uint32_t volatile global_TIM5_ARR_count = 1024; //set as 2048 to default
 
 
-bool static reset_tim3_flag =false;
-bool static reset_tim4_flag =false;
-bool static reset_tim5_flag =false;
+bool static volatile reset_tim3_flag = false;
+bool static volatile reset_tim4_flag = false;
+bool static volatile reset_tim5_flag = false;
+bool static volatile reset_tim11_flag = false;
+
+bool static volatile TIM11_interrupt_flag_active = false;
 
 
 void volatile TIMER_cleanCountFlag(TimerMapAddr_t TIMER_addr){
-	uint32_t volatile *TIM_REG_SR = (uint32_t volatile*)(TIMER_addr + TIMx_SR);
+	__IO uint32_t *TIM_REG_SR = (__IO uint32_t *)(TIMER_addr + TIMx_SR);
 
 	*TIM_REG_SR &= ~(TIMx_UIF);
 
@@ -36,7 +39,7 @@ void volatile TIMER_Clock( Enabled_Disabled_t state, timers_enb_t Timer){
 		RccOffset = RCC_OFFSET_APB2ENR;
 	}
 
-	uint32_t volatile *pClockControlReg = (uint32_t volatile *)(RCC_ADDRESS + RccOffset);
+	__IO uint32_t *pClockControlReg = (__IO uint32_t *)(RCC_ADDRESS + RccOffset);
     if(state) {
         *pClockControlReg |= (Enabled << Timer);
     } else {
@@ -45,7 +48,7 @@ void volatile TIMER_Clock( Enabled_Disabled_t state, timers_enb_t Timer){
 }
 
 void volatile TIMER_WaitFlag(TimerMapAddr_t TIMER_addr){
-	uint32_t volatile *TIM_REG_SR = (uint32_t volatile*)(TIMER_addr + TIMx_SR);
+	__I uint32_t *const TIM_REG_SR = (__I uint32_t *const)(TIMER_addr + TIMx_SR);
 	while(!(TIMx_UIF & *TIM_REG_SR)){}
 	TIMER_cleanCountFlag(TIMER_addr);
 
@@ -72,12 +75,12 @@ Status_code_t TIM3_Init(uint16_t milliseconds){
 		return TimeSetNotSuported;
 	}
 	TIMER_Clock(Enabled,TIMER_3);
-	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_PSC);
-	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_ARR);
-	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CNT);
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_PSC);
+	__IO uint32_t *TIM_REG_ARR = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_ARR);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_CNT);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_CR1);
 
-	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_DIER);
 
 	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
 	*TIM_REG_DIER &= ~TIMx_UIE;
@@ -93,9 +96,9 @@ Status_code_t TIM3_Init(uint16_t milliseconds){
 }
 void TIM3_Start(void){
 
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_DIER);
-	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CNT);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_CNT);
 
 	TIMER_cleanCountFlag(TIM3_ADDRESS);
 	*TIM_REG_CNT = 0;
@@ -107,9 +110,9 @@ void TIM3_Start(void){
 
 void TIM3_Stop(void){
 
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_DIER);
-	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CNT);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_CNT);
 
 	TIMER_cleanCountFlag(TIM3_ADDRESS);
 	*TIM_REG_CNT = 0;
@@ -118,8 +121,8 @@ void TIM3_Stop(void){
 }
 
 void TIM3_Deinit(void){
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_DIER);
 
 	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
 	*TIM_REG_DIER &= ~TIMx_UIE;
@@ -282,6 +285,96 @@ void TIM5_Deinit(void){
 
 	TIMER_Clock(Disabled,TIMER_5);
 
+}
+
+
+/*///////////////////TIMER 11 HANDLER FOR TIMEOUT FOR PROTOCOLS///////////////////////////////////*/
+
+void TIM11_HANDLER(void){
+	/*Develop all the code to be executed in a second thread down here*/
+	TIMER_cleanCountFlag(TIM11_ADDRESS);
+
+	if(reset_tim11_flag){
+
+		TIM11_interrupt_flag_active = true;
+		TIM11_Stop();
+
+	}else{reset_tim11_flag=!reset_tim11_flag;}
+}
+
+
+
+Status_code_t TIM11_Init(uint32_t milliseconds){
+
+	if(milliseconds > MAX_TIME_TIM9_TO_TIM11){
+		return TimeSetNotSuported;
+	}
+	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t*)(TIM11_ADDRESS + TIMx_PSC);
+	__IO uint32_t *TIM_REG_ARR = (__IO uint32_t *)(TIM11_ADDRESS + TIMx_ARR);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM11_ADDRESS + TIMx_CNT);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM11_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM11_ADDRESS + TIMx_DIER);
+
+	TIMER_Clock(Enabled,TIMER_11);
+
+	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
+	*TIM_REG_DIER &= ~TIMx_UIE;
+
+	*TIM_REG_PSC = (PSC_TO_MILLISEC_DELAY-1);
+	*TIM_REG_ARR = (MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,milliseconds) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+	*TIM_REG_CNT = 0;
+
+	NVIC_EnableIRQ(TIM1_TRG_COM_TIM11_IRQn);
+
+	return Success;
+
+}
+
+void TIM11_Start(void){
+
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM11_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM11_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM11_ADDRESS + TIMx_CNT);
+
+
+	TIMER_cleanCountFlag(TIM11_ADDRESS);
+	*TIM_REG_CNT = 0;
+	*TIM_REG_DIER |= TIMx_UIE;
+	*TIM_REG_CR1 |= TIMx_CEN;
+}
+
+void TIM11_Stop(void){
+
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM11_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM11_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM11_ADDRESS + TIMx_CNT);
+
+	TIMER_cleanCountFlag(TIM11_ADDRESS);
+	*TIM_REG_CNT = 0;
+	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
+	*TIM_REG_DIER &= ~TIMx_UIE;
+
+}
+
+void TIM11_Deinit(void){
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM11_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM11_ADDRESS + TIMx_DIER);
+
+	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
+	*TIM_REG_DIER &= ~TIMx_UIE;
+	NVIC_DisableIRQ(TIM1_TRG_COM_TIM11_IRQn);
+
+	TIMER_Clock(Disabled,TIMER_11);
+
+}
+
+
+bool TIM11_GET_interrupt_flag_status(void){
+	return TIM11_interrupt_flag_active;
+}
+
+void TIM11_clear_interrupt_flag(void){
+	TIM11_interrupt_flag_active = false;
 }
 
 

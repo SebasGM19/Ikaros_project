@@ -54,9 +54,9 @@ int main(void){
 
 
 	while(1){
-		UART2_Read(data_arr, &data_size);
+		UART2_Read(data_arr, &data_size, 3000);
 
-		UART2_Write((uint8_t const *)"recibido\r\n", 10);
+		UART2_Write((uint8_t const *)"recibido\r\n", 10,1000);
 
 
 		Delay(500000);

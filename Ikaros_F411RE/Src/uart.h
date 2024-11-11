@@ -185,8 +185,8 @@ Status_code_t UART1_Read(uint8_t *data_buff, uint32_t *data_buff_lenght);
 
 
 Status_code_t Init_UART2(usart_config_t USART_config);
-Status_code_t UART2_Write(uint8_t const *data, uint32_t data_lenght);
-Status_code_t UART2_Read(uint8_t *data_buff, uint32_t *data_buff_lenght);
+Status_code_t UART2_Write(uint8_t const *data, uint32_t data_lenght, uint16_t timeout);
+Status_code_t UART2_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_t timeout);
 
 Status_code_t Init_UART6(usart_config_t USART_config);
 Status_code_t UART6_Write(uint8_t *data,uint32_t data_lenght);
