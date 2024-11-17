@@ -47,17 +47,16 @@ usart_config_t usart_config={
 int main(void){
 	Init_Board();
 	uint8_t data_arr[100] = {0};
-	uint32_t data_size =0;
-
+//	uint32_t data_size =0;
+//	Status_code_t status =0;
 	Init_UART2(usart_config);
 
 
 
 	while(1){
-		UART2_Read(data_arr, &data_size, 3000);
-
-		UART2_Write((uint8_t const *)"recibido\r\n", 10,1000);
-
+//		status= UART2_Read_bytes(data_arr, 5, 3000);
+//
+//		status = UART2_Write((uint8_t const *)"recibido\r\n", 10,3000);
 
 		Delay(500000);
 

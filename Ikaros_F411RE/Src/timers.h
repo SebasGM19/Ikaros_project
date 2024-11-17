@@ -25,116 +25,116 @@
 #define TIM11_HANDLER TIM1_TRG_COM_TIM11_IRQHandler //usar como delay para protocolos y timeout
 
 /*Value in microseconds Equals to 2^32 bit count*/
-#define MAX_TIME_TIM5_AND_TIM2	(uint32_t)(4294967290)
-#define MAX_TIME_TIM3_TIM4		(uint16_t)(65530)
-#define MAX_TIME_TIM1			(uint16_t)(65530)
-#define MAX_TIME_TIM9_TO_TIM11	(uint16_t)(65530)
+#define MAX_TIME_TIM5_AND_TIM2	(uint32_t)(4294967290U)
+#define MAX_TIME_TIM3_TIM4		(uint16_t)(65530U)
+#define MAX_TIME_TIM1			(uint16_t)(65530U)
+#define MAX_TIME_TIM9_TO_TIM11	(uint16_t)(65530U)
 
-#define MAX_DATA_BUFF			(100)
+#define MAX_DATA_BUFF			(100U)
 
 
 
 typedef enum{
-	TIMER_2, //APB1
-	TIMER_3,
-	TIMER_4,
-	TIMER_5,
+	TIMER_2  = 0U, //APB1
+	TIMER_3  = 1U,
+	TIMER_4  = 2U,
+	TIMER_5  = 3U,
 
-	TIMER_1 = 	10, //APB2 substrac 10
-	TIMER_9 = 	26,
-	TIMER_10 = 	27,
-	TIMER_11 = 	28
+	TIMER_1  = 10U, //APB2 substrac 10
+	TIMER_9  = 26U,
+	TIMER_10 = 27U,
+	TIMER_11 = 28U
 
 }timers_enb_t;
 
 typedef enum{
-	TIMx_CR1 =		0x00,
-	TIMx_CR2 =		0x04,
-	TIMx_SMCR =		0x08,
-	TIMx_DIER = 	0x0C, //important
-	TIMx_SR = 		0x10,
-	TIMx_EGR = 		0x14,
-	TIMx_CCMR1 = 	0x18,
-	TIMx_CCMR2 = 	0x1C,
-	TIMx_CCER = 	0x20,
-	TIMx_CNT = 		0x24, //important
-	TIMx_PSC = 		0x28, //important
-	TIMx_ARR = 		0x2C, //important
-	TIMx_CCR1 = 	0x34,
-	TIMx_CCR2 = 	0x38,
-	TIMx_CCR3 =		0x3C,
-	TIMx_CCR4 = 	0x40,
-	TIMx_DCR = 		0x48,
-	TIMx_DMAR = 	0x4C,
-	TIM2_TIM5_OR = 	0x50
+	TIMx_CR1 =		0x00U,
+	TIMx_CR2 =		0x04U,
+	TIMx_SMCR =		0x08U,
+	TIMx_DIER = 	0x0CU, //important
+	TIMx_SR = 		0x10U,
+	TIMx_EGR = 		0x14U,
+	TIMx_CCMR1 = 	0x18U,
+	TIMx_CCMR2 = 	0x1CU,
+	TIMx_CCER = 	0x20U,
+	TIMx_CNT = 		0x24U, //important
+	TIMx_PSC = 		0x28U, //important
+	TIMx_ARR = 		0x2CU, //important
+	TIMx_CCR1 = 	0x34U,
+	TIMx_CCR2 = 	0x38U,
+	TIMx_CCR3 =		0x3CU,
+	TIMx_CCR4 = 	0x40U,
+	TIMx_DCR = 		0x48U,
+	TIMx_DMAR = 	0x4CU,
+	TIM2_TIM5_OR = 	0x50U
 
 }TIMx_register_offset_t;
 
 typedef enum{
-	TIMx_DIV_BY_1 = 	(1u<<1),
-	TIMx_DIV_BY_2 =		(1u<<2),
-	TIMx_DIV_BY_4=		(1u<<3),
-	TIMx_DIV_BY_8=		(1u<<4),
-	TIMx_DIV_BY_16=		(1u<<5),
-	TIMx_DIV_BY_32=		(1u<<6),
-	TIMx_DIV_BY_64=		(1u<<7),
-	TIMx_DIV_BY_128=	(1u<<8),
-	TIMx_DIV_BY_256=	(1u<<9),
-	TIMx_DIV_BY_512=	(1u<<10)
+	TIMx_DIV_BY_1 = 	(1U<<0U),
+	TIMx_DIV_BY_2 =		(1U<<1U),
+	TIMx_DIV_BY_4=		(1U<<2U),
+	TIMx_DIV_BY_8=		(1U<<3U),
+	TIMx_DIV_BY_16=		(1U<<4U),
+	TIMx_DIV_BY_32=		(1U<<5U),
+	TIMx_DIV_BY_64=		(1U<<6U),
+	TIMx_DIV_BY_128=	(1U<<7U),
+	TIMx_DIV_BY_256=	(1U<<8U),
+	TIMx_DIV_BY_512=	(1U<<9U)
 
 }TIMx_preescaler_t;
 
 /*_____________________________________TIMx_CR1 BITS____________________________________________*/
 
 typedef enum{
-	 TIMx_CEN= 					(1u<<0),
-	 TIMx_UDIS=					(1u<<1),
-	 TIMx_URS=					(1u<<2),
-	 TIMx_OPM=					(1u<<3),
-	 TIM1_TIM2_TO_TIM5_DIR=		(1u<<4),
-	 TIM1_TIM2_TO_TIM5_CMS=		(5),
-	 TIMx_ARPE=					(1u<<7),
-	 TIMx_CKD=					(8) //2 bits set
+	 TIMx_CEN= 					(1U<<0U),
+	 TIMx_UDIS=					(1U<<1U),
+	 TIMx_URS=					(1U<<2U),
+	 TIMx_OPM=					(1U<<3U),
+	 TIM1_TIM2_TO_TIM5_DIR=		(1U<<4U),
+	 TIM1_TIM2_TO_TIM5_CMS=		(5U),
+	 TIMx_ARPE=					(1U<<7U),
+	 TIMx_CKD=					(8U) //2 bits set
 
 }global_timers_CR1_t;
 
 /*_____________________________________TIMx_SR BITS____________________________________________*/
 
 typedef enum{
-	 TIM1_CC1F=		(1u<<1),
-	 TIM1_CC2IF=	(1u<<2),
-	 TIM1_CC3IF=	(1u<<3),
-	 TIM1_CC4IF=	(1u<<4),
-	 TIM1_COMIF=	(1u<<5),
-	 TIM1_TIF=		(1u<<6),
-	 TIM1_BIF=		(1u<<7),
-	 TIM1_CC10F=	(1u<<9),
-	 TIM1_CC20F=	(1u<<10),
-	 TIM1_CC30F=	(1u<<11),
-	 TIM1_CC40F=	(1u<<12)
+	 TIM1_CC1F=		(1U<<1U),
+	 TIM1_CC2IF=	(1U<<2U),
+	 TIM1_CC3IF=	(1U<<3U),
+	 TIM1_CC4IF=	(1U<<4U),
+	 TIM1_COMIF=	(1U<<5U),
+	 TIM1_TIF=		(1U<<6U),
+	 TIM1_BIF=		(1U<<7U),
+	 TIM1_CC10F=	(1U<<9U),
+	 TIM1_CC20F=	(1U<<10U),
+	 TIM1_CC30F=	(1U<<11U),
+	 TIM1_CC40F=	(1U<<12U)
 
 }TIM1_SR_status_t;
 
 typedef enum{
-	 TIM2_TO_TIM5_CC1F=		(1u<<1),
-	 TIM2_TO_TIM5_CC2IF=	(1u<<2),
-	 TIM2_TO_TIM5_CC3IF=	(1u<<3),
-	 TIM2_TO_TIM5_CC4IF=	(1u<<4),
-	 TIM2_TO_TIM5_TIF=		(1u<<6),
-	 TIM2_TO_TIM5_CC10F=	(1u<<9),
-	 TIM2_TO_TIM5_CC20F=	(1u<<10),
-	 TIM2_TO_TIM5_CC30F=	(1u<<11),
-	 TIM2_TO_TIM5_CC40F=	(1u<<12)
+	 TIM2_TO_TIM5_CC1F=		(1U<<1U),
+	 TIM2_TO_TIM5_CC2IF=	(1U<<2U),
+	 TIM2_TO_TIM5_CC3IF=	(1U<<3U),
+	 TIM2_TO_TIM5_CC4IF=	(1U<<4U),
+	 TIM2_TO_TIM5_TIF=		(1U<<6U),
+	 TIM2_TO_TIM5_CC10F=	(1U<<9U),
+	 TIM2_TO_TIM5_CC20F=	(1U<<10U),
+	 TIM2_TO_TIM5_CC30F=	(1U<<11U),
+	 TIM2_TO_TIM5_CC40F=	(1U<<12U)
 
 }TIM2_TIM5_SR_status_t;
 
 
 typedef enum{
-	 TIM9_CC1F=		(1u<<1),
-	 TIM9_CC2IF=	(1u<<2),
-	 TIM9_TIF=		(1u<<6),
-	 TIM9_CC10F=	(1u<<9),
-	 TIM9_CC20F=	(1u<<10)
+	 TIM9_CC1F=		(1U<<1U),
+	 TIM9_CC2IF=	(1U<<2U),
+	 TIM9_TIF=		(1U<<6U),
+	 TIM9_CC10F=	(1U<<9U),
+	 TIM9_CC20F=	(1U<<10U)
 
 }TIM9_SR_status_t;
 
@@ -390,9 +390,9 @@ typedef struct{
 
 volatile void set_cuenta(uint32_t cuenta_lim);
 
-void volatile TIMER_WaitFlag(TimerMapAddr_t TIMER_addr);
-void volatile TIMER_Clock(Enabled_Disabled_t state, timers_enb_t Timer);
-void volatile TIMER_cleanCountFlag(TimerMapAddr_t TIMER_addr);
+void TIMER_WaitFlag(TimerMapAddr_t TIMER_addr);
+void TIMER_Clock(Enabled_Disabled_t state, timers_enb_t Timer);
+void TIMER_cleanCountFlag(TimerMapAddr_t TIMER_addr);
 
 void TIM3_HANDLER(void);
 Status_code_t TIM3_Init(uint16_t milliseconds);

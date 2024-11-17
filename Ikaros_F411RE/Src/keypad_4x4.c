@@ -5,6 +5,7 @@
  *      Author: Sebastian G.M.
  */
 #include "keypad_4x4.h"
+#include "timers.h"
 
 
 uint8_t KeypadMap[MAX_ROWS][MAX_COLUMNS] = {
@@ -17,7 +18,7 @@ uint8_t KeypadMap[MAX_ROWS][MAX_COLUMNS] = {
 Status_code_t Init_keypad(keypad_alternatives_t keypad_alternative){
 
 	Set_Port_t Port_option = Port_A; //set as a default
-	uint16_t volatile PositionsOfPin =0;
+	uint16_t PositionsOfPin =0;
 	uint8_t input_output_count =0;
 
 	switch(keypad_alternative){
@@ -31,20 +32,20 @@ Status_code_t Init_keypad(keypad_alternatives_t keypad_alternative){
 		return OptionNotSupported;
 	}
 
-	uint32_t volatile *pPort_ModeReg = (uint32_t volatile *)(Port_option+ OFFSET_PORTS);
+	__IO uint32_t *pPort_ModeReg = (__IO uint32_t *)(Port_option+ OFFSET_PORTS);
 	ClockEnable(Port_option, Enabled);
 
-	PositionsOfPin = (uint16_t volatile)keypad_alternative*2;
+	PositionsOfPin = (uint16_t)keypad_alternative*2;
 	*pPort_ModeReg &= ~(Clear_sixteen_bits<<PositionsOfPin);
 
 	while(input_output_count < NUM_OUTPUT_INPUT_COUNT){
 		//SET_THE OUTPUT
-		PositionsOfPin = (uint16_t volatile)((keypad_alternative+input_output_count)*2);
+		PositionsOfPin = (uint16_t)((keypad_alternative+input_output_count)*2);
 		*pPort_ModeReg |= (Output<<PositionsOfPin);
 		GPIO_DigitalWrite(Port_option,(keypad_alternative+input_output_count),High); //set them as high for default
 
 		//SET THE INPUTS
-		PositionsOfPin = (uint16_t volatile)((keypad_alternative + input_output_count + INPUT_OFFSET)*2);
+		PositionsOfPin = (uint16_t)((keypad_alternative + input_output_count + INPUT_OFFSET)*2);
 		*pPort_ModeReg |= (Input<<PositionsOfPin);
 		GpioPullUpDownState(Port_option,(keypad_alternative + input_output_count + INPUT_OFFSET),Pull_Up);
 		input_output_count++;
@@ -57,7 +58,7 @@ Status_code_t Init_keypad(keypad_alternatives_t keypad_alternative){
 Status_code_t Deinit_keypad(keypad_alternatives_t keypad_alternative){
 
 	Set_Port_t Port_option = Port_A; //set as a default
-	uint16_t volatile PositionsOfPin =0;
+	uint16_t PositionsOfPin =0;
 	uint8_t input_output_count =0;
 
 	switch(keypad_alternative){
@@ -71,16 +72,12 @@ Status_code_t Deinit_keypad(keypad_alternatives_t keypad_alternative){
 		return OptionNotSupported;
 	}
 
-	uint32_t volatile *pPort_ModeReg = (uint32_t volatile *)(Port_option+ OFFSET_PORTS);
-	ClockEnable(Port_option, Enabled);
+	__IO uint32_t *pPort_ModeReg = (__IO uint32_t *)(Port_option + OFFSET_PORTS);
 
-	PositionsOfPin = (uint16_t volatile)keypad_alternative*2;
+	PositionsOfPin = (uint16_t)keypad_alternative*2;
 	*pPort_ModeReg &= ~(Clear_sixteen_bits<<PositionsOfPin);
 
-	while(input_output_count < NUM_OUTPUT_INPUT_COUNT){
-		//SET THE INPUTS
-		PositionsOfPin = (uint16_t volatile)((keypad_alternative + input_output_count + INPUT_OFFSET)*2);
-		*pPort_ModeReg |= (Input<<PositionsOfPin);
+	while(input_output_count < NUM_OUTPUT_INPUT_COUNT){ //check this
 		GpioPullUpDownState(Port_option,(keypad_alternative + input_output_count + INPUT_OFFSET),No_pull_No_Down);
 		input_output_count++;
 	}
@@ -91,6 +88,7 @@ Status_code_t Deinit_keypad(keypad_alternatives_t keypad_alternative){
 
 uint32_t Read_keypad(keypad_alternatives_t keypad_alternative){
 
+	Status_code_t status = Success;
 	Set_Port_t Port_option = Port_A; //set as a default
 	uint8_t dataArray[MAX_INPUT_DATA];
 	uint8_t positionXY =0;
@@ -110,6 +108,12 @@ uint32_t Read_keypad(keypad_alternatives_t keypad_alternative){
 		return OptionNotSupported;
 	}
 
+	status = TIM11_Init(MAX_KEYPAD_TIMEOUT);
+
+	if(status != Success){
+		return 0;
+	}
+	TIM11_Start();
 
 	do{
 		rowSequence(Port_option, keypad_alternative, (first_row +positionXY));
@@ -118,11 +122,14 @@ uint32_t Read_keypad(keypad_alternatives_t keypad_alternative){
 		if(positionXY>3){
 			positionXY=0;
 		}
-	}while((dataArray[(array_position)]!= HASH) && array_position < MAX_INPUT_DATA);
+	}while((dataArray[(array_position)]!= HASH) && array_position < MAX_INPUT_DATA && !TIM11_GET_interrupt_flag_status());
 
-	if(array_position == 0){ //if # is only pressed will return 0
+	TIM11_Deinit();
+	if(array_position == 0 || TIM11_GET_interrupt_flag_status()){ //if # is only pressed will return 0
+		TIM11_clear_interrupt_flag();
 		return 0;
 	}
+	TIM11_clear_interrupt_flag();
 
 	uint8_t finalDataArray[(array_position)];
 	memset(finalDataArray,'\0',(array_position));
@@ -143,8 +150,6 @@ uint32_t print_keypad(keypad_alternatives_t keypad_alternative, uint8_t X_axis, 
 	uint32_t capture_value =0;
 	memset(dataArray,'\0',MAX_INPUT_DATA);
 
-
-
 	switch(keypad_alternative){
 	case keypad_PortA:
 		Port_option = Port_A;
@@ -158,9 +163,12 @@ uint32_t print_keypad(keypad_alternatives_t keypad_alternative, uint8_t X_axis, 
 	}
 
 	status = lcd_set_cursor_position(X_axis,Y_axis);
-	if(status!= Success){
+	status |= TIM11_Init(MAX_KEYPAD_TIMEOUT);
+
+	if(status != Success){
 		return 0;
 	}
+	TIM11_Start();
 
 	do{
 		rowSequence(Port_option, keypad_alternative, (first_row +positionXY));
@@ -169,11 +177,16 @@ uint32_t print_keypad(keypad_alternatives_t keypad_alternative, uint8_t X_axis, 
 		if(positionXY>3){
 			positionXY=0;
 		}
-	}while((dataArray[(array_position)]!= HASH) && array_position < MAX_INPUT_DATA);
+	}while((dataArray[(array_position)]!= HASH) && array_position < MAX_INPUT_DATA && !TIM11_GET_interrupt_flag_status());
 
-	if(array_position == 0){ //if # is only pressed will return 0
+	TIM11_Deinit();
+
+	if(array_position == 0 || TIM11_GET_interrupt_flag_status()){ //if # is only pressed will return 0
+		TIM11_clear_interrupt_flag();
 		return 0;
 	}
+
+	TIM11_clear_interrupt_flag();
 
 	uint8_t finalDataArray[(array_position)];
 	memset(finalDataArray,'\0',(array_position));
@@ -196,7 +209,8 @@ void rowSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low_st
 
 }
 
-void columnSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low_states_t row_to_low, uint8_t* pDataArray, uint8_t* data_lenght, print_activate_t opPrint){
+void columnSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low_states_t row_to_low,
+					uint8_t* pDataArray, uint8_t* data_lenght, print_activate_t opPrint){
 
 	uint8_t pressed_boton=0;
 
@@ -204,10 +218,10 @@ void columnSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low
 
 		if(!GPIO_DigitalRead(Port_option, (Pin_defined+column+INPUT_OFFSET))){
 
-			while(!GPIO_DigitalRead(Port_option, (Pin_defined+column+INPUT_OFFSET)));//wait until the button is not pressed
-			/*later put a condition to avoid the infinite button pressed*/
+			while( (!GPIO_DigitalRead(Port_option, (Pin_defined+column+INPUT_OFFSET))) );//wait until the button is not pressed
+			/*latter put a condition to avoid the infinite button pressed*/
 
-			Peripherial_delay(150); //small delay to avoid troubles
+			Peripherial_delay(150); //small delay to avoid troubles //include debouncing latter to delete while and delay
 
 			if(column == fourth_column){
 				pressed_boton = (ASCII_A)+column; //for A,B,C,D but will do nothing

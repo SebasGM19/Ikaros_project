@@ -7,7 +7,7 @@
 #include "lcd.h"
 
 
-controls_gpios_t volatile control_alternative;
+controls_gpios_t static control_alternative;
 //uint8_t volatile coordinate_X = 0;//Coordinates
 //uint8_t volatile coordinate_Y = 0;
 //
@@ -50,7 +50,7 @@ Status_code_t Send_command(uint8_t command, command_type_t type){
 	MSB = (command & 0xF0)>>4;
 	LSB = (command & 0x0F); 	//keep only the first 4 bits
 
-	uint32_t volatile *PORT_REG_OUTPUT = (uint32_t volatile*)(control_alternative.PORT + GPIOx_ODR_OFFSET); //agregamos el 0x14 par indicar output
+	__IO uint32_t  *PORT_REG_OUTPUT = (__IO uint32_t *)(control_alternative.PORT + GPIOx_ODR_OFFSET); //agregamos el 0x14 par indicar output
 //	*PORT_REG_OUTPUT &= ~(Clear_four_bits<<control_alternative.LCD_PIN_D4);
 //	*PORT_REG_OUTPUT |= (MSB<<control_alternative.LCD_PIN_D4);
 
@@ -87,7 +87,7 @@ Status_code_t Send_command(uint8_t command, command_type_t type){
  */
 Status_code_t lcd_init(lcd_alternative_t lcd_alternative){
 
-	uint16_t volatile PositionsOfPin =0;
+	uint16_t PositionsOfPin =0;
 
 	switch(lcd_alternative){
 	case lcd_PortB:
@@ -101,10 +101,10 @@ Status_code_t lcd_init(lcd_alternative_t lcd_alternative){
 		return OptionNotSupported;
 	}
 
-	uint32_t volatile *pPort_ModeReg = (uint32_t volatile *)(control_alternative.PORT+ OFFSET_PORTS);
+	__IO uint32_t *pPort_ModeReg = (__IO uint32_t *)(control_alternative.PORT+ OFFSET_PORTS);
 	ClockEnable(control_alternative.PORT, Enabled);
 
-	PositionsOfPin = (uint16_t volatile)(lcd_alternative * 2);
+	PositionsOfPin = (uint16_t)(lcd_alternative * 2);
 	*pPort_ModeReg &= ~(clear_fourteen_bits<<PositionsOfPin);
 	*pPort_ModeReg |= (0x1555 << PositionsOfPin);// equal to : 01 0101 0101 0101 set as output
 
@@ -145,7 +145,7 @@ Status_code_t lcd_init(lcd_alternative_t lcd_alternative){
 
 Status_code_t lcd_deinit(lcd_alternative_t lcd_alternative){
 
-	uint16_t volatile PositionsOfPin =0;
+	uint16_t PositionsOfPin =0;
 
 	switch(lcd_alternative){
 	case lcd_PortB:
@@ -159,9 +159,9 @@ Status_code_t lcd_deinit(lcd_alternative_t lcd_alternative){
 		return OptionNotSupported;
 	}
 
-	uint32_t volatile *pPort_ModeReg = (uint32_t volatile *)(control_alternative.PORT+ OFFSET_PORTS);
+	__IO uint32_t *pPort_ModeReg = (__IO uint32_t *)(control_alternative.PORT+ OFFSET_PORTS);
 
-	PositionsOfPin = (uint16_t volatile)(lcd_alternative * 2);
+	PositionsOfPin = (uint16_t)(lcd_alternative * 2);
 	*pPort_ModeReg &= ~(clear_fourteen_bits<<PositionsOfPin);
 	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_RW, Low); //this stay LOW in 4bit configuration
 	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_RS, Low);

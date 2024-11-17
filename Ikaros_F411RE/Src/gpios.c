@@ -13,7 +13,7 @@ uint8_t static GPIO_EXT_Pin_ocupped[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 Gpio_State_Control_t GPIO_DigitalRead(Set_Port_t Port_define, Pin_number_t Pin_defined){
 
-	uint32_t const volatile * const PORT_REG_INPUT = (uint32_t const volatile *const)(Port_define + GPIOx_IDR_OFFSET); //agregamos el 10 para decirle el offset
+	__I uint32_t* const PORT_REG_INPUT = (__I uint32_t* const)(Port_define + GPIOx_IDR_OFFSET); //agregamos el 10 para decirle el offset
 
 	if(((1<<Pin_defined) & (*PORT_REG_INPUT))==(1<<Pin_defined)){
 		return High;
@@ -24,7 +24,7 @@ Gpio_State_Control_t GPIO_DigitalRead(Set_Port_t Port_define, Pin_number_t Pin_d
 
 Gpio_State_Control_t GPIO_DigitalWrite(Set_Port_t Port_define, Pin_number_t Pin_defined, Gpio_State_Control_t State){
 
-	uint32_t volatile *PORT_REG_OUTPUT = (uint32_t volatile*)(Port_define + GPIOx_ODR_OFFSET); //agregamos el 0x14 par indicar output
+	__IO uint32_t *PORT_REG_OUTPUT = (__IO uint32_t *)(Port_define + GPIOx_ODR_OFFSET); //agregamos el 0x14 par indicar output
 
 	if(State){
 		*PORT_REG_OUTPUT |= (1<<Pin_defined);
@@ -40,8 +40,8 @@ Gpio_State_Control_t GPIO_DigitalWrite(Set_Port_t Port_define, Pin_number_t Pin_
 
 Status_code_t SetPinMode(Set_Port_t Port_define, Pin_number_t Pin_defined, PinMode_t Mode){
 
-	uint32_t volatile *pPort_ModeReg = (uint32_t volatile *)((Port_define)+ OFFSET_PORTS);
-	uint16_t volatile PositionsOfPin =0;
+	__IO uint32_t *pPort_ModeReg = (__IO uint32_t *)(Port_define + OFFSET_PORTS);
+	__IO uint16_t PositionsOfPin =0;
 	Status_code_t status=Success;
 
 	/*DO NOT MODIFY THIS IF STATEMENT, IMPLEMENTED TO AVOID TROUBLES WITH THE BOARD!!!*/
@@ -55,7 +55,7 @@ Status_code_t SetPinMode(Set_Port_t Port_define, Pin_number_t Pin_defined, PinMo
 
 	status = ClockEnable(Port_define, Enabled);
 
-	PositionsOfPin = (uint16_t volatile)Pin_defined*2;
+	PositionsOfPin = (__IO uint16_t)Pin_defined*2;
 	*pPort_ModeReg &= ~(Clear_two_bits<<PositionsOfPin);
 
 	switch(Mode){
@@ -91,7 +91,7 @@ void GpioSetAlternativeFunction(Set_Port_t Port_define, Pin_number_t Pin_defined
 		Pin_offset_to_substract = 32;//to adjust for AFRH and PIN position
 	}
 
-	uint32_t volatile *pGpio_alt_func_reg = (uint32_t volatile *)((Port_define)+ GPIO_AFRx_Offset);
+	__IO uint32_t *pGpio_alt_func_reg = (__IO uint32_t *)((Port_define)+ GPIO_AFRx_Offset);
 
 	real_register_position = (Pin_defined*4) - Pin_offset_to_substract;
 
@@ -102,7 +102,7 @@ void GpioSetAlternativeFunction(Set_Port_t Port_define, Pin_number_t Pin_defined
 }
 
 Status_code_t GpioPullUpDownState(Set_Port_t Port_define, Pin_number_t Pin_defined, GPIO_UP_DOWN_STATE_t GPIO_State){
-	uint32_t volatile *REG_PULL_UPdown = (uint32_t volatile*)(Port_define + GPIOx_PUPDR_OFFSET); //add 0x0C for offset to pull up or pull down
+	__IO uint32_t *REG_PULL_UPdown = (__IO uint32_t *)(Port_define + GPIOx_PUPDR_OFFSET); //add 0x0C for offset to pull up or pull down
 	uint16_t RealPosition=0;
 
 	RealPosition = Pin_defined*2;
@@ -128,7 +128,7 @@ void GPIO_Delete_EXTI_PIN(Pin_number_t Pin_defined){
 void GPIO_Set_EXTI_Line(GPIO_Exti_Port_t EXTI_Port,Pin_number_t Pin_defined){
 
 	SYSCFG_register_offset_t Syscf_EXTI_CR_Offset = SYSCFG_EXTICR1 + (((uint8_t)(Pin_defined / 4)) * 4);
-	uint32_t volatile *EXTI_LineReg = (uint32_t volatile *)(SYSCFG_ADDRESS+ Syscf_EXTI_CR_Offset);
+	__IO uint32_t *EXTI_LineReg = (__IO uint32_t *)(SYSCFG_ADDRESS+ Syscf_EXTI_CR_Offset);
 
 	uint8_t reg_pin_offser = (((uint8_t)(Pin_defined / 4)) * 16);
 	uint8_t star_position = (Pin_defined*4)-reg_pin_offser;
@@ -141,7 +141,7 @@ void GPIO_Set_EXTI_Line(GPIO_Exti_Port_t EXTI_Port,Pin_number_t Pin_defined){
 void GPIO_EXTI_Mask(Pin_number_t Pin_defined,Enabled_Disabled_t Intention){
 
 
-	uint32_t volatile *EXTI_mask_reg = (uint32_t volatile *)(EXT1_ADDRESS+ EXTI_IMR);
+	__IO uint32_t *EXTI_mask_reg = (__IO uint32_t *)(EXT1_ADDRESS+ EXTI_IMR);
 //	*EXTI_mask_reg = Intention ? (*EXTI_mask_reg | (1u << Pin_defined)) : (*EXTI_mask_reg & ~(1u << Pin_defined));
 	if(Intention){
 		*EXTI_mask_reg |= (1u<<Pin_defined);
@@ -162,7 +162,7 @@ void GPIO_EXTI_Trigger_seleccion(Pin_number_t Pin_defined,GPIO_Exti_Config_t EXT
 		trigger_offset = EXTI_RTSR;
 	}
 
-	uint32_t volatile *EXTI_trigger_reg = (uint32_t volatile *)(EXT1_ADDRESS + trigger_offset);
+	__IO uint32_t *EXTI_trigger_reg = (__IO uint32_t *)(EXT1_ADDRESS + trigger_offset);
 	*EXTI_trigger_reg|= (1u<<Pin_defined);
 
 }
@@ -170,14 +170,14 @@ void GPIO_EXTI_Trigger_seleccion(Pin_number_t Pin_defined,GPIO_Exti_Config_t EXT
 
 void GPIO_EXTI_Clean_Flag(Pin_number_t Pin_defined){
 
-	uint32_t volatile *EXTI_REG_PR = (uint32_t volatile*)(EXT1_ADDRESS + EXTI_PR);
+	__IO uint32_t *EXTI_REG_PR = (__IO uint32_t *)(EXT1_ADDRESS + EXTI_PR);
 	*EXTI_REG_PR |= (1u<<Pin_defined);	//is cleared by programming it to ‘1’.
 
 }
 
 void GPIO_EXTI_Clean_Group_Of_Flag(Pin_number_t Pin_defined,RegAuxClean_t bit_to_clear){
 
-	uint32_t volatile *EXTI_REG_PR = (uint32_t volatile*)(EXT1_ADDRESS + EXTI_PR);
+	__IO uint32_t *EXTI_REG_PR = (__IO uint32_t *)(EXT1_ADDRESS + EXTI_PR);
 	*EXTI_REG_PR |= (bit_to_clear<<Pin_defined);	//is cleared by programming it to ‘1’.
 
 }
@@ -629,20 +629,13 @@ void GPIO_Deinit_EXTI9_To_EXTI5(Pin_number_t Pin_defined){
 ////////////////////////////////ONLY 1 PIN FROM PIN_10 TO PIN_15 OF ALL PORTS/////////////////////////////
 
 
-uint8_t global_duty_percent =0;
-
-uint8_t return_global_duty(void){
-	return global_duty_percent;
-}
 
 void EXTI15_10_HANDLER(void){
 	/*Develop your interruption code from here*/
 	uint32_t hw_count_dummy=0;
 
-	global_duty_percent +=25;
-	if(global_duty_percent>100){
-		global_duty_percent=0;
-	}
+
+
 	while(hw_count_dummy<40000){hw_count_dummy++;} //dummy count to avoid debouncing
 
 
