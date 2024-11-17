@@ -19,6 +19,8 @@
 #define HASH						(0x23)
 #define STAR						(0x2A)
 
+#define MAX_KEYPAD_TIMEOUT			(15000)
+
 #include "system_settings.h"
 #include "gpios.h"
 #include "lcd.h"

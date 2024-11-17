@@ -8,8 +8,8 @@
 #ifndef ADC_H_
 #define ADC_H_
 #include "system_settings.h"
-#include "gpios.h"
 
+#define MAX_ADC_TIMEOUT	(5000)
 
 typedef enum{
 	ADC_SR =		0x00,
@@ -231,6 +231,7 @@ typedef enum{
 }ADC_operation_mode_t;
 
 Status_code_t ADC_Init(ADC_resolution_t resolution);
+Status_code_t ADC_Configure_Channel(ADC_channel_t Channel);
 uint32_t ADC_Read(ADC_channel_t Channel);
 Status_code_t ADC_Deinit(void);
 
@@ -241,10 +242,10 @@ uint8_t ADC_countChannelActivated(void);
 void ADC_Channel_SQR_Single_position(ADC_channel_t Channel);
 void ADC_SetSingleChannelLenght(ADC_single_channel_lenght_t lenght);
 void ADC_Clock(Enabled_Disabled_t state);
-Status_code_t ADC_Configure_Channel(ADC_channel_t Channel);
 Status_code_t ADC_start_convertion_regular_channel(void);
 void ADC_cleanConversionFlag(void);
-void ADC_wait_conversion_flag(void);
+Status_code_t ADC_wait_conversion_flag(void);
+
 void ADC_start_conversion(ADC_conversion_start_t state);
 void ADC_Set_Resolution(ADC_resolution_t resolution);
 

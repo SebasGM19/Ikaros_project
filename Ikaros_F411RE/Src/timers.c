@@ -11,9 +11,9 @@
 #include "keypad_4x4.h"
 #include "adc.h"
 
-uint32_t volatile global_TIM3_ARR_count = 1024; //set as 1048 to default
-uint32_t volatile global_TIM4_ARR_count = 1024; //set as 2048 to default
-//uint32_t volatile global_TIM5_ARR_count = 1024; //set as 2048 to default
+uint32_t static global_TIM3_ARR_count = 1024; //set as 1048 to default
+uint32_t static global_TIM4_ARR_count = 1024; //set as 2048 to default
+//uint32_t static global_TIM5_ARR_count = 1024; //set as 2048 to default
 
 
 bool static volatile reset_tim3_flag = false;
@@ -24,15 +24,15 @@ bool static volatile reset_tim11_flag = false;
 bool static volatile TIM11_interrupt_flag_active = false;
 
 
-void volatile TIMER_cleanCountFlag(TimerMapAddr_t TIMER_addr){
+void TIMER_cleanCountFlag(TimerMapAddr_t TIMER_addr){
 	__IO uint32_t *TIM_REG_SR = (__IO uint32_t *)(TIMER_addr + TIMx_SR);
 
 	*TIM_REG_SR &= ~(TIMx_UIF);
 
 }
 
-void volatile TIMER_Clock( Enabled_Disabled_t state, timers_enb_t Timer){
-	RCC_offset_t volatile RccOffset = RCC_OFFSET_APB1ENR;
+void TIMER_Clock( Enabled_Disabled_t state, timers_enb_t Timer){
+	RCC_offset_t RccOffset = RCC_OFFSET_APB1ENR;
 
 	if(Timer >= 10){
 		Timer-=10; //it means that is the timers from the APB2
@@ -47,7 +47,7 @@ void volatile TIMER_Clock( Enabled_Disabled_t state, timers_enb_t Timer){
     }
 }
 
-void volatile TIMER_WaitFlag(TimerMapAddr_t TIMER_addr){
+void TIMER_WaitFlag(TimerMapAddr_t TIMER_addr){
 	__I uint32_t *const TIM_REG_SR = (__I uint32_t *const)(TIMER_addr + TIMx_SR);
 	while(!(TIMx_UIF & *TIM_REG_SR)){}
 	TIMER_cleanCountFlag(TIMER_addr);
@@ -149,12 +149,12 @@ Status_code_t TIM4_Init(uint16_t milliseconds){
 	if(milliseconds > MAX_TIME_TIM3_TIM4){
 		return TimeSetNotSuported;
 	}
-	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_PSC);
-	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_ARR);
-	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CNT);
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_PSC);
+	__IO uint32_t *TIM_REG_ARR = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_ARR);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_CNT);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_CR1);
 
-	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_DIER);
 	TIMER_Clock(Enabled,TIMER_4);
 
 	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
@@ -171,9 +171,9 @@ Status_code_t TIM4_Init(uint16_t milliseconds){
 }
 
 void TIM4_Start(void){
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_DIER);
-	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CNT);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_CNT);
 
 	TIMER_cleanCountFlag(TIM4_ADDRESS);
 	*TIM_REG_CNT = 0;
@@ -183,9 +183,9 @@ void TIM4_Start(void){
 }
 
 void TIM4_Stop(void){
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_DIER);
-	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CNT);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_CNT);
 
 
 	TIMER_cleanCountFlag(TIM4_ADDRESS);
@@ -197,8 +197,8 @@ void TIM4_Stop(void){
 }
 
 void TIM4_Deinit(void){
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_DIER);
 
 	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
 	*TIM_REG_DIER &= ~TIMx_UIE;
@@ -228,11 +228,11 @@ Status_code_t TIM5_Init(uint32_t microseconds){
 	if(microseconds > MAX_TIME_TIM5_AND_TIM2){
 		return TimeSetNotSuported;
 	}
-	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_PSC);
-	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_ARR);
-	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CNT);
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_PSC);
+	__IO uint32_t *TIM_REG_ARR = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_ARR);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_CNT);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_DIER);
 
 	TIMER_Clock(Enabled,TIMER_5);
 
@@ -251,9 +251,9 @@ Status_code_t TIM5_Init(uint32_t microseconds){
 
 void TIM5_Start(void){
 
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_DIER);
-	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CNT);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_CNT);
 
 
 	TIMER_cleanCountFlag(TIM5_ADDRESS);
@@ -264,9 +264,9 @@ void TIM5_Start(void){
 
 void TIM5_Stop(void){
 
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_DIER);
-	uint32_t volatile *TIM_REG_CNT = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CNT);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_CNT);
 
 	TIMER_cleanCountFlag(TIM5_ADDRESS);
 	*TIM_REG_CNT = 0;
@@ -276,8 +276,8 @@ void TIM5_Stop(void){
 }
 
 void TIM5_Deinit(void){
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_DIER = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_DIER);
 
 	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
 	*TIM_REG_DIER &= ~TIMx_UIE;
@@ -289,15 +289,14 @@ void TIM5_Deinit(void){
 
 
 /*///////////////////TIMER 11 HANDLER FOR TIMEOUT FOR PROTOCOLS///////////////////////////////////*/
-
 void TIM11_HANDLER(void){
-	/*Develop all the code to be executed in a second thread down here*/
 	TIMER_cleanCountFlag(TIM11_ADDRESS);
-
 	if(reset_tim11_flag){
+	/*Develop all the code to be executed in a second thread down here*/
 
 		TIM11_interrupt_flag_active = true;
 		TIM11_Stop();
+
 
 	}else{reset_tim11_flag=!reset_tim11_flag;}
 }
@@ -379,7 +378,7 @@ void TIM11_clear_interrupt_flag(void){
 
 
 
-//__________________PWM functions for TIM3____________________________________________
+/*______________________________PWM functions for TIM3____________________________________________*/
 void TIM3_set_global_PWM_ARR(uint32_t new_arr_value){
 	global_TIM3_ARR_count = new_arr_value;
 }
@@ -438,9 +437,9 @@ Status_code_t TIM3_PWM_Init(TIM3_PWM_channel_select_t channel,PWM_mode_OCxM_t mo
 	}
 
 
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_CCMRx = (uint32_t volatile*)(TIM3_ADDRESS + capture_compare_mode_reg);
-	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CCER);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_CCMRx = (__IO uint32_t *)(TIM3_ADDRESS + capture_compare_mode_reg);
+	__IO uint32_t *TIM_REG_CCER = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_CCER);
 
 
 
@@ -500,11 +499,11 @@ Status_code_t TIM3_PWM_start_custom_channel(TIM3_pwm_custom_parameters_t const P
 		return TIMx_incorrect;
 		break;
 	}
-	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_PSC);
-	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_ARR);
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CCER);
-	uint32_t volatile *TIM_REG_CCRx = (uint32_t volatile*)(TIM3_ADDRESS + capture_compare_reg);
+	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_PSC);
+	__IO uint32_t *TIM_REG_ARR = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_ARR);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_CCER = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_CCER);
+	__IO uint32_t *TIM_REG_CCRx = (__IO uint32_t *)(TIM3_ADDRESS + capture_compare_reg);
 
 
 
@@ -559,11 +558,11 @@ Status_code_t TIM3_PWM_start_channel(TIM3_pwm_auto_parameters_t const PWM){
 		return TIMx_incorrect;
 		break;
 	}
-	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_PSC);
-	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_ARR);
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CCER);
-	uint32_t volatile *TIM_REG_CCRx = (uint32_t volatile*)(TIM3_ADDRESS + capture_compare_reg);
+	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_PSC);
+	__IO uint32_t *TIM_REG_ARR = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_ARR);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_CCER = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_CCER);
+	__IO uint32_t *TIM_REG_CCRx = (__IO uint32_t *)(TIM3_ADDRESS + capture_compare_reg);
 
 
 	if(PWM.duty_cycle_percent<=0){
@@ -615,7 +614,7 @@ Status_code_t TIM3_PWM_stop_channel(TIM3_PWM_channel_select_t channel){
 	}
 
 
-	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CCER);
+	__IO uint32_t *TIM_REG_CCER = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_CCER);
 
 	*TIM_REG_CCER &= ~CCx_enable;
 
@@ -625,7 +624,7 @@ Status_code_t TIM3_PWM_stop_channel(TIM3_PWM_channel_select_t channel){
 }
 
 Status_code_t TIM3_PWM_Deinit(void){
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM3_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM3_ADDRESS + TIMx_CR1);
 
 	*TIM_REG_CR1 &= ~TIMx_CEN;
 	TIMER_Clock(Disabled,TIMER_3);
@@ -634,7 +633,7 @@ Status_code_t TIM3_PWM_Deinit(void){
 }
 
 
-//__________________________________PWM functions for TIM4____________________________________________
+/*__________________________________PWM functions for TIM4____________________________________________*/
 void TIM4_set_global_PWM_ARR(uint32_t new_arr_value){
 	global_TIM4_ARR_count = new_arr_value;
 }
@@ -692,9 +691,9 @@ Status_code_t TIM4_PWM_Init(TIM4_PWM_channel_select_t channel,PWM_mode_OCxM_t mo
 	}
 
 
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_CCMRx = (uint32_t volatile*)(TIM4_ADDRESS + capture_compare_mode_reg);	//depending the channel selected
-	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CCER);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_CCMRx = (__IO uint32_t *)(TIM4_ADDRESS + capture_compare_mode_reg);	//depending the channel selected
+	__IO uint32_t *TIM_REG_CCER = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_CCER);
 
 
 
@@ -754,11 +753,11 @@ Status_code_t TIM4_PWM_start_custom_channel(TIM4_pwm_custom_parameters_t const P
 		return TIMx_incorrect;
 		break;
 	}
-	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_PSC);
-	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_ARR);
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CCER);
-	uint32_t volatile *TIM_REG_CCRx = (uint32_t volatile*)(TIM4_ADDRESS + capture_compare_reg);
+	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_PSC);
+	__IO uint32_t *TIM_REG_ARR = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_ARR);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_CCER = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_CCER);
+	__IO uint32_t *TIM_REG_CCRx = (__IO uint32_t *)(TIM4_ADDRESS + capture_compare_reg);
 
 
 
@@ -813,11 +812,11 @@ Status_code_t TIM4_PWM_start_channel(TIM4_pwm_auto_parameters_t const PWM){
 		return TIMx_incorrect;
 		break;
 	}
-	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_PSC);
-	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_ARR);
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CR1);
-	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CCER);
-	uint32_t volatile *TIM_REG_CCRx = (uint32_t volatile*)(TIM4_ADDRESS + capture_compare_reg);
+	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_PSC);
+	__IO uint32_t *TIM_REG_ARR = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_ARR);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_CCER = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_CCER);
+	__IO uint32_t *TIM_REG_CCRx = (__IO uint32_t *)(TIM4_ADDRESS + capture_compare_reg);
 
 
 	if(PWM.duty_cycle_percent<=0){
@@ -869,7 +868,7 @@ Status_code_t TIM4_PWM_stop_channel(TIM4_PWM_channel_select_t channel){
 	}
 
 
-	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CCER);
+	__IO uint32_t *TIM_REG_CCER = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_CCER);
 
 	*TIM_REG_CCER &= ~CCx_enable;
 
@@ -879,7 +878,7 @@ Status_code_t TIM4_PWM_stop_channel(TIM4_PWM_channel_select_t channel){
 }
 
 Status_code_t TIM4_PWM_Deinit(void){
-	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM4_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM4_ADDRESS + TIMx_CR1);
 
 	*TIM_REG_CR1 &= ~TIMx_CEN;
 	TIMER_Clock(Disabled,TIMER_4);
@@ -928,9 +927,9 @@ Status_code_t TIM4_PWM_Deinit(void){
 //	}
 //
 //
-//	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CR1);
-//	uint32_t volatile *TIM_REG_CCMRx = (uint32_t volatile*)(TIM5_ADDRESS + capture_compare_mode_reg);	//depending the channel selected
-//	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CCER);
+//	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_CR1);
+//	__IO uint32_t *TIM_REG_CCMRx = (__IO uint32_t *)(TIM5_ADDRESS + capture_compare_mode_reg);	//depending the channel selected
+//	__IO uint32_t *TIM_REG_CCER = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_CCER);
 //
 //
 //
@@ -982,11 +981,11 @@ Status_code_t TIM4_PWM_Deinit(void){
 //		return TIMx_incorrect;
 //		break;
 //	}
-//	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_PSC);
-//	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_ARR);
-//	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CR1);
-//	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CCER);
-//	uint32_t volatile *TIM_REG_CCRx = (uint32_t volatile*)(TIM5_ADDRESS + capture_compare_reg);
+//	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_PSC);
+//	__IO uint32_t *TIM_REG_ARR = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_ARR);
+//	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_CR1);
+//	__IO uint32_t *TIM_REG_CCER = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_CCER);
+//	__IO uint32_t *TIM_REG_CCRx = (__IO uint32_t *)(TIM5_ADDRESS + capture_compare_reg);
 //
 //
 //
@@ -1033,11 +1032,11 @@ Status_code_t TIM4_PWM_Deinit(void){
 //		return TIMx_incorrect;
 //		break;
 //	}
-//	uint32_t volatile *TIM_REG_PSC = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_PSC);
-//	uint32_t volatile *TIM_REG_ARR = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_ARR);
-//	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CR1);
-//	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CCER);
-//	uint32_t volatile *TIM_REG_CCRx = (uint32_t volatile*)(TIM5_ADDRESS + capture_compare_reg);
+//	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_PSC);
+//	__IO uint32_t *TIM_REG_ARR = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_ARR);
+//	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_CR1);
+//	__IO uint32_t *TIM_REG_CCER = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_CCER);
+//	__IO uint32_t *TIM_REG_CCRx = (__IO uint32_t *)(TIM5_ADDRESS + capture_compare_reg);
 //
 //
 //	if(PWM.duty_cycle_percent<=0){
@@ -1083,7 +1082,7 @@ Status_code_t TIM4_PWM_Deinit(void){
 //	}
 //
 //
-//	uint32_t volatile *TIM_REG_CCER = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CCER);
+//	__IO uint32_t *TIM_REG_CCER = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_CCER);
 //
 //	*TIM_REG_CCER &= ~CCx_enable;
 //
@@ -1092,7 +1091,7 @@ Status_code_t TIM4_PWM_Deinit(void){
 //}
 //
 //Status_code_t TIM5_PWM_Deinit(void){
-//	uint32_t volatile *TIM_REG_CR1 = (uint32_t volatile*)(TIM5_ADDRESS + TIMx_CR1);
+//	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_CR1);
 //
 //	*TIM_REG_CR1 &= ~TIMx_CEN;
 //	TIMER_Clock(Disabled,TIMER_5);

@@ -19,16 +19,16 @@
 
 
 
-#define BOARD_CLOCK 			(16000000) //set to 16MHz
-#define PSC_TO_MICROSEC_DELAY	(uint32_t)(16) //minimum to microsecond count
-#define PSC_TO_MILLISEC_DELAY	(uint32_t)(16000) //minimum to microsecond count
+#define BOARD_CLOCK 			(16000000U) //set to 16MHz
+#define PSC_TO_MICROSEC_DELAY	(uint32_t)(16U) //minimum to microsecond count
+#define PSC_TO_MILLISEC_DELAY	(uint32_t)(16000U) //minimum to microsecond count
 #define USEC_TO_DELAY(CLOCK_BASE,PSC,DELAY)	 (uint32_t)((((CLOCK_BASE) / (PSC)) * ((DELAY) * (0.000001))) )
 #define MILLSEC_TO_DELAY(CLOCK_BASE,PSC,DELAY)	 (uint32_t)((((CLOCK_BASE) / (PSC)) * ((DELAY) * (0.001))) )
 
-#define BINARY_BASE			(2)
-#define OCTAL_BASE			(8)
-#define DECIMAL_BASE		(10)
-#define HEXADECIMAL_BASE	(16)
+#define BINARY_BASE			(2U)
+#define OCTAL_BASE			(8U)
+#define DECIMAL_BASE		(10U)
+#define HEXADECIMAL_BASE	(16U)
 
 typedef enum{
 	Success,
@@ -58,6 +58,8 @@ typedef enum{
 	USART_alternative_not_suported,
 	USART_baud_rate_out_of_limit,
 	Timeout,
+
+	WWDG_invalid_parameter,
 
 }Status_code_t;
 
