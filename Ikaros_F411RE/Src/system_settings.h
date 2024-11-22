@@ -269,12 +269,30 @@ typedef enum{
 }EXTI_registers_offset_t;
 
 
+typedef enum{
+	RCC_LSION = 	(1U<<0U),
+	RCC_LSIRDY = 	(1U<<1U),
+	RCC_RMVF = 		(1U<<24U), //used to clear all flags
+	RCC_BORRSTF = 	(1U<<25U),
+	RCC_PINRSTF = 	(1U<<26U),
+	RCC_PORRSTF = 	(1U<<27U),
+	RCC_SFTRSTF = 	(1U<<28U),
+	RCC_IWDGRSTF = 	(1U<<29U),
+	RCC_WWDGRSTF = 	(1U<<30U),
+	RCC_LPWRRSTF = 	(1U<<31U),
+
+}RCC_CSR_t;
+
+
 Status_code_t ClockEnable(Set_Port_t Port_define, Enabled_Disabled_t Intention);
 Status_code_t Delay(uint32_t microseconds);
 void resetDelay(TimerMapAddr_t Timer);
 Status_code_t Peripherial_delay(uint16_t miliseconds);
 void Init_Board(void);
 void ftoa(float decimalData, uint8_t* cadena, uint8_t decimales);
+
+bool RCC_reset_status_flag(RCC_CSR_t flag);
+void RCC_clear_reset_flags(void);
 
 void SYS_ClockEnable(Enabled_Disabled_t Intention);
 #endif /* SYSTEM_SETTINGS_H_ */

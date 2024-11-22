@@ -22,11 +22,11 @@
 
 #define WWDG_CLOCK_BIT_REG		(1U<<11U)
 #define WWDG_MAX_TIME_VALUE		(130U)
+#define WWDG_MAX_COUNT_VALUE	(127U)
 #define WWDG_MIN_TIME_VALUE		(2U)
 #define WWDG_INIT_START_TIME	(0x40U)
+#define WWDG_CHECK_T_TIME_VALUE	(0x3F)
 
-//#define WWDG_MAX_PRESCALER		(0x08U)
-//#define WWDG_MIN_PRESCALER		(0x01U)
 
 #define WWDG_MAX_CK_DIV			(0x03U)
 #define WWDG_MIN_CK_DIV			(0x00U)
@@ -34,12 +34,9 @@
 #define WWDG_W_VALUE_TO_RESET	(0x01U)
 #define WWDG_T_VALUE_TO_RESET	(0x02U)
 
+#define WWDG_MS_TIME_T(CLOCK_BASE,div,time)	 (uint32_t)((round((double)((((float)time/1000U) / ((1/ ((float)CLOCK_BASE)) * (1U<<div) * 4096U)))))+64U)
 
-
-
-
-
-#define WWDG_MS_TIME(CLOCK_BASE,div,time)	 (uint32_t)((((float)time/1000) / ((1/ ((float)CLOCK_BASE)) * (1<<div) * 4096))-1)
+#define WWDG_MS_TIME_W(CLOCK_BASE,div,time)	 (uint32_t)((round((double)((((float)time/1000U) / ((1/ ((float)CLOCK_BASE)) * (1U<<div) * 4096U))))))
 
 typedef enum{
 	reset_food,
@@ -47,16 +44,17 @@ typedef enum{
 
 }watchdog_food_t;
 
+/*__________________Independent_Watchdog__________________*/
 
 typedef enum{
 
-	reload_512ms,
-	reload_1024ms,
-	reload_2048ms,
-	reload_4096ms,
-	reload_8192ms,
-	reload_16384ms,
-	reload_32768ms,
+	reload_512ms,   /*  0.512 s*/
+	reload_1024ms,  /*  1.024 s*/
+	reload_2048ms,  /*  2.048 s*/
+	reload_4096ms,  /*  4.096 s*/
+	reload_8192ms,  /*  8.192 s*/
+	reload_16384ms, /* 16.384 s*/
+	reload_32768ms, /* 32.768 s*/
 
 }IWDG_reload_time_t;
 
@@ -84,7 +82,6 @@ typedef enum{
 	IWDG_RVU = (1U<<1U),
 }IWDG_SR_t;
 
-/*__________________Independent_Watchdog__________________*/
 
 void Init_Ind_Watchdog(IWDG_reload_time_t reload_time);
 void Ind_Watchdog_control(watchdog_food_t food);
@@ -114,12 +111,16 @@ typedef enum{
 	WWDG_EWIF = (1U<<0U),
 }WWDG_SR_t;
 
-
+typedef enum{
+	disabled_interrupt,
+	enabled_interrupt,
+}WWDG_interrupt_access_t;
 
 
 typedef struct{
 	uint8_t T_max_time;
 	uint8_t W_time;
+	WWDG_interrupt_access_t interrupt_access;
 
 }WWDG_config_t;
 
@@ -129,6 +130,7 @@ Status_code_t Init_Win_Watchdog(WWDG_config_t config_window);
 void Win_Watchdog_control(watchdog_food_t food);
 void Win_resetTheDog(void);
 void Win_reloadTheDog(void);
+void Win_clear_reset_flag(void);
 
 Status_code_t WWDG_Clock(Enabled_Disabled_t state);
 

@@ -13,6 +13,8 @@ void Init_Board(void){//see if this is good
 	__disable_irq();
 	Delay(100000);
 	__enable_irq();
+	RCC->CSR |= RCC_CSR_RMVF;
+
 
 }
 
@@ -217,6 +219,19 @@ void ftoa(float decimalData, uint8_t* cadena, uint8_t decimales){
         bandera=0;
 }
 
+bool RCC_reset_status_flag(RCC_CSR_t flag){
+	__I uint32_t *const RCC_CSR_Reg = (__I uint32_t *const)(RCC_ADDRESS + RCC_OFFSET_CSR);
+	if((*RCC_CSR_Reg) & flag){
+		return true;
+	}else{
+		return false;
+	}
+}
+
+void RCC_clear_reset_flags(void){
+	__IO uint32_t *RCC_CSR_Reg = (__IO uint32_t *)(RCC_ADDRESS + RCC_OFFSET_CSR);
+	*RCC_CSR_Reg |= RCC_RMVF;
+}
 
 void SYS_ClockEnable(Enabled_Disabled_t Intention){
 	__IO uint32_t *pClockControlReg = (__IO uint32_t *)(RCC_ADDRESS + RCC_OFFSET_APB2ENR);

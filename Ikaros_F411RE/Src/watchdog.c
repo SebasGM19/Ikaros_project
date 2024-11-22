@@ -5,19 +5,22 @@
  *      Author: sebas
  */
 #include "watchdog.h"
+#include "uart.h"
+
 
 WWDG_config_t static WWDG_global_params;
 
 
 void Init_Ind_Watchdog(IWDG_reload_time_t reload_time){
-	__O uint32_t *IWDG_KR_Reg = (__O uint32_t *)(IWDG_ADDRESS + IWDG_KEY);
+	__O uint32_t *IWDG_KR_Reg = (__O uint32_t *)(IWDG_ADDRESS + IWDG_KR);
 	__IO uint32_t *IWDG_PR_Reg = (__IO uint32_t *)(IWDG_ADDRESS + IWDG_PR);
-	__IO uint32_t *IWDG_RLR_Reg = (__IO uint32_t *)(IWDG_ADDRESS + IWDG_RL);
+	__IO uint32_t *IWDG_RLR_Reg = (__IO uint32_t *)(IWDG_ADDRESS + IWDG_RLR);
 
+	*IWDG_KR_Reg = IWDG_ENABLE_ACCESS;
+	*IWDG_PR_Reg |= (reload_time<<IWDG_PR_DIV);
+	*IWDG_RLR_Reg |= IWDG_MAX_RL_TIME;
+	*IWDG_KR_Reg |= IWDG_RELOAD_COUNT;
 	*IWDG_KR_Reg = IWDG_START_COUNT;
-	*IWDG_PR_Reg = (reload_time<<IWDG_PR_DIV);
-	*IWDG_RLR_Reg = IWDG_MAX_RL_TIME;
-	*IWDG_KR_Reg = IWDG_RELOAD_COUNT;
 
 }
 
@@ -34,22 +37,22 @@ void Ind_Watchdog_control(watchdog_food_t food){
 
 void Ind_resetTheDog(void){
 
-	__O uint32_t *IWDG_KR_Reg = (__O uint32_t *)(IWDG_ADDRESS + IWDG_KEY);
+	__O uint32_t *IWDG_KR_Reg = (__O uint32_t *)(IWDG_ADDRESS + IWDG_KR);
 	__IO uint32_t *IWDG_PR_Reg = (__IO uint32_t *)(IWDG_ADDRESS + IWDG_PR);
-	__IO uint32_t *IWDG_RLR_Reg = (__IO uint32_t *)(IWDG_ADDRESS + IWDG_RL);
+	__IO uint32_t *IWDG_RLR_Reg = (__IO uint32_t *)(IWDG_ADDRESS + IWDG_RLR);
 
-	*IWDG_KR_Reg = IWDG_START_COUNT;
-	*IWDG_PR_Reg = (reload_512ms<<IWDG_PR_DIV);
-	*IWDG_RLR_Reg = IWDG_MIN_RL_RESET_DOG;
-	*IWDG_KR_Reg = IWDG_RELOAD_COUNT;
+	*IWDG_KR_Reg |= IWDG_START_COUNT;
+	*IWDG_PR_Reg |= (reload_512ms<<IWDG_PR_DIV);
+	*IWDG_RLR_Reg |= IWDG_MIN_RL_RESET_DOG;
+	*IWDG_KR_Reg |= IWDG_RELOAD_COUNT;
 
 }
 
 
 void Ind_reloadTheDog(void){
-	__O uint32_t *IWDG_KR_Reg = (__O uint32_t *)(IWDG_ADDRESS + IWDG_KEY);
+	__O uint32_t *IWDG_KR_Reg = (__O uint32_t *)(IWDG_ADDRESS + IWDG_KR);
 
-	*IWDG_KR_Reg = IWDG_RELOAD_COUNT;
+	*IWDG_KR_Reg |= IWDG_RELOAD_COUNT;
 
 }
 
@@ -58,15 +61,22 @@ void Ind_reloadTheDog(void){
 
 /*__________________WINDOW_WD__________________*/
 void WWDG_HANDLER(void){
+	Win_reloadTheDog(); //keep reloading the dog until you procces is over, then  use the Win_resetTheDog function
+	Win_clear_reset_flag();
 
 
+
+	Win_resetTheDog();
 }
 
 
-Status_code_t Init_Win_Watchdog(WWDG_config_t config_window){
+Status_code_t Init_Win_Watchdog(WWDG_config_t config_window){ //max time 0.130 s to wd reset
 
-	__IO uint32_t *IWDG_CFR_Reg = (__IO uint32_t *)(WWDG_ADDRESS + WWDG_CFR);
+	uint32_t T_var=0;
+	uint32_t W_var=0;
+
 	__IO uint32_t *WWDG_CR_Reg = (__IO uint32_t *)(WWDG_ADDRESS + WWDG_CR);
+	__IO uint32_t *WWDG_CFR_Reg = (__IO uint32_t *)(WWDG_ADDRESS + WWDG_CFR);
 
 	if(config_window.T_max_time >= WWDG_MAX_TIME_VALUE || config_window.T_max_time < WWDG_MIN_TIME_VALUE
 			|| config_window.W_time >= WWDG_MAX_TIME_VALUE ||config_window.W_time < WWDG_MIN_TIME_VALUE
@@ -74,22 +84,33 @@ Status_code_t Init_Win_Watchdog(WWDG_config_t config_window){
 
 		return WWDG_invalid_parameter;
 	}
+	Win_clear_reset_flag();
 
 	WWDG_global_params = config_window;
 
 	WWDG_Clock(Enabled);
-	*WWDG_CR_Reg |= WWDG_INIT_START_TIME<<WWDG_T;
+//	*WWDG_CR_Reg |= WWDG_INIT_START_TIME<<WWDG_T;
+
+	T_var = WWDG_MS_TIME_T(BOARD_CLOCK,WWDG_MAX_CK_DIV,config_window.T_max_time);
+	W_var = WWDG_MS_TIME_T(BOARD_CLOCK,WWDG_MAX_CK_DIV,config_window.T_max_time) - WWDG_MS_TIME_W(BOARD_CLOCK,WWDG_MAX_CK_DIV,config_window.W_time);
+
+	if(T_var >= WWDG_MAX_COUNT_VALUE || W_var >= WWDG_MAX_COUNT_VALUE){
+		return WWDG_invalid_parameter;
+	}
+
+	*WWDG_CFR_Reg &= ~(Clear_two_bits<<WWDG_WDGTB);
+
+	*WWDG_CFR_Reg |= (WWDG_MAX_CK_DIV<<WWDG_WDGTB | (WWDG_MS_TIME_T(BOARD_CLOCK,WWDG_MAX_CK_DIV,config_window.T_max_time) - WWDG_MS_TIME_W(BOARD_CLOCK,WWDG_MAX_CK_DIV,config_window.W_time)) );
 
 
-	*IWDG_CFR_Reg &= ~(Clear_two_bits<<WWDG_WDGTB);
-	*IWDG_CFR_Reg |= WWDG_MAX_CK_DIV<<WWDG_WDGTB;
-	*IWDG_CFR_Reg |= WWDG_MS_TIME(BOARD_CLOCK,WWDG_MAX_CK_DIV,config_window.W_time)<<WWDG_W ;
+	if(WWDG_global_params.interrupt_access){
+		*WWDG_CFR_Reg |= WWDG_EWI;
 
+		NVIC_EnableIRQ(WWDG_IRQn);
+	}
 
-	*WWDG_CR_Reg  |=  WWDG_MS_TIME(BOARD_CLOCK,WWDG_MAX_CK_DIV,config_window.T_max_time)<<WWDG_T;
-	*WWDG_CR_Reg |= (WWDG_WDGA);
+	*WWDG_CR_Reg  |=  (WWDG_WDGA | WWDG_MS_TIME_T(BOARD_CLOCK,WWDG_MAX_CK_DIV,config_window.T_max_time));
 
-	NVIC_EnableIRQ(WWDG_IRQn);
 	return Success;
 
 }
@@ -104,25 +125,33 @@ void Win_Watchdog_control(watchdog_food_t food){
 
 }
 void Win_resetTheDog(void){
-	__IO uint32_t *IWDG_CFR_Reg = (__IO uint32_t *)(WWDG_ADDRESS + WWDG_CFR);
+	__IO uint32_t *WWDG_CFR_Reg = (__IO uint32_t *)(WWDG_ADDRESS + WWDG_CFR);
 	__IO uint32_t *WWDG_CR_Reg = (__IO uint32_t *)(WWDG_ADDRESS + WWDG_CR);
+
+	NVIC_DisableIRQ(WWDG_IRQn);
 
 	*WWDG_CR_Reg |= WWDG_INIT_START_TIME<<WWDG_T;
 
 
-	*IWDG_CFR_Reg &= ~(Clear_two_bits<<WWDG_WDGTB);
-	*IWDG_CFR_Reg |= WWDG_MIN_CK_DIV<<WWDG_WDGTB;
-	*IWDG_CFR_Reg |= WWDG_W_VALUE_TO_RESET<<WWDG_W ;
+	*WWDG_CFR_Reg &= ~(Clear_two_bits<<WWDG_WDGTB);
+	*WWDG_CFR_Reg |= WWDG_MIN_CK_DIV<<WWDG_WDGTB;
+	*WWDG_CFR_Reg |= WWDG_W_VALUE_TO_RESET;
 
-	*WWDG_CR_Reg  |=  WWDG_T_VALUE_TO_RESET<<WWDG_T;
+	*WWDG_CR_Reg  |=  WWDG_T_VALUE_TO_RESET;
 
 }
+
+void Win_clear_reset_flag(void){
+	__IO uint32_t *WWDG_CR_Reg = (__IO uint32_t *)(WWDG_ADDRESS + WWDG_SR);
+	*WWDG_CR_Reg &= ~(WWDG_EWIF);
+}
+
 
 
 void Win_reloadTheDog(void){
 	__IO uint32_t *WWDG_CR_Reg = (__IO uint32_t *)(WWDG_ADDRESS + WWDG_CR);
 
-	*WWDG_CR_Reg |= WWDG_MS_TIME(BOARD_CLOCK,WWDG_MAX_CK_DIV,WWDG_global_params.T_max_time)<<WWDG_T;
+	*WWDG_CR_Reg |= WWDG_MS_TIME_T(BOARD_CLOCK,WWDG_MAX_CK_DIV,WWDG_global_params.T_max_time)<<WWDG_T;
 
 }
 
