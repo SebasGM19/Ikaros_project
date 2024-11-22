@@ -9,11 +9,10 @@
 #include "system_settings.h"
 #include "timers.h"
 
-void Init_Board(void){//see if this is good
+void Init_Board(void){
 	__disable_irq();
 	Delay(100000);
 	__enable_irq();
-	RCC->CSR |= RCC_CSR_RMVF;
 
 
 }
