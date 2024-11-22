@@ -182,18 +182,18 @@ Status_code_t USART_Clock(Enabled_Disabled_t state, usart_alternative_t USART);
 Status_code_t Init_UART1(usart_config_t USART_config);
 Status_code_t UART1_Write(uint8_t const *data, uint32_t data_lenght, uint16_t timeout);
 Status_code_t UART1_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_t timeout);
-Status_code_t UART1_Read_bytes(uint8_t *data_buff, uint32_t data_lenght, uint16_t timeout);
+Status_code_t UART1_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght, uint16_t timeout);
 
 
 Status_code_t Init_UART2(usart_config_t USART_config);
 Status_code_t UART2_Write(uint8_t const *data, uint32_t data_lenght, uint16_t timeout);
 Status_code_t UART2_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_t timeout);
-Status_code_t UART2_Read_bytes(uint8_t *data_buff, uint32_t data_lenght, uint16_t timeout);
+Status_code_t UART2_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght, uint16_t timeout);
 
 Status_code_t Init_UART6(usart_config_t USART_config);
 Status_code_t UART6_Write(uint8_t const *data, uint32_t data_lenght, uint16_t timeout);
 Status_code_t UART6_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_t timeout);
-Status_code_t UART6_Read_bytes(uint8_t *data_buff, uint32_t data_lenght, uint16_t timeout);
+Status_code_t UART6_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght, uint16_t timeout);
 
 
 Status_code_t USART_set_baud_rate(USARTMapAddr_t USART_Addr, uint32_t baudrate);

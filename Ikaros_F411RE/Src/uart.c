@@ -150,7 +150,7 @@ Status_code_t UART1_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_
 
 }
 
-Status_code_t UART1_Read_bytes(uint8_t *data_buff, uint32_t data_lenght, uint16_t timeout){
+Status_code_t UART1_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght, uint16_t timeout){
 
 	Status_code_t status = Success;
 	uint32_t data_arrive_count = 0;
@@ -183,7 +183,7 @@ Status_code_t UART1_Read_bytes(uint8_t *data_buff, uint32_t data_lenght, uint16_
 		data_buff[data_arrive_count] = (uint8_t)(*USART_DR_Reg);
 		data_arrive_count++;
 
-	}while(data_arrive_count != data_lenght);
+	}while(data_arrive_count != expected_data_lenght);
 
 	TIM11_Deinit();
 	TIM11_clear_interrupt_flag();
@@ -205,12 +205,10 @@ Status_code_t Init_UART2(usart_config_t USART_config){
 	if(status!=Success){
 		return status;
 	}
-	USART_Clock(Enabled, Usart_2);
-
-
 	GpioSetAlternativeFunction(Port_A, Pin_2, SPI3_I2S3_USART1_USART2);
 	GpioSetAlternativeFunction(Port_A, Pin_3, SPI3_I2S3_USART1_USART2);
 
+	USART_Clock(Enabled, Usart_2);
 	USART_SET_RX_ending_string(default_str_end, STRING_END_STANDAR);
 
 	status = USART_set_baud_rate(USART2_ADDRESS, USART_config.baud_rate);
@@ -312,7 +310,7 @@ Status_code_t UART2_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_
 
 }
 
-Status_code_t UART2_Read_bytes(uint8_t *data_buff, uint32_t data_lenght, uint16_t timeout){
+Status_code_t UART2_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght, uint16_t timeout){
 
 	Status_code_t status = Success;
 	uint32_t data_arrive_count = 0;
@@ -345,7 +343,7 @@ Status_code_t UART2_Read_bytes(uint8_t *data_buff, uint32_t data_lenght, uint16_
 		data_buff[data_arrive_count] = (uint8_t)(*USART_DR_Reg);
 		data_arrive_count++;
 
-	}while(data_arrive_count != data_lenght);
+	}while(data_arrive_count != expected_data_lenght);
 
 	TIM11_Deinit();
 	TIM11_clear_interrupt_flag();
@@ -474,7 +472,7 @@ Status_code_t UART6_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_
 
 }
 
-Status_code_t UART6_Read_bytes(uint8_t *data_buff, uint32_t data_lenght, uint16_t timeout){
+Status_code_t UART6_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght, uint16_t timeout){
 
 	Status_code_t status = Success;
 	uint32_t data_arrive_count = 0;
@@ -507,7 +505,7 @@ Status_code_t UART6_Read_bytes(uint8_t *data_buff, uint32_t data_lenght, uint16_
 		data_buff[data_arrive_count] = (uint8_t)(*USART_DR_Reg);
 		data_arrive_count++;
 
-	}while(data_arrive_count != data_lenght);
+	}while(data_arrive_count != expected_data_lenght);
 
 	TIM11_Deinit();
 	TIM11_clear_interrupt_flag();
@@ -519,9 +517,8 @@ Status_code_t UART6_Read_bytes(uint8_t *data_buff, uint32_t data_lenght, uint16_
 
 
 
-
 /*_____________________________Others protocol functions______________________________________*/
-/*NOTE: firts deinit uart alternative before configure the uart*/
+/*NOTE: first deinit uart alternative before configure the uart*/
 
 Status_code_t USART_set_baud_rate(USARTMapAddr_t USART_Addr, uint32_t baudrate){
 
@@ -531,9 +528,7 @@ Status_code_t USART_set_baud_rate(USARTMapAddr_t USART_Addr, uint32_t baudrate){
 	if(baudrate<300U || baudrate > 460800U ){
 		return USART_baud_rate_out_of_limit;
 	}
-	total_clock_ticks = (uint32_t)(BOARD_CLOCK/baudrate);
-
-	*USART_BRR_Reg = total_clock_ticks;
+	*USART_BRR_Reg |= (uint32_t)(round((BOARD_CLOCK/baudrate)));
 
 	return Success;
 }
@@ -592,6 +587,7 @@ void USART_enable(USARTMapAddr_t USART_Addr){
 	*USART_CR1_Reg |= (USART_UE);
 
 }
+
 void USART_disabled(USARTMapAddr_t USART_Addr){
 
 	__IO uint32_t *USART_CR1_Reg = (__IO uint32_t *)(USART_Addr + USART_CR1);
@@ -602,11 +598,9 @@ void USART_disabled(USARTMapAddr_t USART_Addr){
 
 void USART_SET_RX_ending_string(uint8_t const* ending_string, uint32_t ending_string_lenght){
 
-
 	memset(string_end,'\0',STRING_END_MAX_LENGHT);
 	string_end_lenght = ending_string_lenght;
 	strncpy((char *)(string_end), (const char *)(ending_string),string_end_lenght);
-
 
 }
 
@@ -614,5 +608,4 @@ void USART_SET_RX_ending_string(uint8_t const* ending_string, uint32_t ending_st
 void clear_global_buff(void){
 	memset(usart_global_buffer,'\0',MAX_LENGHT_GLOBAL_BUFFER);
 	global_data_count=0;
-
 }

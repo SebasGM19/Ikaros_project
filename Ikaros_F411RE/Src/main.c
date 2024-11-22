@@ -23,6 +23,7 @@
 #include "lcd.h"
 #include "adc.h"
 #include "uart.h"
+#include "watchdog.h"
 
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
@@ -42,29 +43,69 @@ usart_config_t usart_config={
 		Stop_1_bits
 };
 
-
+WWDG_config_t WWDog ={
+		100,
+		40,
+		1
+};
 
 int main(void){
 	Init_Board();
-	uint8_t data_arr[100] = {0};
-//	uint32_t data_size =0;
-//	Status_code_t status =0;
-	Init_UART2(usart_config);
+	Init_UART6(usart_config);
+//	bool wwdst_reg = RCC_reset_status_flag(RCC_WWDGRSTF);
 
+//	Delay(200000);
+//	UART2_Write("\r\n",2,2000);
 
+	SetPinMode(Port_C, Pin_13, Input);
+	SetPinMode(Port_A, Pin_5, Output);
+//
+	Delay(100000);
+	GPIO_DigitalWrite(Port_A, Pin_5, High);
+
+	Init_Win_Watchdog(WWDog);
 
 	while(1){
-//		status= UART2_Read_bytes(data_arr, 5, 3000);
-//
-//		status = UART2_Write((uint8_t const *)"recibido\r\n", 10,3000);
 
-		Delay(500000);
+		Delay(70000);
+		Win_Watchdog_control(reload_food);
 
+
+		if(!GPIO_DigitalRead(Port_C, Pin_13)){
+			while(1);
+		}
 
 	}
 
 	return 0;
 }
+
+//
+////volver a checar lo del wwdg para ver si el init esta bien
+//int main(void){
+//	Init_Board();
+//	uint8_t data[100]={0};
+//	uint8_t data_rx_buff[100]={0};
+//	uint32_t data_lenght=0;
+//
+//		Init_UART6(usart_config);
+//		Delay(200000);
+//		UART6_Write("inicio\n",7,2000);
+//
+//
+//	while(1){
+//
+//		UART6_Write("inicio\n",7,2000);
+//
+//		UART6_Read(data,&data_lenght,2000);
+//
+//		UART6_Read_bytes(data_rx_buff,5,2000);
+//
+//
+//	}
+//
+//	return 0;
+//}
 
 
 
