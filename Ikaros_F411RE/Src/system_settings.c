@@ -218,7 +218,7 @@ void ftoa(float decimalData, uint8_t* cadena, uint8_t decimales){
         bandera=0;
 }
 
-bool RCC_reset_status_flag(RCC_CSR_t flag){
+bool RCC_get_reset_status_flag(RCC_CSR_t flag){
 	__I uint32_t *const RCC_CSR_Reg = (__I uint32_t *const)(RCC_ADDRESS + RCC_OFFSET_CSR);
 	if((*RCC_CSR_Reg) & flag){
 		return true;
@@ -241,4 +241,27 @@ void SYS_ClockEnable(Enabled_Disabled_t Intention){
 		*pClockControlReg &= ~(RCC_SYSCFG_ENABLE);
 	}
 }
+
+
+bool system_is_debugging(void){
+	__IO uint32_t *DBG_CR_reg = (__IO uint32_t *)(DBGMCU_CR);
+	if((*DBG_CR_reg) & DBG_SLEEP){
+		return true;
+	}else{
+		return false;
+	}
+
+}
+
+void frezze_WWDG(void){
+	__IO uint32_t *DBG_APB1_FZ_reg = (__IO uint32_t *)(DBGMCU_APB1_FZ);
+	*DBG_APB1_FZ_reg |= DBG_WWDG_STOP;
+
+}
+
+void frezze_IWDG(void){
+	__IO uint32_t *DBG_APB1_FZ_reg = (__IO uint32_t *)(DBGMCU_APB1_FZ);
+	*DBG_APB1_FZ_reg |= DBG_IWDG_STOP;
+}
+
 

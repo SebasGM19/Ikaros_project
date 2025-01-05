@@ -26,12 +26,14 @@ Gpio_State_Control_t GPIO_DigitalWrite(Set_Port_t Port_define, Pin_number_t Pin_
 
 	__IO uint32_t *PORT_REG_OUTPUT = (__IO uint32_t *)(Port_define + GPIOx_ODR_OFFSET); //agregamos el 0x14 par indicar output
 
-	if(State){
-		*PORT_REG_OUTPUT |= (1<<Pin_defined);
-	}else{
-		*PORT_REG_OUTPUT &= ~(1<<Pin_defined);
+//	if(State){
+//		*PORT_REG_OUTPUT |= (1<<Pin_defined);
+//	}else{
+//		*PORT_REG_OUTPUT &= ~(1<<Pin_defined);
+//
+//	}
+	*PORT_REG_OUTPUT = (*PORT_REG_OUTPUT & ~(1 << Pin_defined)) | (State << Pin_defined);
 
-	}
 
 	return State;
 

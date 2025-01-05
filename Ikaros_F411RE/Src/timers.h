@@ -16,13 +16,14 @@
 //#define TIM1  usado para delay periphericos
 //#define TIM2  usado para delay  general
 
+
 #define TIM3_HANDLER TIM3_IRQHandler
 #define TIM4_HANDLER TIM4_IRQHandler
 #define TIM5_HANDLER TIM5_IRQHandler
 
 #define TIM9_HANDLER TIM1_BRK_TIM9_IRQHandler
 #define TIM10_HANDLER TIM1_UP_TIM10_IRQHandler
-#define TIM11_HANDLER TIM1_TRG_COM_TIM11_IRQHandler //usar como delay para protocolos y timeout
+#define TIM11_HANDLER TIM1_TRG_COM_TIM11_IRQHandler //handler used for timeout for protocols
 
 /*Value in microseconds Equals to 2^32 bit count*/
 #define MAX_TIME_TIM5_AND_TIM2	(uint32_t)(4294967290U)
@@ -399,6 +400,8 @@ Status_code_t TIM3_Init(uint16_t milliseconds);
 void TIM3_Start(void);
 void TIM3_Stop(void);
 void TIM3_Deinit(void);
+
+void state_to_print(uint8_t state); //dummy for example___________________
 
 void TIM4_HANDLER(void);
 Status_code_t TIM4_Init(uint16_t milliseconds);

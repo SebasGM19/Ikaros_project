@@ -21,9 +21,9 @@
 
 
 #define WWDG_CLOCK_BIT_REG		(1U<<11U)
-#define WWDG_MAX_TIME_VALUE		(130U)
+#define WWDG_MAX_MS_TIME_VALUE	(130U)
+#define WWDG_MIN_MS_TIME_VALUE	(2U)
 #define WWDG_MAX_COUNT_VALUE	(127U)
-#define WWDG_MIN_TIME_VALUE		(2U)
 #define WWDG_INIT_START_TIME	(0x40U)
 #define WWDG_CHECK_T_TIME_VALUE	(0x3F)
 
@@ -59,10 +59,10 @@ typedef enum{
 }IWDG_reload_time_t;
 
 typedef enum{
-	IWDG_KR = 0x00U,
-	IWDG_PR = 0x04U,
-	IWDG_RLR = 0x08U,
-	IWDG_SR = 0x0CU
+	IWDG_KR  = 	0x00U,
+	IWDG_PR  = 	0x04U,
+	IWDG_RLR = 	0x08U,
+	IWDG_SR  = 	0x0CU
 }IWDG_register_offset_t;
 
 typedef enum{

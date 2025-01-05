@@ -19,11 +19,12 @@
 #define HASH						(0x23)
 #define STAR						(0x2A)
 
-#define MAX_KEYPAD_TIMEOUT			(15000)
+#define MAX_KEYPAD_TIMEOUT			(10000)
 
 #include "system_settings.h"
 #include "gpios.h"
 #include "lcd.h"
+#include "timers.h"
 
 typedef enum{
 	keypad_PortA = 4,	//start with the first GPIO of the alternative corresponding to the R1
@@ -59,12 +60,12 @@ Status_code_t Init_keypad(keypad_alternatives_t keypad_alternative);
 Status_code_t Deinit_keypad(keypad_alternatives_t keypad_alternative);
 
 
-uint32_t Read_keypad(keypad_alternatives_t keypad_alternative);
+uint32_t Read_keypad(keypad_alternatives_t keypad_alternative, Status_code_t *returt_status);
 
 
 void rowSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low_states_t row_to_low);
 
 void columnSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low_states_t row_to_low, uint8_t* pDataArray, uint8_t* data_lenght, print_activate_t opPrint);
 
-uint32_t print_keypad(keypad_alternatives_t keypad_alternative, uint8_t X_axis, uint8_t Y_axis);
+uint32_t print_keypad(keypad_alternatives_t keypad_alternative, Status_code_t *returt_status, uint8_t X_axis, uint8_t Y_axis);
 #endif /* KEYPAD_4X4_H_ */

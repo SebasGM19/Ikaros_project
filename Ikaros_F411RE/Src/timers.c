@@ -10,6 +10,8 @@
 #include "lcd.h"
 #include "keypad_4x4.h"
 #include "adc.h"
+#include "watchdog.h"
+
 
 uint32_t static global_TIM3_ARR_count = 1024; //set as 1048 to default
 uint32_t static global_TIM4_ARR_count = 1024; //set as 2048 to default
@@ -60,13 +62,14 @@ void TIMER_WaitFlag(TimerMapAddr_t TIMER_addr){
 /*////////////////////////////////// TIMER 3 HANDLER AND CONTROL FUNCTIONS/////////////////////////////////////*/
 void TIM3_HANDLER(void){
 	TIMER_cleanCountFlag(TIM3_ADDRESS);
-	/*Develop all the code to be executed in a second thread down here*/
-	if(reset_tim3_flag){
 
+	if(reset_tim3_flag){
+	/*Develop all the code to be executed in a second thread down here*/
+
+		Win_Watchdog_control(reload_food); //reload the food
 
 
 	}else{reset_tim3_flag=!reset_tim3_flag;}
-
 }
 
 Status_code_t TIM3_Init(uint16_t milliseconds){
@@ -134,10 +137,10 @@ void TIM3_Deinit(void){
 
 
 /*////////////////////////////////// TIMER 4 HANDLER AND CONTROL FUNCTIONS/////////////////////////////////////*/
-
 void TIM4_HANDLER(void){
 	TIMER_cleanCountFlag(TIM4_ADDRESS);
 	if(reset_tim4_flag){
+
 	/*Develop all the code to be executed in a second thread down here*/
 
 
@@ -210,13 +213,52 @@ void TIM4_Deinit(void){
 
 
 /*///////////////////TIMER 5 HANDLER AND CONTROL FUNCTIONS///////////////////////////////////*/
+uint8_t netx_lcd_msg =0;//dummy var
+void state_to_print(uint8_t state){  //dummy function
+	netx_lcd_msg = state;
+}
 
 void TIM5_HANDLER(void){
 	/*Develop all the code to be executed in a second thread down here*/
 	TIMER_cleanCountFlag(TIM5_ADDRESS);
 	if(reset_tim5_flag){
 
+		switch(netx_lcd_msg){
+		case 1:
+			lcd_printXY(0, 0," Welcome to my  ", 16);
+			lcd_printXY(0, 1," State Machine  ", 16);
+			break;
+		case 2:
+			lcd_printXY(0, 0,"1-Write UART2 : ", 16);
+			lcd_printXY(0, 1,"2-Write UART1 >6", 16);
+			break;
+		case 3:
+			lcd_printXY(0, 0,"3-Read UART1  : ", 16);
+			lcd_printXY(0, 1,"4-Reset WWDG  <8", 16);
+			break;
+		case 4:
+			lcd_printXY(0, 0," Write to UART2 ", 16);
+			lcd_printXY(0, 1,"                ", 16);
+			break;
+		case 5:
+			lcd_printXY(0, 0," Write to UART1 ", 16);
+			lcd_printXY(0, 1,"                ", 16);
+			break;
+		case 6:
+			lcd_printXY(0, 0,"Received Data:  ", 16);
+			lcd_printXY(0, 1,"                ", 16);
+			break;
+		case 7:
+			lcd_printXY(0, 0,"  WWDG RESET!!  ", 16);
+			lcd_printXY(0, 1,"                ", 16);
+			break;
+		case 8:
+			lcd_printXY(0, 0," INVALID OPTION ", 16);
+			lcd_printXY(0, 1,"                ", 16);
+			break;
 
+
+		}
 
 	}else{reset_tim5_flag=!reset_tim5_flag;}
 }

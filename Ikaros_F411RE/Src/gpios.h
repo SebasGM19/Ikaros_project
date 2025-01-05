@@ -9,6 +9,9 @@
 #ifndef BASIC_SETTINGS_H_
 #define BASIC_SETTINGS_H_
 
+#include "system_settings.h"
+
+
 #define EXTI0_HANDLER EXTI0_IRQHandler
 #define EXTI1_HANDLER EXTI1_IRQHandler
 
@@ -22,7 +25,6 @@
 
 #define MAX_GPIOS	(16)
 
-#include "system_settings.h"
 
 
 

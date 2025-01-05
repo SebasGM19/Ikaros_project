@@ -9,6 +9,7 @@
 #define ADC_H_
 #include "system_settings.h"
 
+
 #define MAX_ADC_TIMEOUT	(5000)
 
 typedef enum{
