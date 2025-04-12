@@ -35,10 +35,20 @@
 
 int main(void){
 
-	runMachine();
+//	runMachine();
+	uint32_t tempre =0;
+	float voltaje=0.0f, cels =0.0f;
+
+	ADC_Init_Temperature_Sensor(RES_12_bits);
+
 
 	while(1){
+	tempre =0;
 
+	ADC_Read_Temperature(&tempre);
+
+	cels = (float)(tempre/100.0f);
+	tempre =0;
 	}
 
 	return 0;

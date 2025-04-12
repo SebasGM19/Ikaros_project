@@ -208,7 +208,11 @@ Status_code_t UART1_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_
 		}
 
 		status = USART_error_flags_status(USART1_ADDRESS);
-
+        if (status != Success) {
+            TIM11_Deinit();
+            TIM11_clear_interrupt_flag();
+            return status;
+        }
 		usart_global_buffer[global_data_count] =(uint8_t)(*USART_DR_Reg);
 		if(global_data_count == MAX_LENGHT_GLOBAL_BUFFER-1){
 			global_data_count = 0;
@@ -260,6 +264,11 @@ Status_code_t UART1_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght
 		}
 
 		status = USART_error_flags_status(USART1_ADDRESS);
+        if (status != Success) {
+            TIM11_Deinit();
+            TIM11_clear_interrupt_flag();
+            return status;
+        }
 		usart_global_buffer[global_data_count] =(uint8_t)(*USART_DR_Reg);
 		if(global_data_count == MAX_LENGHT_GLOBAL_BUFFER-1){
 			global_data_count = 0;
@@ -306,7 +315,7 @@ void USART2_HANDLER(void){
 		}
 
 /*_____________________________DEVELOP_EXTRA_CODE_HERE_______________________________*/
-	print_message((uint8_t)(*USART_DR_Reg));
+//	print_message((uint8_t)(*USART_DR_Reg));
 
 
 /*_____________________________________TO_HERE_______________________________________*/
@@ -318,45 +327,45 @@ void USART2_HANDLER(void){
 
 }
 
-/*dummy function for a test*/
-uint32_t finish_count = 0;
-uint32_t msg_count =0;
-void print_message(uint8_t character){
-
-	uint8_t data_msg_get[30]={};
-	uint32_t point_to_data =0;
-	int32_t aux_point_value =0;
-
-	if(default_str_end[finish_count]== character){
-		finish_count++;
-		if(finish_count >=2){
-
-			lcd_printXY(0, 0,"MSG received:   ", 16);
-			lcd_printXY(0, 1,"                ", 16);
-
-			for(uint32_t i =0; i<msg_count; i++){
-
-				aux_point_value = (int32_t)(usart2_interrupt_data_count - ((msg_count+2)-i));
-
-				if( aux_point_value  < 0){
-					point_to_data = MAX_LENGHT_GLOBAL_BUFFER - ((msg_count+2)-i) + usart2_interrupt_data_count;
-				}
-				if( aux_point_value >= 0){
-							point_to_data = (usart2_interrupt_data_count - ((msg_count+2)-i) );
-				}
-				data_msg_get[i] = usart2_interrupt_buffer[point_to_data];
-			}
-
-			lcd_printXY(0, 1,data_msg_get, msg_count);
-
-			TIM5_Start();
-			finish_count=0;
-			msg_count=0;
-		}
-	}else{
-		msg_count++;
-	}
-}
+///*dummy function for a test*/
+//uint32_t finish_count = 0;
+//uint32_t msg_count =0;
+//void print_message(uint8_t character){
+//
+//	uint8_t data_msg_get[30]={};
+//	uint32_t point_to_data =0;
+//	int32_t aux_point_value =0;
+//
+//	if(default_str_end[finish_count]== character){
+//		finish_count++;
+//		if(finish_count >=2){
+//
+//			lcd_printXY(0, 0,"MSG received:   ", 16);
+//			lcd_printXY(0, 1,"                ", 16);
+//
+//			for(uint32_t i =0; i<msg_count; i++){
+//
+//				aux_point_value = (int32_t)(usart2_interrupt_data_count - ((msg_count+2)-i));
+//
+//				if( aux_point_value  < 0){
+//					point_to_data = MAX_LENGHT_GLOBAL_BUFFER - ((msg_count+2)-i) + usart2_interrupt_data_count;
+//				}
+//				if( aux_point_value >= 0){
+//							point_to_data = (usart2_interrupt_data_count - ((msg_count+2)-i) );
+//				}
+//				data_msg_get[i] = usart2_interrupt_buffer[point_to_data];
+//			}
+//
+//			lcd_printXY(0, 1,data_msg_get, msg_count);
+//
+//			TIM5_Start();
+//			finish_count=0;
+//			msg_count=0;
+//		}
+//	}else{
+//		msg_count++;
+//	}
+//}
 
 
 Status_code_t Init_UART2_RX_Interrupt(usart_config_t USART_INT_config){
@@ -489,7 +498,11 @@ Status_code_t UART2_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_
 			return Timeout;
 		}
 		status = USART_error_flags_status(USART2_ADDRESS);
-
+        if (status != Success) {
+            TIM11_Deinit();
+            TIM11_clear_interrupt_flag();
+            return status;
+        }
 		usart_global_buffer[global_data_count] =(uint8_t)(*USART_DR_Reg);
 		if(global_data_count == MAX_LENGHT_GLOBAL_BUFFER-1){
 			global_data_count = 0;
@@ -541,7 +554,11 @@ Status_code_t UART2_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght
 		}
 
 		status = USART_error_flags_status(USART2_ADDRESS);
-
+        if (status != Success) {
+            TIM11_Deinit();
+            TIM11_clear_interrupt_flag();
+            return status;
+        }
 		usart_global_buffer[global_data_count] =(uint8_t)(*USART_DR_Reg);
 		if(global_data_count == MAX_LENGHT_GLOBAL_BUFFER-1){
 			global_data_count = 0;
@@ -723,7 +740,7 @@ Status_code_t UART6_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_
 	TIM11_Start();
 	do{
 
-		while( (!(USART_RXNE & (*USART_SR_Reg))) && !TIM11_GET_interrupt_flag_status() ){} //need to develop the timeout validation
+		while( (!(USART_RXNE & (*USART_SR_Reg))) && !TIM11_GET_interrupt_flag_status() ){}
 
 		if( TIM11_GET_interrupt_flag_status() ){
 			TIM11_Deinit();
@@ -731,7 +748,11 @@ Status_code_t UART6_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_
 			return Timeout;
 		}
 		status = USART_error_flags_status(USART6_ADDRESS);
-
+        if (status != Success) {
+            TIM11_Deinit();
+            TIM11_clear_interrupt_flag();
+            return status;
+        }
 		usart_global_buffer[global_data_count] =(uint8_t)(*USART_DR_Reg);
 		if(global_data_count == MAX_LENGHT_GLOBAL_BUFFER-1){
 			global_data_count = 0;
@@ -774,7 +795,7 @@ Status_code_t UART6_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght
 	TIM11_Start();
 	do{
 
-		while( (!(USART_RXNE & (*USART_SR_Reg))) && !TIM11_GET_interrupt_flag_status() ){} //need to develop the timeout validation
+		while( (!(USART_RXNE & (*USART_SR_Reg))) && !TIM11_GET_interrupt_flag_status() ){}
 
 		if( TIM11_GET_interrupt_flag_status() ){
 			TIM11_Deinit();
@@ -783,6 +804,11 @@ Status_code_t UART6_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght
 		}
 
 		status = USART_error_flags_status(USART6_ADDRESS);
+        if (status != Success) {
+            TIM11_Deinit();
+            TIM11_clear_interrupt_flag();
+            return status;
+        }
 		usart_global_buffer[global_data_count] =(uint8_t)(*USART_DR_Reg);
 		if(global_data_count == MAX_LENGHT_GLOBAL_BUFFER-1){
 			global_data_count = 0;
@@ -916,7 +942,7 @@ void USART_enable_Rx_Interrupt(USARTMapAddr_t USART_Addr){
 }
 
 
-Status_code_t USART_INT_received_status(USARTMapAddr_t USART_Addr){ //sebas agregar las de parity
+Status_code_t USART_INT_received_status(USARTMapAddr_t USART_Addr){
 
 	__IO uint32_t *USART_SR_Reg = (__IO uint32_t *)(USART_Addr + USART_SR);
 
