@@ -69,12 +69,13 @@ void WWDG_HANDLER(void){
 	Win_clear_reset_flag();
 
 
-	UART2_Write("UART2 WWDG RESET!\r\n",19 , 1000);
-	Win_reloadTheDog();
-	UART1_Write("UART1 WWDG RESET!\r\n",19 , 1000);
-	Win_reloadTheDog();
+//	UART2_Write("UART2 WWDG RESET!\r\n",19 , 1000);
+//	Win_reloadTheDog();
+//	UART1_Write("UART1 WWDG RESET!\r\n",19 , 1000);
+//	Win_reloadTheDog();
 
-	Win_resetTheDog();
+
+	Win_resetTheDog(); //last line
 }
 
 

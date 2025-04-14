@@ -493,6 +493,7 @@ Status_code_t TIM3_PWM_Init(TIM3_PWM_channel_select_t channel,PWM_mode_OCxM_t mo
 
 	TIMER_Clock(Enabled,TIMER_3);
 	GpioSetAlternativeFunction(Port_B, channel, TIM3_TIM4_TIM5); 		//alt 2
+	Gpio_Output_type(Port_B, channel, Push_pull);
 
 	*TIM_REG_CCMRx &= ~(clean_channel); 								//clean the bits for the channel
 
@@ -747,6 +748,7 @@ Status_code_t TIM4_PWM_Init(TIM4_PWM_channel_select_t channel,PWM_mode_OCxM_t mo
 
 	TIMER_Clock(Enabled,TIMER_4);
 	GpioSetAlternativeFunction(Port_B, channel, TIM3_TIM4_TIM5); //alt 2
+	Gpio_Output_type(Port_B, channel, Push_pull);
 
 	*TIM_REG_CCMRx &= ~(clean_channel); 					//clean the bits for the channel
 
@@ -983,7 +985,8 @@ Status_code_t TIM4_PWM_Deinit(void){
 //
 //	TIMER_Clock(Enabled,TIMER_5);
 //	GpioSetAlternativeFunction(Port_A, channel, TIM3_TIM4_TIM5); 		//alt 2
-//
+//	Gpio_Output_type(Port_A, channel, Push_pull);
+
 //	*TIM_REG_CCMRx &= ~(clean_channel); 								//clean the bits for the channel
 //
 //	*TIM_REG_CCMRx &= ~(Clear_two_bits<<CCMRx_selecction); 				//00 means PWM output

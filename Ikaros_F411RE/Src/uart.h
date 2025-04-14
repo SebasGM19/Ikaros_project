@@ -20,8 +20,7 @@
 #define DR_MAX_VALUE				(0xFF)
 #define STRING_END_MAX_LENGHT 		(10)
 #define STRING_END_STANDAR	 		(2)
-#define MAX_LENGHT_GLOBAL_BUFFER	(60)//(4096)
-
+#define MAX_LENGHT_GLOBAL_BUFFER	(4096)
 
 
 
@@ -125,15 +124,15 @@ typedef enum{
 
 typedef enum{
 	 USART_PE= 		(1U<<0U),
-	 USART_FE=		(1u<<1u),
-	 USART_NF=		(1u<<2u),
-	 USART_ORE=		(1u<<3u),
-	 USART_IDLE=	(1u<<4u),
-	 USART_RXNE=	(1u<<5u),
-	 USART_TC=		(1u<<6u),
-	 USART_TXE=		(1u<<7u),
-	 USART_LBD=		(1u<<8u),
-	 USART_CTS=		(1u<<9u),
+	 USART_FE=		(1U<<1U),
+	 USART_NF=		(1U<<2U),
+	 USART_ORE=		(1U<<3U),
+	 USART_IDLE=	(1U<<4U),
+	 USART_RXNE=	(1U<<5U),
+	 USART_TC=		(1U<<6U),
+	 USART_TXE=		(1U<<7U),
+	 USART_LBD=		(1U<<8U),
+	 USART_CTS=		(1U<<9U),
 
 }USART_SR_t;
 
@@ -146,22 +145,22 @@ typedef enum{
 
 
 typedef enum{
-	 USART_SBK= 	(1u<<0u),
-	 USART_RWU=		(1u<<1u),
-	 USART_RE=		(1u<<2u),
-	 USART_TE=		(1u<<3u),
-	 USART_IDLEIE=	(1u<<4u),
-	 USART_RXNEIE=	(1u<<5u),
-	 USART_TCIE=	(1u<<6u),
-	 USART_TXEIE=	(1u<<7u),
-	 USART_PEIE=	(1u<<8u),
+	 USART_SBK= 	(1U<<0U),
+	 USART_RWU=		(1U<<1U),
+	 USART_RE=		(1U<<2U),
+	 USART_TE=		(1U<<3U),
+	 USART_IDLEIE=	(1U<<4U),
+	 USART_RXNEIE=	(1U<<5U),
+	 USART_TCIE=	(1U<<6U),
+	 USART_TXEIE=	(1U<<7U),
+	 USART_PEIE=	(1U<<8U),
 
-	 USART_PS=		(1u<<9u),
-	 USART_PCE=		(1u<<10u),
-	 USART_WAKE=	(1u<<11u),
-	 USART_M=		(1u<<12u),
-	 USART_UE=		(1u<<13u),
-	 USART_OVER8=	(1u<<15u),
+	 USART_PS=		(1U<<9U),
+	 USART_PCE=		(1U<<10U),
+	 USART_WAKE=	(1U<<11U),
+	 USART_M=		(1U<<12U),
+	 USART_UE=		(1U<<13U),
+	 USART_OVER8=	(1U<<15U),
 
 }USART_CR1_t;
 
@@ -204,29 +203,28 @@ typedef enum{
 Status_code_t USART_Clock(Enabled_Disabled_t state, usart_alternative_t USART);
 
 void USART1_HANDLER(void);
-Status_code_t Init_UART1_RX_Interrupt(usart_config_t USART_INT_config);
-//Status_code_t Deinit_UART1_RX_Interrupt(void);
-Status_code_t Init_UART1(usart_config_t USART_config);
-Status_code_t Deinit_UART1(void);
+Status_code_t UART1_Init_RX_Interrupt(usart_config_t USART_INT_config);
+Status_code_t UART1_Deinit_RX_Interrupt(void);
+Status_code_t UART1_Init(usart_config_t USART_config);
+Status_code_t UART1_Deinit(void);
 Status_code_t UART1_Write(uint8_t const *data, uint32_t data_lenght, uint16_t timeout);
 Status_code_t UART1_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_t timeout);
 Status_code_t UART1_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght, uint16_t timeout);
 
 void USART2_HANDLER(void);
-void print_message(uint8_t character); //dummy for example_________________________
-Status_code_t Init_UART2_RX_Interrupt(usart_config_t USART_INT_config);
-//Status_code_t Deinit_UART2_RX_Interrupt(void);
-Status_code_t Init_UART2(usart_config_t USART_config);
-Status_code_t Deinit_UART2(void);
+Status_code_t UART2_Init_RX_Interrupt(usart_config_t USART_INT_config);
+Status_code_t UART2_Deinit_RX_Interrupt(void);
+Status_code_t UART2_Init(usart_config_t USART_config);
+Status_code_t UART2_Deinit(void);
 Status_code_t UART2_Write(uint8_t const *data, uint32_t data_lenght, uint16_t timeout);
 Status_code_t UART2_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_t timeout);
 Status_code_t UART2_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght, uint16_t timeout);
 
 void USART6_HANDLER(void);
-Status_code_t Init_UART6_RX_Interrupt(usart_config_t USART_INT_config);
-//Status_code_t Deinit_UART6_RX_Interrupt(void);
-Status_code_t Init_UART6(usart_config_t USART_config);
-Status_code_t Deinit_UART6(void);
+Status_code_t UART6_Init_RX_Interrupt(usart_config_t USART_INT_config);
+Status_code_t UART6_Deinit_RX_Interrupt(void);
+Status_code_t UART6_Init(usart_config_t USART_config);
+Status_code_t UART6_Deinit(void);
 Status_code_t UART6_Write(uint8_t const *data, uint32_t data_lenght, uint16_t timeout);
 Status_code_t UART6_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_t timeout);
 Status_code_t UART6_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght, uint16_t timeout);

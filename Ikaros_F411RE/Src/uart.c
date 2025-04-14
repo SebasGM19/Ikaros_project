@@ -79,7 +79,7 @@ void USART1_HANDLER(void){
 	}
 }
 
-Status_code_t Init_UART1_RX_Interrupt(usart_config_t USART_INT_config){
+Status_code_t UART1_Init_RX_Interrupt(usart_config_t USART_INT_config){
 
 		Status_code_t status = Success;
 
@@ -113,12 +113,17 @@ Status_code_t Init_UART1_RX_Interrupt(usart_config_t USART_INT_config){
 
 }
 
-//Status_code_t Deinit_UART1_RX_Interrupt(void){
-//
-//	return Success;
-//}
+Status_code_t UART1_Deinit_RX_Interrupt(void){
 
-Status_code_t Init_UART1(usart_config_t USART_config){
+	USART_disabled(USART1_ADDRESS);
+	USART_Clock(Disabled, Usart_1);
+	NVIC_DisableIRQ(USART1_IRQn);
+
+	return Success;
+
+}
+
+Status_code_t UART1_Init(usart_config_t USART_config){
 	Status_code_t status = Success;
 
 	SetPinMode(Port_B, Pin_6, Alt_func_mode); //TX
@@ -126,6 +131,7 @@ Status_code_t Init_UART1(usart_config_t USART_config){
 
 	GpioSetAlternativeFunction(Port_B, Pin_6, SPI3_I2S3_USART1_USART2);
 	GpioSetAlternativeFunction(Port_B, Pin_7, SPI3_I2S3_USART1_USART2);
+	Gpio_Output_type(Port_B, Pin_6, Push_pull); //push_pull only in TX line
 
 	USART_Clock(Enabled, Usart_1);
 	USART_SET_RX_ending_string(default_str_end, STRING_END_STANDAR);
@@ -147,8 +153,9 @@ Status_code_t Init_UART1(usart_config_t USART_config){
 
 	return Success;
 }
-Status_code_t Deinit_UART1(void){ //pendiente sebas
-
+Status_code_t UART1_Deinit(void){ //pendiente sebas
+	USART_enable(USART1_ADDRESS);
+	USART_Clock(Disabled, Usart_1);
 	return Success;
 }
 
@@ -368,7 +375,7 @@ void USART2_HANDLER(void){
 //}
 
 
-Status_code_t Init_UART2_RX_Interrupt(usart_config_t USART_INT_config){
+Status_code_t UART2_Init_RX_Interrupt(usart_config_t USART_INT_config){
 
 		Status_code_t status = Success;
 
@@ -402,12 +409,15 @@ Status_code_t Init_UART2_RX_Interrupt(usart_config_t USART_INT_config){
 		return Success;
 
 }
-//Status_code_t Deinit_UART2_RX_Interrupt(void){
-//
-//	return Success;
-//}
+Status_code_t UART2_Deinit_RX_Interrupt(void){
+	USART_disabled(USART2_ADDRESS);
+	USART_Clock(Disabled, Usart_2);
+	NVIC_DisableIRQ(USART2_IRQn);
+	return Success;
 
-Status_code_t Init_UART2(usart_config_t USART_config){
+}
+
+Status_code_t UART2_Init(usart_config_t USART_config){
 	Status_code_t status = Success;
 
 	SetPinMode(Port_A, Pin_2, Alt_func_mode); //TX
@@ -415,6 +425,7 @@ Status_code_t Init_UART2(usart_config_t USART_config){
 
 	GpioSetAlternativeFunction(Port_A, Pin_2, SPI3_I2S3_USART1_USART2);
 	GpioSetAlternativeFunction(Port_A, Pin_3, SPI3_I2S3_USART1_USART2);
+	Gpio_Output_type(Port_A, Pin_2, Push_pull); //push_pull only in TX line
 
 	USART_Clock(Enabled, Usart_2);
 	USART_SET_RX_ending_string(default_str_end, STRING_END_STANDAR);
@@ -438,7 +449,10 @@ Status_code_t Init_UART2(usart_config_t USART_config){
 	return Success;
 }
 
-Status_code_t Deinit_UART2(void){
+Status_code_t UART2_Deinit(void){
+
+	USART_enable(USART6_ADDRESS);
+	USART_Clock(Disabled, Usart_6);
 
 	return Success;
 }
@@ -616,7 +630,7 @@ void USART6_HANDLER(void){
 	}
 }
 
-Status_code_t Init_UART6_RX_Interrupt(usart_config_t USART_INT_config){
+Status_code_t UART6_Init_RX_Interrupt(usart_config_t USART_INT_config){
 
 	Status_code_t status = Success;
 
@@ -651,12 +665,16 @@ Status_code_t Init_UART6_RX_Interrupt(usart_config_t USART_INT_config){
 	return Success;
 }
 
-//Status_code_t Deinit_UART6_RX_Interrupt(void){
-//
-//	return Success;
-//}
+Status_code_t UART6_Deinit_RX_Interrupt(void){
 
-Status_code_t Init_UART6(usart_config_t USART_config){
+	USART_disabled(USART6_ADDRESS);
+	USART_Clock(Disabled, Usart_6);
+	NVIC_DisableIRQ(USART6_IRQn);
+	return Success;
+
+}
+
+Status_code_t UART6_Init(usart_config_t USART_config){
 
 	Status_code_t status = Success;
 
@@ -665,6 +683,7 @@ Status_code_t Init_UART6(usart_config_t USART_config){
 
 	GpioSetAlternativeFunction(Port_C, Pin_6, USART_6);
 	GpioSetAlternativeFunction(Port_C, Pin_7, USART_6);
+	Gpio_Output_type(Port_C, Pin_6, Push_pull); //push_pull only in TX line
 
 	USART_Clock(Enabled, Usart_6);
 	USART_SET_RX_ending_string(default_str_end, STRING_END_STANDAR);
@@ -688,8 +707,9 @@ Status_code_t Init_UART6(usart_config_t USART_config){
 	return Success;
 }
 
-Status_code_t Deinit_UART6(void){
-
+Status_code_t UART6_Deinit(void){
+	USART_enable(USART6_ADDRESS);
+	USART_Clock(Disabled, Usart_6);
 	return Success;
 }
 

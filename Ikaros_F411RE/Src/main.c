@@ -25,7 +25,7 @@
 #include "uart.h"
 #include "watchdog.h"
 #include "state_machine.h"
-
+#include "i2c.h"
 
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
@@ -33,23 +33,10 @@
 #endif
 
 
+
 int main(void){
 
-//	runMachine();
-	uint32_t tempre =0;
-	float voltaje=0.0f, cels =0.0f;
-
-	ADC_Init_Temperature_Sensor(RES_12_bits);
-
-
-	while(1){
-	tempre =0;
-
-	ADC_Read_Temperature(&tempre);
-
-	cels = (float)(tempre/100.0f);
-	tempre =0;
-	}
+	//commit
 
 	return 0;
 }
@@ -66,6 +53,32 @@ int main(void){
 
 
 
+
+
+
+
+
+// funciones para leer la temperatura
+//int main(void){
+//
+////	runMachine();
+//	uint32_t tempre =0;
+//	float cels =0.0f;
+//
+//	ADC_Init_Temperature_Sensor(RES_12_bits);
+//
+//
+//	while(1){
+//		tempre =0;
+//
+//		ADC_Read_Temperature(&tempre);
+//
+//		cels = (float)(tempre/100.0f);
+//		tempre =0;
+//	}
+//
+//	return 0;
+//}
 
 
 
