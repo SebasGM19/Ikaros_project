@@ -9,6 +9,9 @@
 #ifndef BASIC_SETTINGS_H_
 #define BASIC_SETTINGS_H_
 
+#include "system_settings.h"
+
+
 #define EXTI0_HANDLER EXTI0_IRQHandler
 #define EXTI1_HANDLER EXTI1_IRQHandler
 
@@ -22,7 +25,6 @@
 
 #define MAX_GPIOS	(16)
 
-#include "system_settings.h"
 
 
 
@@ -97,6 +99,11 @@ typedef enum{
 
 }GPIO_UP_DOWN_STATE_t;
 
+typedef enum{
+	Push_pull,
+	Open_drain
+
+}GPIO_output_type_t;
 
 typedef enum{
 	Falling_edge,
@@ -121,6 +128,7 @@ Gpio_State_Control_t GPIO_DigitalRead(Set_Port_t Port_define, Pin_number_t Pin_d
 Gpio_State_Control_t GPIO_DigitalWrite(Set_Port_t Port_define, Pin_number_t Pin_defined, Gpio_State_Control_t State);
 void GpioSetAlternativeFunction(Set_Port_t Port_define, Pin_number_t Pin_defined, Alternate_function_map_t AF);
 Status_code_t GpioPullUpDownState(Set_Port_t Port_define, Pin_number_t Pin_defined, GPIO_UP_DOWN_STATE_t GPIO_State);
+Status_code_t Gpio_Output_type(Set_Port_t Port_define, Pin_number_t Pin_defined, GPIO_output_type_t O_type);
 
 
 void EXTI0_HANDLER(void);

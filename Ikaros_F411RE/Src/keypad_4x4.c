@@ -5,10 +5,10 @@
  *      Author: Sebastian G.M.
  */
 #include "keypad_4x4.h"
-#include "timers.h"
+//#include "lcd.h"
+//#include "timers.h"
 
-
-uint8_t KeypadMap[MAX_ROWS][MAX_COLUMNS] = {
+uint8_t const KeypadMap[MAX_ROWS][MAX_COLUMNS] = {
 	{'1','2','3','A'},
 	{'4','5','6','B'},
 	{'7','8','9','C'},
@@ -86,7 +86,7 @@ Status_code_t Deinit_keypad(keypad_alternatives_t keypad_alternative){
 	return Success;
 }
 
-uint32_t Read_keypad(keypad_alternatives_t keypad_alternative){
+uint32_t Read_keypad(keypad_alternatives_t keypad_alternative, Status_code_t *returt_status){
 
 	Status_code_t status = Success;
 	Set_Port_t Port_option = Port_A; //set as a default
@@ -105,12 +105,14 @@ uint32_t Read_keypad(keypad_alternatives_t keypad_alternative){
 		Port_option = Port_C;
 		break;
 	default:
-		return OptionNotSupported;
+		*returt_status = OptionNotSupported;
+		return 0;
 	}
 
 	status = TIM11_Init(MAX_KEYPAD_TIMEOUT);
 
 	if(status != Success){
+		*returt_status = status;
 		return 0;
 	}
 	TIM11_Start();
@@ -125,10 +127,17 @@ uint32_t Read_keypad(keypad_alternatives_t keypad_alternative){
 	}while((dataArray[(array_position)]!= HASH) && array_position < MAX_INPUT_DATA && !TIM11_GET_interrupt_flag_status());
 
 	TIM11_Deinit();
-	if(array_position == 0 || TIM11_GET_interrupt_flag_status()){ //if # is only pressed will return 0
+	if(array_position == 0 && !TIM11_GET_interrupt_flag_status()){ //if # is only pressed will return 0
 		TIM11_clear_interrupt_flag();
+		*returt_status = Success;
 		return 0;
 	}
+	if(TIM11_GET_interrupt_flag_status()){ //if is timeout return 0 and the status
+		TIM11_clear_interrupt_flag();
+		*returt_status = Timeout;
+		return 0;
+	}
+
 	TIM11_clear_interrupt_flag();
 
 	uint8_t finalDataArray[(array_position)];
@@ -136,11 +145,12 @@ uint32_t Read_keypad(keypad_alternatives_t keypad_alternative){
 	strncat((char *)(finalDataArray), (const char *)(dataArray),(array_position));
 	capture_value = (uint32_t)atoi((char *)finalDataArray);
 
+	*returt_status = Success;
 	return capture_value;
 }
 
 
-uint32_t print_keypad(keypad_alternatives_t keypad_alternative, uint8_t X_axis, uint8_t Y_axis){
+uint32_t print_keypad(keypad_alternatives_t keypad_alternative, Status_code_t *returt_status, uint8_t X_axis, uint8_t Y_axis){
 
 	Status_code_t status = Success;
 	Set_Port_t Port_option = Port_A; //set as a default
@@ -158,14 +168,15 @@ uint32_t print_keypad(keypad_alternatives_t keypad_alternative, uint8_t X_axis, 
 		Port_option = Port_C;
 		break;
 	default:
-		return OptionNotSupported;
-		break;
+		*returt_status = OptionNotSupported;
+		return 0;
 	}
 
 	status = lcd_set_cursor_position(X_axis,Y_axis);
 	status |= TIM11_Init(MAX_KEYPAD_TIMEOUT);
 
 	if(status != Success){
+		*returt_status = status;
 		return 0;
 	}
 	TIM11_Start();
@@ -181,8 +192,14 @@ uint32_t print_keypad(keypad_alternatives_t keypad_alternative, uint8_t X_axis, 
 
 	TIM11_Deinit();
 
-	if(array_position == 0 || TIM11_GET_interrupt_flag_status()){ //if # is only pressed will return 0
+	if(array_position == 0 && !TIM11_GET_interrupt_flag_status()){ //if # is only pressed will return 0
 		TIM11_clear_interrupt_flag();
+		*returt_status = Success;
+		return 0;
+	}
+	if(TIM11_GET_interrupt_flag_status()){ //if is timeout return 0 and the status
+		TIM11_clear_interrupt_flag();
+		*returt_status = Timeout;
 		return 0;
 	}
 
@@ -193,6 +210,7 @@ uint32_t print_keypad(keypad_alternatives_t keypad_alternative, uint8_t X_axis, 
 	strncat((char *)(finalDataArray), (const char *)(dataArray),(array_position));
 	capture_value = (uint32_t)atoi((char *)finalDataArray);
 
+	*returt_status = Success;
 	return capture_value;
 }
 
@@ -240,6 +258,7 @@ void columnSequence(Set_Port_t Port_option, Pin_number_t Pin_defined, row_to_low
 
 				if(opPrint){
 					lcd_print(&pressed_boton, 1);
+
 				}
 			}
 		}

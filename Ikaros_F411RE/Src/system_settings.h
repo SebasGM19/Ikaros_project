@@ -19,6 +19,7 @@
 
 
 
+
 #define BOARD_CLOCK 			(16000000U) //set to 16MHz
 #define PSC_TO_MICROSEC_DELAY	(uint32_t)(16U) //minimum to microsecond count
 #define PSC_TO_MILLISEC_DELAY	(uint32_t)(16000U) //minimum to microsecond count
@@ -57,6 +58,11 @@ typedef enum{
 
 	USART_alternative_not_suported,
 	USART_baud_rate_out_of_limit,
+	USART_read_data_not_empty,
+	USART_overrun_error,
+	USART_parity_error,
+	USART_framing_error,
+	USART_noise_error,
 	Timeout,
 
 	WWDG_invalid_parameter,
@@ -72,7 +78,7 @@ typedef enum{
 	Clean_one_bit =			0x01, 	//to clean 1 bit
 	Clear_two_bits=			0x03, 	//to clean 1 GPIOS
 	Clear_three_bits = 		0x07, 	//to clena 3 bits
-	Clear_four_bits = 		0xF, 	//to clean 2 GPIOS
+	Clear_four_bits = 		0x0F, 	//to clean 2 GPIOS
 	Clear_five_bits = 		0x1F,
 	Clear_six_bits =		0x3F,
 	Clear_eight_bits =		0xFF, 	//to clean 4 GPIOS
@@ -284,6 +290,49 @@ typedef enum{
 }RCC_CSR_t;
 
 
+typedef enum{
+	DBGMCU_CR 		= 0xE0042004,
+	DBGMCU_APB1_FZ 	= 0xE0042008,
+	DBGMCU_APB2_FZ 	= 0xE004200C,
+
+}Debug_MCU_addr_t;
+
+
+typedef enum{
+	DBG_SLEEP   = 	(1U<<0U),
+	DBG_STOP    =	(1U<<1U),
+	DBG_STANDBY = 	(1U<<2U),
+	TRACE_IOEN  = 	(1U<<5U),
+	TRACE_MODE  = 	(6U),
+
+}Debug_CR_t;
+
+typedef enum{
+	DBG_TIM2_STOP  			= 	(1U<<0U),
+	DBG_TIM3_STOP  			=	(1U<<1U),
+	DBG_TIM4_STOP 			= 	(1U<<2U),
+	DBG_TIM5_STOP  			= 	(1U<<3U),
+	DBG_RTC_STOP  			= 	(1U<<10U),
+	DBG_WWDG_STOP   		= 	(1U<<11U),
+	DBG_IWDG_STOP    		=	(1U<<12U),
+	DBG_I2C1_SMBUS_TIMEOUT  = 	(1U<<21U),
+	DBG_I2C2_SMBUS_TIMEOUT  = 	(1U<<22U),
+	DBG_I2C3_SMBUS_TIMEOUT  = 	(1U<<23U),
+
+}DBGMCU_APB1_FZ_t;
+
+typedef enum{
+	DBG_TIM1_STOP  	= 	(1U<<0U),
+	DBG_TIM9_STOP  	=	(1U<<16U),
+	DBG_TIM10_STOP 	= 	(1U<<17U),
+	DBG_TIM11_STOP 	= 	(1U<<18U),
+
+}DBGMCU_APB2_FZ_t;
+
+
+
+
+
 Status_code_t ClockEnable(Set_Port_t Port_define, Enabled_Disabled_t Intention);
 Status_code_t Delay(uint32_t microseconds);
 void resetDelay(TimerMapAddr_t Timer);
@@ -291,8 +340,16 @@ Status_code_t Peripherial_delay(uint16_t miliseconds);
 void Init_Board(void);
 void ftoa(float decimalData, uint8_t* cadena, uint8_t decimales);
 
-bool RCC_reset_status_flag(RCC_CSR_t flag);
+bool RCC_get_reset_status_flag(RCC_CSR_t flag);
 void RCC_clear_reset_flags(void);
 
 void SYS_ClockEnable(Enabled_Disabled_t Intention);
+
+
+//DBG functions
+bool system_is_debugging(void);
+void frezze_WWDG(void);
+void frezze_IWDG(void);
+
+
 #endif /* SYSTEM_SETTINGS_H_ */

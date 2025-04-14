@@ -47,7 +47,7 @@ Status_code_t Send_command(uint8_t command, command_type_t type){
 
 	GPIO_DigitalWrite(control_alternative.PORT, control_alternative.LCD_PIN_RS, type);
 
-	MSB = (command & 0xF0)>>4;
+	MSB = command>>4;
 	LSB = (command & 0x0F); 	//keep only the first 4 bits
 
 	__IO uint32_t  *PORT_REG_OUTPUT = (__IO uint32_t *)(control_alternative.PORT + GPIOx_ODR_OFFSET); //agregamos el 0x14 par indicar output
@@ -177,7 +177,7 @@ Status_code_t lcd_deinit(lcd_alternative_t lcd_alternative){
 }
 
 /*
- * This function will only print the data starting at position 0,1
+ * This function will only print the data starting at position 0,0
  */
 void lcd_print(uint8_t* data, uint8_t data_lenght){
 

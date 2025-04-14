@@ -26,12 +26,7 @@ Gpio_State_Control_t GPIO_DigitalWrite(Set_Port_t Port_define, Pin_number_t Pin_
 
 	__IO uint32_t *PORT_REG_OUTPUT = (__IO uint32_t *)(Port_define + GPIOx_ODR_OFFSET); //agregamos el 0x14 par indicar output
 
-	if(State){
-		*PORT_REG_OUTPUT |= (1<<Pin_defined);
-	}else{
-		*PORT_REG_OUTPUT &= ~(1<<Pin_defined);
-
-	}
+    *PORT_REG_OUTPUT = (State) ? (*PORT_REG_OUTPUT | (Enabled << Pin_defined)) : (*PORT_REG_OUTPUT & ~(Enabled << Pin_defined));
 
 	return State;
 
@@ -62,9 +57,11 @@ Status_code_t SetPinMode(Set_Port_t Port_define, Pin_number_t Pin_defined, PinMo
 
 		case Output:
 			*pPort_ModeReg |= (Output<<PositionsOfPin);
+			Gpio_Output_type(Port_define,Pin_defined, Push_pull);
+			GPIO_DigitalWrite(Port_define, Pin_defined, Low); //set low as default
 			break;
 		case Input:
-			*pPort_ModeReg &= ~(Clear_two_bits<<PositionsOfPin); //si es input simplemente limpiara esas posiciones a 00
+			*pPort_ModeReg &= ~(Clear_two_bits<<PositionsOfPin);
 			break;
 		case Alt_func_mode:
 			*pPort_ModeReg |= (Alt_func_mode<<PositionsOfPin);
@@ -106,8 +103,18 @@ Status_code_t GpioPullUpDownState(Set_Port_t Port_define, Pin_number_t Pin_defin
 	uint16_t RealPosition=0;
 
 	RealPosition = Pin_defined*2;
-	*REG_PULL_UPdown &= ~(Clear_two_bits<<RealPosition); //limpiamos esa posicion del bit
+	*REG_PULL_UPdown &= ~(Clear_two_bits<<RealPosition); //clean bits
 	*REG_PULL_UPdown |= (GPIO_State<<RealPosition); //set the state in to pull
+	return Success;
+
+}
+
+
+Status_code_t Gpio_Output_type(Set_Port_t Port_define, Pin_number_t Pin_defined, GPIO_output_type_t O_type){
+	__IO uint32_t *REG_OTYPER = (__IO uint32_t *)(Port_define + GPIOx_OTYPER_OFFSET); //add 0x0C for offset to pull up or pull down
+
+    *REG_OTYPER = (O_type) ? (*REG_OTYPER | (Enabled << Pin_defined)) : (*REG_OTYPER & ~(Enabled << Pin_defined));
+
 	return Success;
 
 }
@@ -595,6 +602,7 @@ Status_code_t GPIO_Init_EXTI9_To_EXTI5(GPIO_Exti_Port_t EXTI_Port, Pin_number_t 
 	}
 
 	status =  SetPinMode(Port_define, Pin_defined, Input);
+
 	if(status!=Success){
 		for(uint8_t i = 5;i<10;i++){
 			GPIO_Delete_EXTI_PIN(i);

@@ -10,12 +10,17 @@
 
 #include "system_settings.h"
 
+
+#define USART1_HANDLER	USART1_IRQHandler
+#define USART2_HANDLER	USART2_IRQHandler
+#define USART6_HANDLER	USART6_IRQHandler
+
+
 #define RX_ENABLE_BIT_POS			(2U)
 #define DR_MAX_VALUE				(0xFF)
 #define STRING_END_MAX_LENGHT 		(10)
 #define STRING_END_STANDAR	 		(2)
 #define MAX_LENGHT_GLOBAL_BUFFER	(4096)
-
 
 
 
@@ -30,7 +35,6 @@ typedef enum{
 typedef enum{
 	Synchronous,
 	Asynchronous,
-	Hardware_flow_control,
 }usart_mode_t;
 
 typedef enum{
@@ -45,14 +49,6 @@ typedef enum{
 	Even,
 	Odd,
 }usart_parity_t;
-
-typedef enum{
-	Ignore = 		0U,
-	Hash = 			35U,
-	Asterisk = 		42U,
-	Question_mark = 63U,
-	Slash_O = 		248U,
-}usart_parity_error_char_t;
 
 typedef enum{
 
@@ -75,17 +71,44 @@ typedef enum{
 
 }usart_hardware_flow_ctrl_t;
 
+typedef enum{
+	CPOL_low = 0U,
+	CPOL_high
+}usart_clock_polarity_t;
 
+typedef enum{
+	CPHA_first_edge = 0U,
+	CPHA_second_edge,
+}usart_clock_phase_t;
+
+typedef enum{
+	LBCL_not_output = 0U,
+	LBCL_is_output,
+}usart_last_bit_clock_t;
+
+typedef struct{
+	usart_clock_polarity_t CPOL;
+	usart_clock_phase_t CPHA;
+	usart_last_bit_clock_t LBCL;
+}usart_synchronous_config_t;
 
 typedef struct{
 	uint32_t baud_rate;
 	usart_mode_t mode;
+	usart_synchronous_config_t *synchronous_config;  //if is Asynchronous put NULL
 	usart_data_direction_t data_direction;
 	usart_parity_t parity;
-	usart_parity_error_char_t parity_char;
 	usart_data_bits_t data_bits;
 	usart_stop_bits_t stop_bits;
 }usart_config_t;
+
+
+//typedef struct{
+//	uint32_t baud_rate;
+//	usart_parity_t parity;
+//	usart_data_bits_t data_bits;
+//	usart_stop_bits_t stop_bits;
+//}usart_INT_config_t;
 
 typedef enum{
 	USART_SR =		0x00U,
@@ -101,15 +124,15 @@ typedef enum{
 
 typedef enum{
 	 USART_PE= 		(1U<<0U),
-	 USART_FE=		(1u<<1u),
-	 USART_NF=		(1u<<2u),
-	 USART_ORE=		(1u<<3u),
-	 USART_IDLE=	(1u<<4u),
-	 USART_RXNE=	(1u<<5u),
-	 USART_TC=		(1u<<6u),
-	 USART_TXE=		(1u<<7u),
-	 USART_LBD=		(1u<<8u),
-	 USART_CTS=		(1u<<9u),
+	 USART_FE=		(1U<<1U),
+	 USART_NF=		(1U<<2U),
+	 USART_ORE=		(1U<<3U),
+	 USART_IDLE=	(1U<<4U),
+	 USART_RXNE=	(1U<<5U),
+	 USART_TC=		(1U<<6U),
+	 USART_TXE=		(1U<<7U),
+	 USART_LBD=		(1U<<8U),
+	 USART_CTS=		(1U<<9U),
 
 }USART_SR_t;
 
@@ -122,22 +145,22 @@ typedef enum{
 
 
 typedef enum{
-	 USART_SBK= 	(1u<<0u),
-	 USART_RWU=		(1u<<1u),
-	 USART_RE=		(1u<<2u),
-	 USART_TE=		(1u<<3u),
-	 USART_IDLEIE=	(1u<<4u),
-	 USART_RXNEIE=	(1u<<5u),
-	 USART_TCIE=	(1u<<6u),
-	 USART_TXEIE=	(1u<<7u),
-	 USART_PEIE=	(1u<<8u),
+	 USART_SBK= 	(1U<<0U),
+	 USART_RWU=		(1U<<1U),
+	 USART_RE=		(1U<<2U),
+	 USART_TE=		(1U<<3U),
+	 USART_IDLEIE=	(1U<<4U),
+	 USART_RXNEIE=	(1U<<5U),
+	 USART_TCIE=	(1U<<6U),
+	 USART_TXEIE=	(1U<<7U),
+	 USART_PEIE=	(1U<<8U),
 
-	 USART_PS=		(1u<<9u),
-	 USART_PCE=		(1u<<10u),
-	 USART_WAKE=	(1u<<11u),
-	 USART_M=		(1u<<12u),
-	 USART_UE=		(1u<<13u),
-	 USART_OVER8=	(1u<<15u),
+	 USART_PS=		(1U<<9U),
+	 USART_PCE=		(1U<<10U),
+	 USART_WAKE=	(1U<<11U),
+	 USART_M=		(1U<<12U),
+	 USART_UE=		(1U<<13U),
+	 USART_OVER8=	(1U<<15U),
 
 }USART_CR1_t;
 
@@ -179,18 +202,29 @@ typedef enum{
 
 Status_code_t USART_Clock(Enabled_Disabled_t state, usart_alternative_t USART);
 
-Status_code_t Init_UART1(usart_config_t USART_config);
+void USART1_HANDLER(void);
+Status_code_t UART1_Init_RX_Interrupt(usart_config_t USART_INT_config);
+Status_code_t UART1_Deinit_RX_Interrupt(void);
+Status_code_t UART1_Init(usart_config_t USART_config);
+Status_code_t UART1_Deinit(void);
 Status_code_t UART1_Write(uint8_t const *data, uint32_t data_lenght, uint16_t timeout);
 Status_code_t UART1_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_t timeout);
 Status_code_t UART1_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght, uint16_t timeout);
 
-
-Status_code_t Init_UART2(usart_config_t USART_config);
+void USART2_HANDLER(void);
+Status_code_t UART2_Init_RX_Interrupt(usart_config_t USART_INT_config);
+Status_code_t UART2_Deinit_RX_Interrupt(void);
+Status_code_t UART2_Init(usart_config_t USART_config);
+Status_code_t UART2_Deinit(void);
 Status_code_t UART2_Write(uint8_t const *data, uint32_t data_lenght, uint16_t timeout);
 Status_code_t UART2_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_t timeout);
 Status_code_t UART2_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght, uint16_t timeout);
 
-Status_code_t Init_UART6(usart_config_t USART_config);
+void USART6_HANDLER(void);
+Status_code_t UART6_Init_RX_Interrupt(usart_config_t USART_INT_config);
+Status_code_t UART6_Deinit_RX_Interrupt(void);
+Status_code_t UART6_Init(usart_config_t USART_config);
+Status_code_t UART6_Deinit(void);
 Status_code_t UART6_Write(uint8_t const *data, uint32_t data_lenght, uint16_t timeout);
 Status_code_t UART6_Read(uint8_t *data_buff, uint32_t *data_buff_lenght, uint16_t timeout);
 Status_code_t UART6_Read_bytes(uint8_t *data_buff, uint32_t expected_data_lenght, uint16_t timeout);
@@ -202,6 +236,11 @@ void USART_CR1_config_bit(USARTMapAddr_t USART_Addr, USART_CR1_t USAR_CR1_bit, E
 void USART_set_data_bits(USARTMapAddr_t USART_Addr, usart_data_bits_t data_lenght);
 void USART_set_stop_bits(USARTMapAddr_t USART_Addr, usart_stop_bits_t stop_bits);
 void USART_set_parity(USARTMapAddr_t USART_Addr, usart_parity_t parity);
+void USART_config_mode(USARTMapAddr_t USART_Addr, usart_mode_t USART_mode, usart_synchronous_config_t *synchronous_config);
+
+void USART_enable_Rx_Interrupt(USARTMapAddr_t USART_Addr);
+Status_code_t USART_INT_received_status(USARTMapAddr_t USART_Addr);
+Status_code_t USART_error_flags_status(USARTMapAddr_t USART_Addr);
 
 void USART_enable(USARTMapAddr_t USART_Addr);
 void USART_disabled(USARTMapAddr_t USART_Addr);
