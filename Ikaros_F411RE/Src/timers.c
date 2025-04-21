@@ -619,7 +619,7 @@ Status_code_t TIM3_PWM_start_channel(TIM3_pwm_auto_parameters_t const PWM){
 	preescaler = (int32_t)round((float)((BOARD_CLOCK / ((global_TIM3_ARR_count + 1) * PWM.frequency)) - 1));
 	if(preescaler<=0){
 		/*NOTE: if this happend try change the global_ARR_reg to a lower value*/
-		return PWM_frecuency_not_suported_in_this_mode;
+		return PWM_frecuency_not_supported_in_this_mode;
 	}
 
 	*TIM_REG_PSC = preescaler;
@@ -874,7 +874,7 @@ Status_code_t TIM4_PWM_start_channel(TIM4_pwm_auto_parameters_t const PWM){
 	preescaler = (int32_t)round((float)((BOARD_CLOCK / ((global_TIM4_ARR_count + 1) * PWM.frequency)) - 1));
 	if(preescaler<=0){
 		/*NOTE: if this happend try change the global_ARR_reg to a lower value*/
-		return PWM_frecuency_not_suported_in_this_mode;
+		return PWM_frecuency_not_supported_in_this_mode;
 	}
 
 	*TIM_REG_PSC = preescaler;

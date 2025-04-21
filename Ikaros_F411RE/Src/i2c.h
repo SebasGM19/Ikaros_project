@@ -10,6 +10,12 @@
 
 #include "system_settings.h"
 
+#define MAX_SM_RISE_TIME_ns  (1000)
+#define MAX_FM_RISE_TIME_ns  (300)
+#define DIVIDE_FOR_TRISE_ns  (1000000000)
+
+
+
 typedef enum{
 	I2C_1 = 21U, 		//SCL:(B8)  SDA:(B9) //21 means RCC APB1 bit 21
 	I2C_3 = 23U, 		//SCL:(A8)  SDA:(C9) //21 means RCC APB1 bit 23
@@ -61,10 +67,11 @@ typedef enum{
 
 
 typedef enum{
-	 I2C_FREQ_OAR1    = (1U<<0U),
-	 I2C_ADD0 	 = 1U,
-	 I2C_ADD1 	 = 8U,
-	 I2C_ADDMODE = (1U<<15U),
+	 I2C_FREQ_OAR1	= (1U<<0U),
+	 I2C_ADD0 	    = 1U,
+	 I2C_ADD1 	 	= 8U,
+	 I2C_OAR1_BIT14 = (1U<<14U),
+	 I2C_ADDMODE 	= (1U<<15U),
 
 }I2C_OAR1_t;
 
@@ -120,7 +127,7 @@ typedef enum{
 
 
 typedef enum{
-	 i2c_TRISE  = 0U,
+	 I2C_TRISE_enum  = 0U,
 
 }I2C_TRISE_t;
 
@@ -140,23 +147,36 @@ typedef enum{
 
 
 typedef enum{
-	frecuency_100Khz  = 100000U,
-	frecuency_400Khz = 400000U,
-	frecuency_1Mhz = 1000000U,
-
+	StandarMode_100Kbps  = 100000U,
+	FastMode_400Kbps 	 = 400000U,
 
 }i2c_baudrate_t;
 
 
 
+typedef enum{
+	duty_2_1 	  = 0U,
+	duty_16_9 = 1U,
+	duny_none = 2U,
+
+}i2c_duty_t;
+
+
+
+
 typedef struct{
-	uint32_t baudrate;
-	i2c_mode_t set_as;
+	i2c_baudrate_t baudrate;
+	i2c_duty_t duty; //only for FM
 
 }i2c_config_parameters_t;
 
-Status_code_t I2C1_Init(i2c_config_parameters_t config);
-Status_code_t I2C3_Init(i2c_config_parameters_t config);
+Status_code_t I2C1_Init_Master(i2c_config_parameters_t config);
+Status_code_t I2C3_Init_Master(i2c_config_parameters_t config);
+
+Status_code_t I2C1_Init_Slave(uint8_t addrs);
+Status_code_t I2C3_Init_Slave(uint8_t addrs);
+
+
 Status_code_t I2C_Write(I2C_alternative_t i2c_alt,uint8_t addrs, uint8_t* data_sent, uint32_t data_size);
 Status_code_t I2C_Read(I2C_alternative_t i2c_alt, uint8_t addrs, uint8_t* data_received, uint32_t data_size_expected);
 Status_code_t I2C1_Deinit(void);
@@ -164,6 +184,16 @@ Status_code_t I2C3_Deinit(void);
 
 
 
-Status_code_t I2C_Clock(Enabled_Disabled_t state, I2C_alternative_t I2C);
+void I2C_Clock(I2C_alternative_t I2C, Enabled_Disabled_t state);
+Status_code_t I2C_config(i2c_config_parameters_t *config);
+void I2C_slave_config(I2CMapAddr_t I2C_addr,uint8_t slave_addrs);
+void I2C_Peripherial_Mode(I2CMapAddr_t I2C_addr,Enabled_Disabled_t state);
+void I2C_Reset_Protocol(I2CMapAddr_t I2C_addr);
+Status_code_t I2C_Set_Clock_frecuency(I2CMapAddr_t I2C_addr,uint32_t Clock_frecuency_hz);
+void I2C_Set_FM_Duty(I2CMapAddr_t I2C_addr, i2c_duty_t duty);
+void I2C_Set_ACK_state(I2CMapAddr_t I2C_addr, Enabled_Disabled_t state);
+Status_code_t I2C_Speed_Mode(I2CMapAddr_t I2C_addr, i2c_config_parameters_t* config, uint32_t peripherial_clock);
+Status_code_t I2C_Set_CCR(I2CMapAddr_t I2C_addr, i2c_config_parameters_t *config, uint32_t peripherial_clock);
+void I2C_Set_Trise(I2CMapAddr_t I2C_addr, i2c_baudrate_t baudrate, uint32_t peripherial_clock);
 
 #endif /* DRIVERS_I2C_H_ */

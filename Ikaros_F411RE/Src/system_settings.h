@@ -21,6 +21,11 @@
 
 
 #define BOARD_CLOCK 			(16000000U) //set to 16MHz
+#define AHB2_CLOCK				(16000000U)
+#define AHB1_CLOCK				(16000000U)
+#define APB2_CLOCK				(16000000U)
+
+#define APB1_CLOCK				(16000000U)
 #define PSC_TO_MICROSEC_DELAY	(uint32_t)(16U) //minimum to microsecond count
 #define PSC_TO_MILLISEC_DELAY	(uint32_t)(16000U) //minimum to microsecond count
 #define USEC_TO_DELAY(CLOCK_BASE,PSC,DELAY)	 (uint32_t)((((CLOCK_BASE) / (PSC)) * ((DELAY) * (0.000001))) )
@@ -54,9 +59,9 @@ typedef enum{
 	EXTI_Pin_Not_Allowed,
 
 	TIMx_incorrect,
-	PWM_frecuency_not_suported_in_this_mode,
+	PWM_frecuency_not_supported_in_this_mode,
 
-	USART_alternative_not_suported,
+	USART_alternative_not_supported,
 	USART_baud_rate_out_of_limit,
 	USART_read_data_not_empty,
 	USART_overrun_error,
@@ -66,6 +71,9 @@ typedef enum{
 	Timeout,
 
 	WWDG_invalid_parameter,
+
+	I2C_frecuency_not_supported,
+	I2C_clock_value_out_of_range
 
 }Status_code_t;
 
@@ -79,10 +87,20 @@ typedef enum{
 	Clear_two_bits=			0x03, 	//to clean 1 GPIOS
 	Clear_three_bits = 		0x07, 	//to clena 3 bits
 	Clear_four_bits = 		0x0F, 	//to clean 2 GPIOS
+
 	Clear_five_bits = 		0x1F,
 	Clear_six_bits =		0x3F,
+	Clear_seven_bits =		0x7F,
 	Clear_eight_bits =		0xFF, 	//to clean 4 GPIOS
+
+	Clear_nine_bits =		0x1FF,
+	Clear_ten_bits =		0x3FF,
+	Clear_eleven_bits =		0x7FF,
+	Clear_twelve_bits =		0xFFF,
+
+	Clear_thirteen_bits =   0x1FFF,
 	clear_fourteen_bits = 	0x3FFF, //to clean 7 GPIOS
+	Clear_fiveteen_bits =	0x7FFF,
 	Clear_sixteen_bits =	0xFFFF 	//to cslean 8 GPIOS
 }RegAuxClean_t;
 
@@ -122,9 +140,9 @@ typedef enum{
 	SPI3_I2S3_ADDRESS = 	0x40003C00,
 	I2S3ext_ADDRESS = 		0x40004000,
 //	USART2_ADDRESS = 		0x40004400,
-	I2C1_ADDRESS = 			0x40005400,
-	I2C2_ADDRESS = 			0x40005800,
-	I2C3_ADDRESS = 			0x40005C00,
+//	I2C1_ADDRESS = 			0x40005400,
+//	I2C2_ADDRESS = 			0x40005800,
+//	I2C3_ADDRESS = 			0x40005C00,
 	PWR_ADDRESS = 			0x40007000, //APB1
 
 //	TIM1_ADDRESS = 			0x40010000, //APB2 BUS
@@ -157,6 +175,13 @@ typedef enum{
 	USART6_ADDRESS = 		0x40011400,
 
 }USARTMapAddr_t;
+
+typedef enum{
+	I2C1_ADDRESS = 			0x40005400,
+	I2C2_ADDRESS = 			0x40005800,
+	I2C3_ADDRESS = 			0x40005C00,
+
+}I2CMapAddr_t;
 
 typedef enum{
 	TIM2_ADDRESS = 	0x40000000, //APB1 BUS
