@@ -7,6 +7,7 @@
 
 #include "i2c.h"
 #include "gpios.h"
+#include "timers.h"
 
 
 Status_code_t I2C1_Init_Master(i2c_config_parameters_t config){
@@ -25,7 +26,7 @@ Status_code_t I2C1_Init_Master(i2c_config_parameters_t config){
 	GpioPullUpDownState(Port_B, Pin_8, Pull_Up);
 	GpioPullUpDownState(Port_B, Pin_9, Pull_Up);
 
-	I2C_Clock(I2C_1,Enabled);
+	I2C_Clock(I2C1_Alt,Enabled);
 
 	status = I2C_config(&config);
 
@@ -37,43 +38,44 @@ Status_code_t I2C1_Init_Master(i2c_config_parameters_t config){
 	return status;
 }
 
-Status_code_t I2C1_Init_Slave(uint8_t addrs){
-
-	Status_code_t status = Success;
-
-	SetPinMode(Port_B, Pin_8, Alt_func_mode); //SCL
-	SetPinMode(Port_B, Pin_9, Alt_func_mode); //SDA
-
-	GpioSetAlternativeFunction(Port_B, Pin_8, I2C1_I2C2_I2C3);
-	GpioSetAlternativeFunction(Port_B, Pin_9, I2C1_I2C2_I2C3);
-
-	Gpio_Output_type(Port_B, Pin_8, Open_drain);
-	Gpio_Output_type(Port_B, Pin_9, Open_drain);
-
-	GpioPullUpDownState(Port_B, Pin_8, Pull_Up);
-	GpioPullUpDownState(Port_B, Pin_9, Pull_Up);
-
-	I2C_Clock(I2C_1,Enabled);
-
-	I2C_Reset_Protocol(I2C1_ADDRESS);
-	I2C_Peripherial_Mode(I2C1_ADDRESS, Disabled);
-
-	status = I2C_Set_Clock_frecuency(I2C1_ADDRESS, APB1_CLOCK);
-
-	if(status != Success){
-		return status;
-	}
-
-	I2C_slave_config(I2C1_ADDRESS,addrs);
-	I2C_Set_ACK_state(I2C1_ADDRESS, Enabled);
-
-	I2C_Peripherial_Mode(I2C1_ADDRESS, Enabled);
-
-
-
-
-	return status;
-}
+//dummy pendiete
+//Status_code_t I2C1_Init_Slave(uint8_t addrs){
+//
+//	Status_code_t status = Success;
+//
+//	SetPinMode(Port_B, Pin_8, Alt_func_mode); //SCL
+//	SetPinMode(Port_B, Pin_9, Alt_func_mode); //SDA
+//
+//	GpioSetAlternativeFunction(Port_B, Pin_8, I2C1_I2C2_I2C3);
+//	GpioSetAlternativeFunction(Port_B, Pin_9, I2C1_I2C2_I2C3);
+//
+//	Gpio_Output_type(Port_B, Pin_8, Open_drain);
+//	Gpio_Output_type(Port_B, Pin_9, Open_drain);
+//
+//	GpioPullUpDownState(Port_B, Pin_8, Pull_Up);
+//	GpioPullUpDownState(Port_B, Pin_9, Pull_Up);
+//
+//	I2C_Clock(I2C1_Alt,Enabled);
+//
+//	I2C_Reset_Protocol(I2C1_ADDRESS);
+//	I2C_Peripherial_Mode(I2C1_ADDRESS, Disabled);
+//
+//	status = I2C_Set_Clock_frecuency(I2C1_ADDRESS, APB1_CLOCK);
+//
+//	if(status != Success){
+//		return status;
+//	}
+//
+//	I2C_slave_config(I2C1_ADDRESS,addrs);
+//	I2C_ACK_bit(I2C1_ADDRESS, Enabled);
+//
+//	I2C_Peripherial_Mode(I2C1_ADDRESS, Enabled);
+//
+//
+//
+//
+//	return status;
+//}
 
 Status_code_t I2C3_Init_Master(i2c_config_parameters_t config){
 
@@ -91,7 +93,7 @@ Status_code_t I2C3_Init_Master(i2c_config_parameters_t config){
 	GpioPullUpDownState(Port_A, Pin_8, Pull_Up);
 	GpioPullUpDownState(Port_C, Pin_9, Pull_Up);
 
-	I2C_Clock(I2C_3,Enabled);
+	I2C_Clock(I2C3_Alt,Enabled);
 
 	status = I2C_config(&config);
 
@@ -103,60 +105,442 @@ Status_code_t I2C3_Init_Master(i2c_config_parameters_t config){
 	return status;
 
 }
+ //dummy pendiente
+//Status_code_t I2C3_Init_Slave(uint8_t addrs){
+//
+//	Status_code_t status = Success;
+//
+//	SetPinMode(Port_A, Pin_8, Alt_func_mode); //SCL
+//	SetPinMode(Port_C, Pin_9, Alt_func_mode); //SDA
+//
+//	GpioSetAlternativeFunction(Port_A, Pin_8, I2C1_I2C2_I2C3);
+//	GpioSetAlternativeFunction(Port_C, Pin_9, I2C1_I2C2_I2C3);
+//
+//	Gpio_Output_type(Port_A, Pin_8, Open_drain);
+//	Gpio_Output_type(Port_C, Pin_9, Open_drain);
+//
+//	GpioPullUpDownState(Port_A, Pin_8, Pull_Up);
+//	GpioPullUpDownState(Port_C, Pin_9, Pull_Up);
+//
+//	I2C_Clock(I2C3_Alt,Enabled);
+//
+//
+//	I2C_Reset_Protocol(I2C3_ADDRESS);
+//	I2C_Peripherial_Mode(I2C3_ADDRESS, Disabled);
+//	status = I2C_Set_Clock_frecuency(I2C3_ADDRESS, APB1_CLOCK);
+//
+//	if(status != Success){
+//		return status;
+//	}
+//
+//	I2C_slave_config(I2C3_ADDRESS,addrs);
+//	I2C_ACK_bit(I2C3_ADDRESS, Enabled);
+//
+//	I2C_Peripherial_Mode(I2C3_ADDRESS, Enabled);
+//
+//
+//	return status;
+//
+//}
 
-Status_code_t I2C3_Init_Slave(uint8_t addrs){
 
+Status_code_t I2C_Write(I2C_alternative_t i2c_alt,uint8_t addr, uint8_t* data_sent, uint32_t data_size){
+	//bit 0 for write
 	Status_code_t status = Success;
+	I2CMapAddr_t I2C_addr = I2C1_ADDRESS;
 
-	SetPinMode(Port_A, Pin_8, Alt_func_mode); //SCL
-	SetPinMode(Port_C, Pin_9, Alt_func_mode); //SDA
+	if(i2c_alt == I2C3_Alt){
+		I2C_addr = I2C3_ADDRESS;
+	}
 
-	GpioSetAlternativeFunction(Port_A, Pin_8, I2C1_I2C2_I2C3);
-	GpioSetAlternativeFunction(Port_C, Pin_9, I2C1_I2C2_I2C3);
+	__IO uint32_t *I2C_DR_Reg = (__IO uint32_t *)(I2C_addr + I2C_DR);
+	__IO uint32_t *I2C_SR2_Reg = (__IO uint32_t *)(I2C_addr + I2C_SR2);
 
-	Gpio_Output_type(Port_A, Pin_8, Open_drain);
-	Gpio_Output_type(Port_C, Pin_9, Open_drain);
-
-	GpioPullUpDownState(Port_A, Pin_8, Pull_Up);
-	GpioPullUpDownState(Port_C, Pin_9, Pull_Up);
-
-	I2C_Clock(I2C_3,Enabled);
-
-
-	I2C_Reset_Protocol(I2C3_ADDRESS);
-	I2C_Peripherial_Mode(I2C3_ADDRESS, Disabled);
-	status = I2C_Set_Clock_frecuency(I2C3_ADDRESS, APB1_CLOCK);
-
+	////////////////////////////////////////////// PART1 /////////////////////////////////////////////////
+	status = TIM11_Init(I2C_MAX_TIMEOUT);
 	if(status != Success){
 		return status;
 	}
+	TIM11_Start();
 
-	I2C_slave_config(I2C3_ADDRESS,addrs);
-	I2C_Set_ACK_state(I2C3_ADDRESS, Enabled);
+	while(I2C_Busy_State(I2C_addr) && !TIM11_GET_interrupt_flag_status()){}
 
-	I2C_Peripherial_Mode(I2C3_ADDRESS, Enabled);
+	if( TIM11_GET_interrupt_flag_status() ){
+		TIM11_Deinit();
+		TIM11_clear_interrupt_flag();
+		return Timeout;
+	}
+
+	TIM11_Deinit();
+	TIM11_clear_interrupt_flag();
+
+	////////////////////////////////////////////// PART2 /////////////////////////////////////////////////
+
+	I2C_START_bit(I2C_addr,Enabled); //START bit
+
+	////////////////////////////////////////////// PART3 /////////////////////////////////////////////////
+
+	status = TIM11_Init(I2C_MAX_TIMEOUT);
+	if(status != Success){
+		I2C_STOP_bit(I2C_addr, Enabled); // STOP
+		return status;
+	}
+	TIM11_Start();
+
+	while(!I2C_status_flag(I2C_addr, I2C_SB) && !TIM11_GET_interrupt_flag_status()){
+
+	    if(I2C_status_flag(I2C_addr, I2C_BERR)){
+			TIM11_Deinit();
+			TIM11_clear_interrupt_flag();
+	    	I2C_Reset_BERR_bit(I2C_addr);
+	        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+	        return I2C_bus_error;
+	    }
+
+	}
+
+	if( TIM11_GET_interrupt_flag_status() ){
+		TIM11_Deinit();
+		TIM11_clear_interrupt_flag();
+		I2C_STOP_bit(I2C_addr, Enabled);// STOP
+		return Timeout;
+	}
+
+	TIM11_Deinit();
+	TIM11_clear_interrupt_flag();
+	////////////////////////////////////////////// PART4 /////////////////////////////////////////////////
+
+	*I2C_DR_Reg = addr<<1; //recorremos en 1 para que al final tenga un 0 representando un write
+
+	////////////////////////////////////////////// PART5 /////////////////////////////////////////////////
+
+	status = TIM11_Init(I2C_MAX_TIMEOUT);
+	if(status != Success){
+        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+		return status;
+	}
+	TIM11_Start();
+
+	while(!I2C_status_flag(I2C_addr, I2C_ADDR) && !TIM11_GET_interrupt_flag_status()){
+
+		if(I2C_status_flag(I2C_addr, I2C_AF)){
+			TIM11_Deinit();
+			TIM11_clear_interrupt_flag();
+	        I2C_Reset_ACK_bit(I2C_addr);
+	        I2C_STOP_bit(I2C_addr, Enabled); // Inmediatamente mandamos STOP
+			return I2C_NACK;
+		}
+
+	    if(I2C_status_flag(I2C_addr, I2C_BERR)){
+			TIM11_Deinit();
+			TIM11_clear_interrupt_flag();
+	    	I2C_Reset_BERR_bit(I2C_addr);
+	        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+	        return I2C_bus_error;
+	    }
+	}
+
+	if( TIM11_GET_interrupt_flag_status() ){
+		TIM11_Deinit();
+		TIM11_clear_interrupt_flag();
+        I2C_STOP_bit(I2C_addr, Enabled); // Inmediatamente mandamos STOP
+		return Timeout;
+	}
+
+	TIM11_Deinit();
+	TIM11_clear_interrupt_flag();
 
 
-	return status;
+	////////////////////////////////////////////// PART6 /////////////////////////////////////////////////
+	(void)*I2C_SR2_Reg;// Dummy read para limpiar la bandera ADDR
+
+	status = TIM11_Init(I2C_MAX_TIMEOUT);
+	if(status != Success){
+        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+		return status;
+	}
+	TIM11_Start();
+
+	for(uint32_t reg =0; reg<data_size; reg++){
+
+		while(!I2C_status_flag(I2C_addr, I2C_TxE) && !TIM11_GET_interrupt_flag_status()){
+
+			if(I2C_status_flag(I2C_addr, I2C_AF)){
+				TIM11_Deinit();
+				TIM11_clear_interrupt_flag();
+		        I2C_Reset_ACK_bit(I2C_addr);
+		        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+				return I2C_NACK;
+			}
+		    if(I2C_status_flag(I2C_addr, I2C_BERR)){
+				TIM11_Deinit();
+				TIM11_clear_interrupt_flag();
+		    	I2C_Reset_BERR_bit(I2C_addr);
+		        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+		        return I2C_bus_error;
+		    }
+		}
+
+    	if( TIM11_GET_interrupt_flag_status() ){
+    		TIM11_Deinit();
+    		TIM11_clear_interrupt_flag();
+	        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+    		return Timeout;
+    	}
+
+		*I2C_DR_Reg = data_sent[reg];
+
+	}
+
+	TIM11_Deinit();
+	TIM11_clear_interrupt_flag();
+
+	////////////////////////////////////////////// PART7 /////////////////////////////////////////////////
+
+	status = TIM11_Init(I2C_MAX_TIMEOUT);
+	if(status != Success){
+        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+		return status;
+	}
+	TIM11_Start();
+
+	while(!I2C_status_flag(I2C_addr, I2C_BTF) && !TIM11_GET_interrupt_flag_status()){
+
+	    if(I2C_status_flag(I2C_addr, I2C_BERR)){
+			TIM11_Deinit();
+			TIM11_clear_interrupt_flag();
+	    	I2C_Reset_BERR_bit(I2C_addr);
+	        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+	        return I2C_bus_error;
+	    }
+
+	}
+
+	if( TIM11_GET_interrupt_flag_status() ){
+		TIM11_Deinit();
+		TIM11_clear_interrupt_flag();
+        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+		return Timeout;
+	}
+
+	TIM11_Deinit();
+	TIM11_clear_interrupt_flag();
+
+	I2C_STOP_bit(I2C_addr,Enabled);
+
+	return Success;
 
 }
 
-
-Status_code_t I2C_Write(I2C_alternative_t i2c_alt,uint8_t addrs, uint8_t* data_sent, uint32_t data_size){
-	//bit 0 for write
-	Status_code_t status = Success;
-
-	return status;
-
-}
-
-Status_code_t I2C_Read(I2C_alternative_t i2c_alt, uint8_t addrs, uint8_t* data_received, uint32_t data_size_expected){
+Status_code_t I2C_Read(I2C_alternative_t i2c_alt, uint8_t addr, uint8_t* data_received, uint32_t data_size_expected){
 	//bit 1 for read
 	Status_code_t status = Success;
+	I2CMapAddr_t I2C_addr = I2C1_ADDRESS;
 
-	return status;
+	if(i2c_alt == I2C3_Alt){
+		I2C_addr = I2C3_ADDRESS;
+	}
+
+	__IO uint32_t *I2C_DR_Reg = (__IO uint32_t *)(I2C_addr + I2C_DR);
+	__IO uint32_t *I2C_SR2_Reg = (__IO uint32_t *)(I2C_addr + I2C_SR2);
+
+
+	status = TIM11_Init(I2C_MAX_TIMEOUT);
+	if(status != Success){
+		return status;
+	}
+	TIM11_Start();
+
+	while(I2C_Busy_State(I2C_addr) && !TIM11_GET_interrupt_flag_status()){}
+
+	if( TIM11_GET_interrupt_flag_status() ){
+		TIM11_Deinit();
+		TIM11_clear_interrupt_flag();
+		return Timeout;
+	}
+
+	TIM11_Deinit();
+	TIM11_clear_interrupt_flag();
+
+
+    I2C_ACK_bit(I2C_addr, Enabled); // Aseguramos que el ACK esté habilitado al principio
+
+    I2C_START_bit(I2C_addr,Enabled); //START
+
+	status = TIM11_Init(I2C_MAX_TIMEOUT);
+	if(status != Success){
+        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+		return status;
+	}
+	TIM11_Start();
+
+	while(!I2C_status_flag(I2C_addr, I2C_SB) && !TIM11_GET_interrupt_flag_status()){
+
+	    if(I2C_status_flag(I2C_addr, I2C_BERR)){
+			TIM11_Deinit();
+			TIM11_clear_interrupt_flag();
+	    	I2C_Reset_BERR_bit(I2C_addr);
+	        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+	        return I2C_bus_error;
+	    }
+
+	}
+
+	if( TIM11_GET_interrupt_flag_status() ){
+		TIM11_Deinit();
+		TIM11_clear_interrupt_flag();
+        I2C_STOP_bit(I2C_addr, Enabled);// STOP
+		return Timeout;
+	}
+
+	TIM11_Deinit();
+	TIM11_clear_interrupt_flag();
+
+	*I2C_DR_Reg = (addr<<1 | 1); //recorremos en 1 y agregamos 1 para que sea read
+
+	status = TIM11_Init(I2C_MAX_TIMEOUT);
+	if(status != Success){
+        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+		return status;
+	}
+	TIM11_Start();
+
+	while(!I2C_status_flag(I2C_addr, I2C_ADDR) && !TIM11_GET_interrupt_flag_status()){
+
+		if(I2C_status_flag(I2C_addr, I2C_AF)){
+			TIM11_Deinit();
+			TIM11_clear_interrupt_flag();
+	        I2C_Reset_ACK_bit(I2C_addr);
+	        I2C_STOP_bit(I2C_addr, Enabled); // Inmediatamente mandamos STOP
+			return I2C_NACK;
+		}
+
+	    if(I2C_status_flag(I2C_addr, I2C_BERR)){
+			TIM11_Deinit();
+			TIM11_clear_interrupt_flag();
+	    	I2C_Reset_BERR_bit(I2C_addr);
+	        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+	        return I2C_bus_error;
+	    }
+	}
+
+	if( TIM11_GET_interrupt_flag_status() ){
+		TIM11_Deinit();
+		TIM11_clear_interrupt_flag();
+        I2C_STOP_bit(I2C_addr, Enabled); // Inmediatamente mandamos STOP
+		return Timeout;
+	}
+
+	TIM11_Deinit();
+	TIM11_clear_interrupt_flag();
+
+
+	if(data_size_expected == 1){
+		I2C_ACK_bit(I2C_addr, Disabled);
+        (void)*I2C_SR2_Reg;
+        I2C_STOP_bit(I2C_addr, Enabled);
+
+    	status = TIM11_Init(I2C_MAX_TIMEOUT);
+    	if(status != Success){
+    		return status;
+    	}
+    	TIM11_Start();
+
+        if(I2C_status_flag(I2C_addr, I2C_OVR)){
+            I2C_Reset_OVR_bit(I2C_addr);
+            I2C_STOP_bit(I2C_addr, Enabled); // STOP inmediato
+            return I2C_overrun_error;
+        }
+
+        while(!I2C_status_flag(I2C_addr, I2C_RxNE) && !TIM11_GET_interrupt_flag_status()){
+
+    	    if(I2C_status_flag(I2C_addr, I2C_BERR)){
+    			TIM11_Deinit();
+    			TIM11_clear_interrupt_flag();
+    	    	I2C_Reset_BERR_bit(I2C_addr);
+    	        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+    	        return I2C_bus_error;
+    	    }
+
+        }
+
+        if(I2C_status_flag(I2C_addr, I2C_OVR)){
+            I2C_Reset_OVR_bit(I2C_addr);
+            I2C_STOP_bit(I2C_addr, Enabled); // STOP inmediato
+            return I2C_overrun_error;
+        }
+
+    	if( TIM11_GET_interrupt_flag_status() ){
+    		TIM11_Deinit();
+    		TIM11_clear_interrupt_flag();
+    		return Timeout;
+    	}
+
+    	TIM11_Deinit();
+    	TIM11_clear_interrupt_flag();
+
+        data_received[0] = (uint8_t)(*I2C_DR_Reg);
+
+	}else{
+        (void)*I2C_SR2_Reg;
+		status = TIM11_Init(I2C_MAX_TIMEOUT);
+		if(status != Success){
+	        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+			return status;
+		}
+		TIM11_Start();
+
+		for(uint32_t i = 0; i<data_size_expected; i++){
+			if(i == (data_size_expected - 2)){
+				I2C_ACK_bit(I2C_addr, Disabled);
+		        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+
+			}
+
+	        if(I2C_status_flag(I2C_addr, I2C_OVR)){
+	            I2C_Reset_OVR_bit(I2C_addr);
+	            I2C_STOP_bit(I2C_addr, Enabled); // STOP inmediato
+	            return I2C_overrun_error;
+	        }
+
+	        while(!I2C_status_flag(I2C_addr, I2C_RxNE) && !TIM11_GET_interrupt_flag_status()){
+
+	    	    if(I2C_status_flag(I2C_addr, I2C_BERR)){
+	    			TIM11_Deinit();
+	    			TIM11_clear_interrupt_flag();
+	    	    	I2C_Reset_BERR_bit(I2C_addr);
+	    	        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+	    	        return I2C_bus_error;
+	    	    }
+
+	        }
+
+	        if(I2C_status_flag(I2C_addr, I2C_OVR)){
+	            I2C_Reset_OVR_bit(I2C_addr);
+	            I2C_STOP_bit(I2C_addr, Enabled); // STOP inmediato
+	            return I2C_overrun_error;
+	        }
+
+	    	if( TIM11_GET_interrupt_flag_status() ){
+	    		TIM11_Deinit();
+	    		TIM11_clear_interrupt_flag();
+		        I2C_STOP_bit(I2C_addr, Enabled); // STOP
+	    		return Timeout;
+	    	}
+
+
+	    	data_received[i] = (uint8_t)(*I2C_DR_Reg);
+		}
+
+		TIM11_Deinit();
+		TIM11_clear_interrupt_flag();
+	}
+
+
+	return Success;
 
 }
+
 
 Status_code_t I2C1_Deinit(void){
 
@@ -166,7 +550,7 @@ Status_code_t I2C1_Deinit(void){
 	GpioPullUpDownState(Port_B, Pin_8, No_pull_No_Down);
 	GpioPullUpDownState(Port_B, Pin_9, No_pull_No_Down);
 
-	I2C_Clock(I2C_1,Disabled);
+	I2C_Clock(I2C1_Alt,Disabled);
 
 	return Success;
 }
@@ -179,7 +563,7 @@ Status_code_t I2C3_Deinit(void){
 	GpioPullUpDownState(Port_A, Pin_8, No_pull_No_Down);
 	GpioPullUpDownState(Port_C, Pin_9, No_pull_No_Down);
 
-	I2C_Clock(I2C_3,Disabled);
+	I2C_Clock(I2C3_Alt,Disabled);
 
 
 	return Success;
@@ -249,7 +633,6 @@ void I2C_Reset_Protocol(I2CMapAddr_t I2C_addr){
 
 
 
-
 Status_code_t I2C_Set_Clock_frecuency(I2CMapAddr_t I2C_addr, uint32_t peripherial_clock){
 	__IO uint32_t *I2C_CR2_Reg = (__IO uint32_t *)(I2C_addr + I2C_CR2);
 
@@ -272,12 +655,6 @@ void I2C_Set_FM_Duty(I2CMapAddr_t I2C_addr, i2c_duty_t duty){
 
 }
 
-void I2C_Set_ACK_state(I2CMapAddr_t I2C_addr, Enabled_Disabled_t state){
-	__IO uint32_t *I2C_CR1_Reg = (__IO uint32_t *)(I2C_addr + I2C_CR1);
-
-    *I2C_CR1_Reg = (state) ? (*I2C_CR1_Reg | (I2C_ACK)) : (*I2C_CR1_Reg & ~(I2C_ACK));
-
-}
 
 Status_code_t I2C_Speed_Mode(I2CMapAddr_t I2C_addr, i2c_config_parameters_t* config, uint32_t peripherial_clock){
 
@@ -364,3 +741,67 @@ void I2C_Set_Trise(I2CMapAddr_t I2C_addr, i2c_baudrate_t baudrate, uint32_t peri
 	*I2C_TRISE_reg |= Trise_value<<I2C_TRISE_enum;
 
 }
+
+
+
+
+bool I2C_status_flag(I2CMapAddr_t I2C_addr, I2C_SR1_t flag){
+
+	__I uint32_t *I2C_SR1_Reg = (__I uint32_t *)(I2C_addr + I2C_SR1);
+	return (*I2C_SR1_Reg && flag); //will return the state
+
+
+}
+
+bool I2C_Busy_State(I2CMapAddr_t I2C_addr){
+	__I uint32_t *I2C_SR2_Reg = (__I uint32_t *)(I2C_addr + I2C_SR2);
+
+	return (*I2C_SR2_Reg && I2C_BUSY); //will return true if is busy and 0 if is not
+
+}
+
+void I2C_START_bit(I2CMapAddr_t I2C_addr, Enabled_Disabled_t state){
+	__IO uint32_t *I2C_CR1_Reg = (__IO uint32_t *)(I2C_addr + I2C_CR1);
+
+    *I2C_CR1_Reg = (state) ? (*I2C_CR1_Reg | (I2C_START)) : (*I2C_CR1_Reg & ~(I2C_START));
+
+}
+
+void I2C_STOP_bit(I2CMapAddr_t I2C_addr, Enabled_Disabled_t state){
+	__IO uint32_t *I2C_CR1_Reg = (__IO uint32_t *)(I2C_addr + I2C_CR1);
+
+    *I2C_CR1_Reg = (state) ? (*I2C_CR1_Reg | (I2C_STOP)) : (*I2C_CR1_Reg & ~(I2C_STOP));
+
+}
+
+void I2C_ACK_bit(I2CMapAddr_t I2C_addr, Enabled_Disabled_t state){
+	__IO uint32_t *I2C_CR1_Reg = (__IO uint32_t *)(I2C_addr + I2C_CR1);
+
+    *I2C_CR1_Reg = (state) ? (*I2C_CR1_Reg | (I2C_ACK)) : (*I2C_CR1_Reg & ~(I2C_ACK));
+
+}
+
+
+void I2C_Reset_ACK_bit(I2CMapAddr_t I2C_addr){
+	__IO uint32_t *I2C_SR1_Reg = (__IO uint32_t *)(I2C_addr + I2C_SR1);
+
+    *I2C_SR1_Reg &= ~(I2C_AF);
+
+}
+
+void I2C_Reset_OVR_bit(I2CMapAddr_t I2C_addr){
+	__IO uint32_t *I2C_SR1_Reg = (__IO uint32_t *)(I2C_addr + I2C_SR1);
+
+    *I2C_SR1_Reg &= ~(I2C_OVR);
+
+}
+
+void I2C_Reset_BERR_bit(I2CMapAddr_t I2C_addr){
+	__IO uint32_t *I2C_SR1_Reg = (__IO uint32_t *)(I2C_addr + I2C_SR1);
+
+    *I2C_SR1_Reg &= ~(I2C_BERR);
+
+}
+
+
+

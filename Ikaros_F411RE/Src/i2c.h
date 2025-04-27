@@ -13,12 +13,12 @@
 #define MAX_SM_RISE_TIME_ns  (1000)
 #define MAX_FM_RISE_TIME_ns  (300)
 #define DIVIDE_FOR_TRISE_ns  (1000000000)
-
+#define I2C_MAX_TIMEOUT		 (3000)
 
 
 typedef enum{
-	I2C_1 = 21U, 		//SCL:(B8)  SDA:(B9) //21 means RCC APB1 bit 21
-	I2C_3 = 23U, 		//SCL:(A8)  SDA:(C9) //21 means RCC APB1 bit 23
+	I2C1_Alt = 21U, 		//SCL:(B8)  SDA:(B9) //21 means RCC APB1 bit 21
+	I2C3_Alt = 23U, 		//SCL:(A8)  SDA:(C9) //21 means RCC APB1 bit 23
 
 }I2C_alternative_t;
 
@@ -162,6 +162,19 @@ typedef enum{
 }i2c_duty_t;
 
 
+//typedef enum{
+//	Start_status_flag = I2C_SB,
+//	Addres_sent_status_flag = I2C_ADDR,
+//	Byte_transfer_status_flag = I2C_BTF,
+//	Bit_10_header_sent_status_flag = I2C_ADD10,
+//	Stop_status_flag = I2C_STOPF,
+//	TxE_status_flag = I2C_TxE,
+//	Bus_error_status_flag = I2C_BERR,
+//	Arbitration_lost_status_flag = I2C_ARLO,
+//	ACK_fail_status_flag = I2C_AF,
+//	OVR_status_flag = I2C_OVR,
+//
+//}i2c_status_flags_t;
 
 
 typedef struct{
@@ -177,8 +190,8 @@ Status_code_t I2C1_Init_Slave(uint8_t addrs);
 Status_code_t I2C3_Init_Slave(uint8_t addrs);
 
 
-Status_code_t I2C_Write(I2C_alternative_t i2c_alt,uint8_t addrs, uint8_t* data_sent, uint32_t data_size);
-Status_code_t I2C_Read(I2C_alternative_t i2c_alt, uint8_t addrs, uint8_t* data_received, uint32_t data_size_expected);
+Status_code_t I2C_Write(I2C_alternative_t i2c_alt,uint8_t addr, uint8_t* data_sent, uint32_t data_size);
+Status_code_t I2C_Read(I2C_alternative_t i2c_alt, uint8_t addr, uint8_t* data_received, uint32_t data_size_expected);
 Status_code_t I2C1_Deinit(void);
 Status_code_t I2C3_Deinit(void);
 
@@ -191,9 +204,17 @@ void I2C_Peripherial_Mode(I2CMapAddr_t I2C_addr,Enabled_Disabled_t state);
 void I2C_Reset_Protocol(I2CMapAddr_t I2C_addr);
 Status_code_t I2C_Set_Clock_frecuency(I2CMapAddr_t I2C_addr,uint32_t Clock_frecuency_hz);
 void I2C_Set_FM_Duty(I2CMapAddr_t I2C_addr, i2c_duty_t duty);
-void I2C_Set_ACK_state(I2CMapAddr_t I2C_addr, Enabled_Disabled_t state);
 Status_code_t I2C_Speed_Mode(I2CMapAddr_t I2C_addr, i2c_config_parameters_t* config, uint32_t peripherial_clock);
 Status_code_t I2C_Set_CCR(I2CMapAddr_t I2C_addr, i2c_config_parameters_t *config, uint32_t peripherial_clock);
 void I2C_Set_Trise(I2CMapAddr_t I2C_addr, i2c_baudrate_t baudrate, uint32_t peripherial_clock);
+
+bool I2C_status_flag(I2CMapAddr_t I2C_addr, I2C_SR1_t flag);
+bool I2C_Busy_State(I2CMapAddr_t I2C_addr);
+void I2C_START_bit(I2CMapAddr_t I2C_addr, Enabled_Disabled_t state);
+void I2C_STOP_bit(I2CMapAddr_t I2C_addr, Enabled_Disabled_t state);
+void I2C_ACK_bit(I2CMapAddr_t I2C_addr, Enabled_Disabled_t state);
+void I2C_Reset_ACK_bit(I2CMapAddr_t I2C_addr);
+void I2C_Reset_OVR_bit(I2CMapAddr_t I2C_addr);
+void I2C_Reset_BERR_bit(I2CMapAddr_t I2C_addr);
 
 #endif /* DRIVERS_I2C_H_ */

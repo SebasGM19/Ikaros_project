@@ -73,7 +73,10 @@ typedef enum{
 	WWDG_invalid_parameter,
 
 	I2C_frecuency_not_supported,
-	I2C_clock_value_out_of_range
+	I2C_clock_value_out_of_range,
+	I2C_NACK,
+	I2C_overrun_error,
+	I2C_bus_error,
 
 }Status_code_t;
 
