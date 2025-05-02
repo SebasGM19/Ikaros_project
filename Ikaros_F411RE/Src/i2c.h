@@ -13,7 +13,7 @@
 #define MAX_SM_RISE_TIME_ns  (1000)
 #define MAX_FM_RISE_TIME_ns  (300)
 #define DIVIDE_FOR_TRISE_ns  (1000000000)
-#define I2C_MAX_TIMEOUT		 (3000)
+#define I2C_MAX_TIMEOUT		 (6000)
 
 
 typedef enum{
@@ -155,10 +155,8 @@ typedef enum{
 
 
 typedef enum{
-	duty_2_1 	  = 0U,
+	duty_2_1  = 0U, // Standard value
 	duty_16_9 = 1U,
-	duny_none = 2U,
-
 }i2c_duty_t;
 
 
@@ -198,7 +196,7 @@ Status_code_t I2C3_Deinit(void);
 
 
 void I2C_Clock(I2C_alternative_t I2C, Enabled_Disabled_t state);
-Status_code_t I2C_config(i2c_config_parameters_t *config);
+Status_code_t I2C_config(I2CMapAddr_t I2C_addr,i2c_config_parameters_t *config);
 void I2C_slave_config(I2CMapAddr_t I2C_addr,uint8_t slave_addrs);
 void I2C_Peripherial_Mode(I2CMapAddr_t I2C_addr,Enabled_Disabled_t state);
 void I2C_Reset_Protocol(I2CMapAddr_t I2C_addr);

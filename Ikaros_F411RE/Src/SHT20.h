@@ -17,7 +17,7 @@
 
 
 
-Status_code_t SHT20_Read_Temperature(I2C_alternative_t I2C, int16_t* temp);
-Status_code_t SHT20_Read_Humedad(I2C_alternative_t I2C, uint16_t* hum);
+Status_code_t SHT20ReadTemperature(I2C_alternative_t I2C, int16_t* temp);
+Status_code_t SHT20ReadHumedad(I2C_alternative_t I2C, uint16_t* hum);
 
 #endif /* SHT20_H_ */

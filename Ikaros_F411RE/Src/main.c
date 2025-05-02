@@ -26,17 +26,36 @@
 #include "watchdog.h"
 #include "state_machine.h"
 #include "i2c.h"
-
+#include "SHT20.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
 
-
 int main(void){
 
-	//commit
+i2c_config_parameters_t I2C_config;
+Status_code_t status =Success;
+uint16_t humedad =0;
+int16_t temperature =0;
+
+
+I2C_config.baudrate = FastMode_400Kbps;
+I2C_config.duty = duty_2_1;
+
+	SetPinMode(Port_C, Pin_9, Output);
+	GPIO_DigitalWrite(Port_C, Pin_9, High);
+
+	I2C1_Init_Master(I2C_config);
+
+
+	while(1){
+	status = SHT20ReadHumedad(I2C1_Alt, &humedad);
+
+//	status = SHT20ReadTemperature(I2C1_Alt, &temperature);
+
+	}
 
 	return 0;
 }

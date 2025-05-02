@@ -28,7 +28,7 @@ Status_code_t I2C1_Init_Master(i2c_config_parameters_t config){
 
 	I2C_Clock(I2C1_Alt,Enabled);
 
-	status = I2C_config(&config);
+	status = I2C_config(I2C1_ADDRESS,&config);
 
 
 	if(status != Success){
@@ -95,7 +95,7 @@ Status_code_t I2C3_Init_Master(i2c_config_parameters_t config){
 
 	I2C_Clock(I2C3_Alt,Enabled);
 
-	status = I2C_config(&config);
+	status = I2C_config(I2C3_ADDRESS,&config);
 
 	if(status != Success){
 		return status;
@@ -153,7 +153,7 @@ Status_code_t I2C_Write(I2C_alternative_t i2c_alt,uint8_t addr, uint8_t* data_se
 		I2C_addr = I2C3_ADDRESS;
 	}
 
-	__IO uint32_t *I2C_DR_Reg = (__IO uint32_t *)(I2C_addr + I2C_DR);
+	__IO uint8_t *I2C_DR_Reg = (__IO uint8_t *)(I2C_addr + I2C_DR);
 	__IO uint32_t *I2C_SR2_Reg = (__IO uint32_t *)(I2C_addr + I2C_SR2);
 
 	////////////////////////////////////////////// PART1 /////////////////////////////////////////////////
@@ -210,7 +210,7 @@ Status_code_t I2C_Write(I2C_alternative_t i2c_alt,uint8_t addr, uint8_t* data_se
 	TIM11_clear_interrupt_flag();
 	////////////////////////////////////////////// PART4 /////////////////////////////////////////////////
 
-	*I2C_DR_Reg = addr<<1; //recorremos en 1 para que al final tenga un 0 representando un write
+	*I2C_DR_Reg = (uint8_t)(addr<<1); //recorremos en 1 para que al final tenga un 0 representando un write
 
 	////////////////////////////////////////////// PART5 /////////////////////////////////////////////////
 
@@ -288,7 +288,7 @@ Status_code_t I2C_Write(I2C_alternative_t i2c_alt,uint8_t addr, uint8_t* data_se
     		return Timeout;
     	}
 
-		*I2C_DR_Reg = data_sent[reg];
+		*I2C_DR_Reg = (uint8_t)(*(data_sent + reg));
 
 	}
 
@@ -341,7 +341,7 @@ Status_code_t I2C_Read(I2C_alternative_t i2c_alt, uint8_t addr, uint8_t* data_re
 		I2C_addr = I2C3_ADDRESS;
 	}
 
-	__IO uint32_t *I2C_DR_Reg = (__IO uint32_t *)(I2C_addr + I2C_DR);
+	__IO uint8_t *I2C_DR_Reg = (__IO uint8_t *)(I2C_addr + I2C_DR);
 	__IO uint32_t *I2C_SR2_Reg = (__IO uint32_t *)(I2C_addr + I2C_SR2);
 
 
@@ -396,7 +396,7 @@ Status_code_t I2C_Read(I2C_alternative_t i2c_alt, uint8_t addr, uint8_t* data_re
 	TIM11_Deinit();
 	TIM11_clear_interrupt_flag();
 
-	*I2C_DR_Reg = (addr<<1 | 1); //recorremos en 1 y agregamos 1 para que sea read
+	*I2C_DR_Reg = (uint8_t)(addr<<1 | 1); //recorremos en 1 y agregamos 1 para que sea read
 
 	status = TIM11_Init(I2C_MAX_TIMEOUT);
 	if(status != Success){
@@ -582,20 +582,20 @@ void I2C_Clock(I2C_alternative_t I2C, Enabled_Disabled_t state){
 }
 
 
-Status_code_t I2C_config(i2c_config_parameters_t *config){
+Status_code_t I2C_config(I2CMapAddr_t I2C_addr,i2c_config_parameters_t *config){
 	Status_code_t status = Success;
 
-	I2C_Reset_Protocol(I2C3_ADDRESS);
-	I2C_Peripherial_Mode(I2C3_ADDRESS, Disabled);
-	status = I2C_Set_Clock_frecuency(I2C3_ADDRESS, APB1_CLOCK);
+	I2C_Reset_Protocol(I2C_addr);
+	I2C_Peripherial_Mode(I2C_addr, Disabled);
+	status = I2C_Set_Clock_frecuency(I2C_addr, APB1_CLOCK);
 
 	if(status != Success){
 		return status;
 	}
 
-	I2C_Speed_Mode(I2C3_ADDRESS,config, APB1_CLOCK);
+	I2C_Speed_Mode(I2C_addr,config, APB1_CLOCK);
 
-	I2C_Peripherial_Mode(I2C3_ADDRESS, Enabled);
+	I2C_Peripherial_Mode(I2C_addr, Enabled);
 
 
 	return status;
@@ -670,7 +670,7 @@ Status_code_t I2C_Speed_Mode(I2CMapAddr_t I2C_addr, i2c_config_parameters_t* con
 		I2C_Set_FM_Duty(I2C_addr, config->duty);
 	}
 
-	status = I2C_Set_CCR(I2C3_ADDRESS, config, peripherial_clock);
+	status = I2C_Set_CCR(I2C_addr, config, peripherial_clock);
 
 	if(status != Success){
 		return status;
@@ -748,7 +748,7 @@ void I2C_Set_Trise(I2CMapAddr_t I2C_addr, i2c_baudrate_t baudrate, uint32_t peri
 bool I2C_status_flag(I2CMapAddr_t I2C_addr, I2C_SR1_t flag){
 
 	__I uint32_t *I2C_SR1_Reg = (__I uint32_t *)(I2C_addr + I2C_SR1);
-	return (*I2C_SR1_Reg && flag); //will return the state
+	return ((*I2C_SR1_Reg & flag) == flag); //will return the state
 
 
 }
@@ -756,7 +756,7 @@ bool I2C_status_flag(I2CMapAddr_t I2C_addr, I2C_SR1_t flag){
 bool I2C_Busy_State(I2CMapAddr_t I2C_addr){
 	__I uint32_t *I2C_SR2_Reg = (__I uint32_t *)(I2C_addr + I2C_SR2);
 
-	return (*I2C_SR2_Reg && I2C_BUSY); //will return true if is busy and 0 if is not
+	return ((*I2C_SR2_Reg & I2C_BUSY) == I2C_BUSY); //will return true if is busy and 0 if is not
 
 }
 
