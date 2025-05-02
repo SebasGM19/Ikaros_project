@@ -50,7 +50,7 @@ I2C_config.duty = duty_2_1;
 	while(1){
 	status = SHT20ReadHumedad(I2C1_Alt, &humedad);
 
-//	status = SHT20ReadTemperature(I2C1_Alt, &temperature);
+	status = SHT20ReadTemperature(I2C1_Alt, &temperature);
 
 	}
 
