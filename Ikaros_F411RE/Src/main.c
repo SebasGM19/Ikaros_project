@@ -44,9 +44,6 @@ int16_t temperature =0;
 I2C_config.baudrate = FastMode_400Kbps;
 I2C_config.duty = duty_2_1;
 
-	SetPinMode(Port_C, Pin_9, Output);
-	GPIO_DigitalWrite(Port_C, Pin_9, High);
-
 	I2C1_Init_Master(I2C_config);
 
 
