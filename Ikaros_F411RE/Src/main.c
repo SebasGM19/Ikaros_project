@@ -41,7 +41,7 @@ uint16_t humedad =0;
 int16_t temperature =0;
 
 
-I2C_config.baudrate = FastMode_400Kbps;
+I2C_config.baudrate = StandarMode_100Kbps;
 I2C_config.duty = duty_2_1;
 
 	I2C1_Init_Master(I2C_config);
@@ -49,8 +49,10 @@ I2C_config.duty = duty_2_1;
 
 	while(1){
 	status = SHT20ReadHumedad(I2C1_Alt, &humedad);
+	Delay(5000);
 
 	status = SHT20ReadTemperature(I2C1_Alt, &temperature);
+	Delay(5000);
 
 	}
 

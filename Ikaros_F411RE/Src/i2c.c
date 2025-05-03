@@ -171,21 +171,11 @@ Status_code_t I2C_Write(I2C_alternative_t i2c_alt,uint8_t addr, uint8_t* data_se
 		return Timeout;
 	}
 
-	TIM11_Deinit();
-	TIM11_clear_interrupt_flag();
-
 	////////////////////////////////////////////// PART2 /////////////////////////////////////////////////
 
 	I2C_START_bit(I2C_addr,Enabled); //START bit
 
 	////////////////////////////////////////////// PART3 /////////////////////////////////////////////////
-
-	status = TIM11_Init(I2C_MAX_TIMEOUT);
-	if(status != Success){
-		I2C_STOP_bit(I2C_addr, Enabled); // STOP
-		return status;
-	}
-	TIM11_Start();
 
 	while(!I2C_status_flag(I2C_addr, I2C_SB) && !TIM11_GET_interrupt_flag_status()){
 
@@ -206,20 +196,11 @@ Status_code_t I2C_Write(I2C_alternative_t i2c_alt,uint8_t addr, uint8_t* data_se
 		return Timeout;
 	}
 
-	TIM11_Deinit();
-	TIM11_clear_interrupt_flag();
 	////////////////////////////////////////////// PART4 /////////////////////////////////////////////////
 
 	*I2C_DR_Reg = (uint8_t)(addr<<1); //recorremos en 1 para que al final tenga un 0 representando un write
 
 	////////////////////////////////////////////// PART5 /////////////////////////////////////////////////
-
-	status = TIM11_Init(I2C_MAX_TIMEOUT);
-	if(status != Success){
-        I2C_STOP_bit(I2C_addr, Enabled); // STOP
-		return status;
-	}
-	TIM11_Start();
 
 	while(!I2C_status_flag(I2C_addr, I2C_ADDR) && !TIM11_GET_interrupt_flag_status()){
 
@@ -247,19 +228,10 @@ Status_code_t I2C_Write(I2C_alternative_t i2c_alt,uint8_t addr, uint8_t* data_se
 		return Timeout;
 	}
 
-	TIM11_Deinit();
-	TIM11_clear_interrupt_flag();
 
 
 	////////////////////////////////////////////// PART6 /////////////////////////////////////////////////
 	(void)*I2C_SR2_Reg;// Dummy read para limpiar la bandera ADDR
-
-	status = TIM11_Init(I2C_MAX_TIMEOUT);
-	if(status != Success){
-        I2C_STOP_bit(I2C_addr, Enabled); // STOP
-		return status;
-	}
-	TIM11_Start();
 
 	for(uint32_t reg =0; reg<data_size; reg++){
 
@@ -292,17 +264,9 @@ Status_code_t I2C_Write(I2C_alternative_t i2c_alt,uint8_t addr, uint8_t* data_se
 
 	}
 
-	TIM11_Deinit();
-	TIM11_clear_interrupt_flag();
 
 	////////////////////////////////////////////// PART7 /////////////////////////////////////////////////
 
-	status = TIM11_Init(I2C_MAX_TIMEOUT);
-	if(status != Success){
-        I2C_STOP_bit(I2C_addr, Enabled); // STOP
-		return status;
-	}
-	TIM11_Start();
 
 	while(!I2C_status_flag(I2C_addr, I2C_BTF) && !TIM11_GET_interrupt_flag_status()){
 
@@ -323,10 +287,11 @@ Status_code_t I2C_Write(I2C_alternative_t i2c_alt,uint8_t addr, uint8_t* data_se
 		return Timeout;
 	}
 
+	I2C_STOP_bit(I2C_addr,Enabled);
+
 	TIM11_Deinit();
 	TIM11_clear_interrupt_flag();
 
-	I2C_STOP_bit(I2C_addr,Enabled);
 
 	return Success;
 
@@ -359,20 +324,10 @@ Status_code_t I2C_Read(I2C_alternative_t i2c_alt, uint8_t addr, uint8_t* data_re
 		return Timeout;
 	}
 
-	TIM11_Deinit();
-	TIM11_clear_interrupt_flag();
-
 
     I2C_ACK_bit(I2C_addr, Enabled); // Aseguramos que el ACK esté habilitado al principio
 
-    I2C_START_bit(I2C_addr,Enabled); //START
-
-	status = TIM11_Init(I2C_MAX_TIMEOUT);
-	if(status != Success){
-        I2C_STOP_bit(I2C_addr, Enabled); // STOP
-		return status;
-	}
-	TIM11_Start();
+    I2C_START_bit(I2C_addr, Enabled); //START
 
 	while(!I2C_status_flag(I2C_addr, I2C_SB) && !TIM11_GET_interrupt_flag_status()){
 
@@ -393,17 +348,8 @@ Status_code_t I2C_Read(I2C_alternative_t i2c_alt, uint8_t addr, uint8_t* data_re
 		return Timeout;
 	}
 
-	TIM11_Deinit();
-	TIM11_clear_interrupt_flag();
-
 	*I2C_DR_Reg = (uint8_t)(addr<<1 | 1); //recorremos en 1 y agregamos 1 para que sea read
 
-	status = TIM11_Init(I2C_MAX_TIMEOUT);
-	if(status != Success){
-        I2C_STOP_bit(I2C_addr, Enabled); // STOP
-		return status;
-	}
-	TIM11_Start();
 
 	while(!I2C_status_flag(I2C_addr, I2C_ADDR) && !TIM11_GET_interrupt_flag_status()){
 
@@ -431,20 +377,11 @@ Status_code_t I2C_Read(I2C_alternative_t i2c_alt, uint8_t addr, uint8_t* data_re
 		return Timeout;
 	}
 
-	TIM11_Deinit();
-	TIM11_clear_interrupt_flag();
-
-
 	if(data_size_expected == 1){
 		I2C_ACK_bit(I2C_addr, Disabled);
         (void)*I2C_SR2_Reg;
         I2C_STOP_bit(I2C_addr, Enabled);
 
-    	status = TIM11_Init(I2C_MAX_TIMEOUT);
-    	if(status != Success){
-    		return status;
-    	}
-    	TIM11_Start();
 
         if(I2C_status_flag(I2C_addr, I2C_OVR)){
             I2C_Reset_OVR_bit(I2C_addr);
@@ -476,25 +413,18 @@ Status_code_t I2C_Read(I2C_alternative_t i2c_alt, uint8_t addr, uint8_t* data_re
     		return Timeout;
     	}
 
-    	TIM11_Deinit();
-    	TIM11_clear_interrupt_flag();
 
-        data_received[0] = (uint8_t)(*I2C_DR_Reg);
+        (*data_received) = (uint8_t)(*I2C_DR_Reg);
 
 	}else{
         (void)*I2C_SR2_Reg;
-		status = TIM11_Init(I2C_MAX_TIMEOUT);
-		if(status != Success){
-	        I2C_STOP_bit(I2C_addr, Enabled); // STOP
-			return status;
-		}
-		TIM11_Start();
 
 		for(uint32_t i = 0; i<data_size_expected; i++){
-			if(i == (data_size_expected - 2)){
+
+			if(i == (data_size_expected - 1)){
+
 				I2C_ACK_bit(I2C_addr, Disabled);
 		        I2C_STOP_bit(I2C_addr, Enabled); // STOP
-
 			}
 
 	        if(I2C_status_flag(I2C_addr, I2C_OVR)){
@@ -529,13 +459,13 @@ Status_code_t I2C_Read(I2C_alternative_t i2c_alt, uint8_t addr, uint8_t* data_re
 	    	}
 
 
-	    	data_received[i] = (uint8_t)(*I2C_DR_Reg);
+	    	*(data_received + i) = (uint8_t)(*I2C_DR_Reg);
 		}
 
-		TIM11_Deinit();
-		TIM11_clear_interrupt_flag();
 	}
 
+	TIM11_Deinit();
+	TIM11_clear_interrupt_flag();
 
 	return Success;
 

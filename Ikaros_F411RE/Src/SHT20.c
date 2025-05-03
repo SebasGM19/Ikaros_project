@@ -19,13 +19,13 @@ Status_code_t SHT20ReadTemperature(I2C_alternative_t I2C, int16_t* temp){
     if(Success != status){
         return status;
     }
-    Delay(10000);
+    Delay(100000);
 
     status= I2C_Read(I2C,SLAVE_ADDRS,read_data_temp,2);
     if(Success!=status){
         return status;
     }
-    Delay(500000);
+//    Delay(500000);
     decimal_temp = (175.72f * (((read_data_temp[0]<<8 | read_data_temp[1])+1.0f)/65536.0f))-46.85f;
 
     (*temp)=decimal_temp*10;
@@ -43,13 +43,13 @@ Status_code_t SHT20ReadHumedad(I2C_alternative_t I2C, uint16_t* hum){
     if(Success != status){
         return status;
     }
-    Delay(10000);
+    Delay(100000);
 
     status= I2C_Read(I2C,SLAVE_ADDRS,read_data_hum,2);
     if(Success != status){
         return status;
     }
-    Delay(500000);
+//    Delay(500000);
     decimal_hum = (125.0f * (((read_data_hum[0]<<8 | read_data_hum[1])+1.0f)/65536.0f))-6.0f;
 
     (*hum)=decimal_hum*10;
