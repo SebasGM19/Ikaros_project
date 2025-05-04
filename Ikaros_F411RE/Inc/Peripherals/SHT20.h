@@ -8,12 +8,11 @@
 #ifndef SHT20_H_
 #define SHT20_H_
 
-#include "system_settings.h"
-#include "i2c.h"
+#include "../Src/system_settings.h"
+#include "../Drivers/i2c.h"
 
-#define SLAVE_ADDRS (0x40)
-#define TEMP_REG	(0xF3)
-#define HUM_REG		(0xF5)
+#define SHT20_SLAVE_ADDR (0x40)
+
 
 
 

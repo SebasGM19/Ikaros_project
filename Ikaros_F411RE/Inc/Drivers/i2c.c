@@ -6,8 +6,8 @@
  */
 
 #include "i2c.h"
-#include "gpios.h"
-#include "timers.h"
+#include "../Src/gpios.h"
+#include "../Src/timers.h"
 
 
 Status_code_t I2C1_Init_Master(i2c_config_parameters_t config){

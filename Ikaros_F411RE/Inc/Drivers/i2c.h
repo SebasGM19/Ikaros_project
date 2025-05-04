@@ -8,7 +8,7 @@
 #ifndef DRIVERS_I2C_H_
 #define DRIVERS_I2C_H_
 
-#include "system_settings.h"
+#include "../Src/system_settings.h"
 
 #define MAX_SM_RISE_TIME_ns  (1000)
 #define MAX_FM_RISE_TIME_ns  (300)
