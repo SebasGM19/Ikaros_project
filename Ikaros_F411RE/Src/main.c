@@ -25,21 +25,79 @@
 #include "uart.h"
 #include "watchdog.h"
 #include "state_machine.h"
-#include "i2c.h"
 
+#include "../Inc/Drivers/i2c.h"
+
+#include "../Inc/Peripherals/SHT20.h"
+#include "../Inc/Peripherals/BMI160.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
-
-
 int main(void){
 
-	//commit
+	i2c_config_parameters_t I2C_config;
+	Status_code_t status =Success;
+	uint8_t chip_id =0;
+	int16_t temperature =0;
+	PMU_status_t accelerometer  = Normal;
+	PMU_status_t Gyroscope 		= Normal;
+	PMU_status_t magnetomer 	= Normal;
 
+	I2C_config.baudrate = FastMode_400Kbps;
+	I2C_config.duty = duty_2_1;
+
+	I2C1_Init_Master(I2C_config);
+
+	status = BMI160_Chip_ID(I2C1_Alt, &chip_id);
+
+	status =  BMI160_temperature(I2C1_Alt,&temperature);
+
+	status = BMI160_PMU_Status(I2C1_Alt, &accelerometer, &Gyroscope, &magnetomer);
+
+
+	status =  BMI160_Set_Acceleromete_PM(I2C1_Alt, Acc_Normal);
+
+	status =  BMI160_Set_Gyroscope_PM(I2C1_Alt, Gyr_Normal);
+
+	status =  BMI160_Set_Magnetometer_PM(I2C1_Alt, Mag_Normal);
+
+	status = BMI160_PMU_Status(I2C1_Alt, &accelerometer, &Gyroscope, &magnetomer);
+
+	status =  BMI160_temperature(I2C1_Alt,&temperature);
+
+	while(1);
 	return 0;
 }
+
+
+
+//int main(void){
+//
+//i2c_config_parameters_t I2C_config;
+//Status_code_t status =Success;
+//uint16_t humedad =0;
+//int16_t temperature =0;
+//
+//
+//	I2C_config.baudrate = FastMode_400Kbps;
+//	I2C_config.duty = duty_2_1;
+//
+//	I2C1_Init_Master(I2C_config);
+//
+//
+//	while(1){
+//	status = SHT20ReadHumedad(I2C1_Alt, &humedad);
+//	Delay(5000);
+//
+//	status = SHT20ReadTemperature(I2C1_Alt, &temperature);
+//	Delay(5000);
+//
+//	}
+//
+//	return 0;
+//}
 
 
 
