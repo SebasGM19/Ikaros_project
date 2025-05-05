@@ -26,6 +26,11 @@ typedef enum{
 
 
 typedef enum{
+	Not_ready = 0U,
+	Ready 	  = 1U,
+}data_status_t;
+
+typedef enum{
 	Acc_Suspend = 0x10U,
 	Acc_Normal = 0x11U,
 	Acc_Low_Power = 0x12U,
@@ -46,6 +51,24 @@ typedef enum{
 
 }Mag_PM_t;
 
+
+typedef struct{
+	int16_t magnetometer_X;
+	int16_t magnetometer_Y;
+	int16_t magnetometer_Z;
+
+	int16_t gyroscope_X;
+	int16_t gyroscope_Y;
+	int16_t gyroscope_Z;
+
+	int16_t accelerometer_X;
+	int16_t accelerometer_Y;
+	int16_t accelerometer_Z;
+
+	uint16_t hall_resistance;
+
+}BMI160_TotalData_t;
+
 //returns the CHIP ID, typically 0xD1
 Status_code_t BMI160_Chip_ID(I2C_alternative_t I2C, uint8_t *chip_id);
 
@@ -53,8 +76,24 @@ Status_code_t BMI160_Chip_ID(I2C_alternative_t I2C, uint8_t *chip_id);
 Status_code_t BMI160_PMU_Status(I2C_alternative_t I2C,
 				PMU_status_t *Accelerometer, PMU_status_t *Gyroscope, PMU_status_t *Magnetometer);
 
+//this function gets all the data of magnetometer, gyroscope and accelerometer in one struct
+Status_code_t BMI160_Get_TotalData(I2C_alternative_t I2C, BMI160_TotalData_t *parameter);
+
+//this function gets the data of magnetometer in the struct
+Status_code_t BMI160_Get_Magnetometer_Data(I2C_alternative_t I2C, BMI160_TotalData_t *parameter);
+
+//this function gets the data of gyroscope in the struct
+Status_code_t BMI160_Get_Gyroscope_Data(I2C_alternative_t I2C, BMI160_TotalData_t *parameter);
+
+//this function gets the data of accelerometer in the struct
+Status_code_t BMI160_Get_Accelerometer_Data(I2C_alternative_t I2C, BMI160_TotalData_t *parameter);
+
+//this function return the data status if its ready to read
+Status_code_t BMI160_Data_Status(I2C_alternative_t I2C, data_status_t* accelerometer,
+								data_status_t* gyroscope, data_status_t* magnetometer);
+
 //this function get the temperature
-Status_code_t BMI160_temperature(I2C_alternative_t I2C, int16_t *temperature);
+Status_code_t BMI160_Temperature(I2C_alternative_t I2C, int16_t *temperature);
 
 //This function change the power mode of the accelerometer
 Status_code_t BMI160_Set_Acceleromete_PM(I2C_alternative_t I2C, Acc_PM_t selected_ACC_PM);

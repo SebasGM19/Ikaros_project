@@ -52,7 +52,7 @@ int main(void){
 
 	status = BMI160_Chip_ID(I2C1_Alt, &chip_id);
 
-	status =  BMI160_temperature(I2C1_Alt,&temperature);
+	status =  BMI160_Temperature(I2C1_Alt,&temperature);
 
 	status = BMI160_PMU_Status(I2C1_Alt, &accelerometer, &Gyroscope, &magnetomer);
 
@@ -65,7 +65,7 @@ int main(void){
 
 	status = BMI160_PMU_Status(I2C1_Alt, &accelerometer, &Gyroscope, &magnetomer);
 
-	status =  BMI160_temperature(I2C1_Alt,&temperature);
+	status =  BMI160_Temperature(I2C1_Alt,&temperature);
 
 	while(1);
 	return 0;
