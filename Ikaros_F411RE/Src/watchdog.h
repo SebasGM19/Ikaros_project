@@ -48,13 +48,13 @@ typedef enum{
 
 typedef enum{
 
-	reload_512ms,   /*  0.512 s*/
-	reload_1024ms,  /*  1.024 s*/
-	reload_2048ms,  /*  2.048 s*/
-	reload_4096ms,  /*  4.096 s*/
-	reload_8192ms,  /*  8.192 s*/
-	reload_16384ms, /* 16.384 s*/
-	reload_32768ms, /* 32.768 s*/
+	reload_512ms   = 0U,   /*  0.512 s*/
+	reload_1024ms  = 1U,  /*  1.024 s*/
+	reload_2048ms  = 2U,  /*  2.048 s*/
+	reload_4096ms  = 3U,  /*  4.096 s*/
+	reload_8192ms  = 4U,  /*  8.192 s*/
+	reload_16384ms = 5U, /* 16.384 s*/
+	reload_32768ms = 6U, /* 32.768 s*/
 
 }IWDG_reload_time_t;
 
@@ -62,7 +62,7 @@ typedef enum{
 	IWDG_KR  = 	0x00U,
 	IWDG_PR  = 	0x04U,
 	IWDG_RLR = 	0x08U,
-	IWDG_SR  = 	0x0CU
+	IWDG_SR  = 	0x0CU,
 }IWDG_register_offset_t;
 
 typedef enum{
@@ -85,8 +85,6 @@ typedef enum{
 
 void Init_Ind_Watchdog(IWDG_reload_time_t reload_time);
 void Ind_Watchdog_control(watchdog_food_t food);
-void Ind_resetTheDog(void);
-void Ind_reloadTheDog(void);
 
 /*__________________WINDOW_Watchdog__________________*/
 
@@ -128,8 +126,6 @@ typedef struct{
 void WWDG_HANDLER(void);
 Status_code_t Init_Win_Watchdog(WWDG_config_t config_window);
 void Win_Watchdog_control(watchdog_food_t food);
-void Win_resetTheDog(void);
-void Win_reloadTheDog(void);
 void Win_clear_reset_flag(void);
 
 Status_code_t WWDG_Clock(Enabled_Disabled_t state);

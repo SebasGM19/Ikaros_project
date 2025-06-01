@@ -647,6 +647,7 @@ void EXTI15_10_HANDLER(void){
 	while(hw_count_dummy<40000){hw_count_dummy++;} //dummy count to avoid debouncing
 
 
+
 	/*To here*/
 	GPIO_EXTI_Clean_Group_Of_Flag(Pin_10,Clear_six_bits);
 
