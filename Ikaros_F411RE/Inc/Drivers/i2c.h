@@ -13,7 +13,7 @@
 #define MAX_SM_RISE_TIME_ns  (1000)
 #define MAX_FM_RISE_TIME_ns  (300)
 #define DIVIDE_FOR_TRISE_ns  (1000000000)
-#define I2C_MAX_TIMEOUT		 (5000)
+#define I2C_MAX_TIMEOUT		 (2000)
 
 
 typedef enum{

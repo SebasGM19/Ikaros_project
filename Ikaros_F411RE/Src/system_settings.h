@@ -44,6 +44,8 @@ typedef enum{
 	OptionNotSupported,
 	WrongParameter,
 	TimeSetNotSuported,
+	Unknown,
+	Error,
 
 	lcd_Wrong_X_Axis_Value,
 	lcd_Wrong_Y_Axis_Value,

@@ -14,68 +14,74 @@
 #include "stepper_motor.h"
 #include "keypad_4x4.h"
 
+#include "../Inc/Drivers/i2c.h"
 
+#include "../Inc/Peripherals/SHT20.h"
+#include "../Inc/Peripherals/BMI160.h"
+
+const SM_functions_list_t SM_Init_Watchdog_next = init_Protocols;
 
 const SM_functions_list_t SM_Init_Protocols_next[2]={
-		welcome_msg,
+		config_sensors,
 		init_Protocols,
 };
 
-
-const SM_functions_list_t SM_Welcome_msg_next = select_action_msg_menu1;
-
-
-const SM_functions_list_t SM_Select_Action_msg_menu1_next[4]={
-	send_UART2,
-	send_UART1,
-	select_action_msg_menu2,
-	select_action_msg_menu1,
-
+const SM_functions_list_t SM_Config_Sensors_next[3] ={
+		read_sensors,
+		config_sensors,
+		deinit_protocols,
 };
 
-
-const SM_functions_list_t SM_Select_Action_msg_menu2_next[4]={
-
-	read_UART1,
-	reset_WWDG,
-	select_action_msg_menu1,
-	select_action_msg_menu2,
-
+const SM_functions_list_t SM_Read_Sensors_next[3]={
+	data_format,
+	read_sensors,
+	deinit_protocols
 };
 
+const SM_functions_list_t SM_Data_Format_next = send_msg;
 
-const SM_functions_list_t SM_Send_UART2_next = select_action_msg_menu1;
+const SM_functions_list_t SM_Send_Msg_next[3]={
+	read_sensors,
+	send_msg,
+	deinit_protocols,
+};
 
-const SM_functions_list_t SM_Send_UART1_next = select_action_msg_menu1;
-
-const SM_functions_list_t SM_Read_UART1_next = select_action_msg_menu2;
-const SM_functions_list_t SM_Reset_WWDG_next = wait_reset;
-const SM_functions_list_t SM_Wait_Reset_next = wait_reset;
+const SM_functions_list_t SM_Deinit_protocols_next = init_Protocols;
 
 
 SM_parameters_t const State_machine_map[SM_MAX_STATES] =
 {
+    {SM_Watchdog_Init,&SM_Init_Watchdog_next},
     {SM_Init_Protocols,SM_Init_Protocols_next},
-    {SM_Welcome_msg,&SM_Welcome_msg_next},
-    {SM_Select_Action_msg_menu1,SM_Select_Action_msg_menu1_next},
-    {SM_Select_Action_msg_menu2,SM_Select_Action_msg_menu2_next},
-	{SM_Send_UART2,&SM_Send_UART2_next},
-    {SM_Send_UART1,&SM_Send_UART1_next},
-    {SM_Read_UART1,&SM_Read_UART1_next},
-    {SM_Reset_WWDG,&SM_Reset_WWDG_next},
-    {SM_Wait_Reset,&SM_Wait_Reset_next},
-
+    {SM_Config_Sensors,SM_Config_Sensors_next},
+    {SM_Read_Sensors,SM_Read_Sensors_next},
+	{SM_Data_Format,&SM_Data_Format_next},
+    {SM_Send_Msg,SM_Send_Msg_next},
+    {SM_Deinit_protocols,&SM_Deinit_protocols_next},
 
 };
 
-//pendiente lo del LCD mesagge con uart 2 interrupcion
 
-SM_next_state_t SM_Init_Protocols(void){
+
+
+SM_next_state_t SM_Watchdog_Init(void)
+{
+
+	Init_Ind_Watchdog(reload_32768ms);
+	Ind_Watchdog_control(reload_food);
+
+	return Next_state_0;
+
+}
+
+SM_next_state_t SM_Init_Protocols(void)
+{
 	Status_code_t status = Success;
+	i2c_config_parameters_t I2C_configurations;
 
 	usart_config_t usart_config={
-			9600,
-			Asynchronous, //pendiente  y las demas configuraciones
+			115200,
+			Asynchronous,
 			NULL,
 			enable_TX_and_RX,
 			None,
@@ -83,195 +89,243 @@ SM_next_state_t SM_Init_Protocols(void){
 			Stop_1_bits
 	};
 
-	WWDG_config_t WWDog ={
-			120, //ms
-			50,  //allow to refresh after 50 ms has passed but before 120 ms
-			enabled_interrupt //eneable interrupt
-	};
+	status = UART2_Init(usart_config);
 
-	status = Init_UART2_RX_Interrupt(usart_config);
-	status |= Init_UART1(usart_config);
+	I2C_configurations.baudrate = FastMode_400Kbps;
+	I2C_configurations.duty = duty_2_1;
 
-	status |= lcd_init(lcd_PortC);
-	Delay(300000);
-	status |= Init_keypad(keypad_PortA);
-
-	status |= TIM3_Init(WWDog.W_time + 10); //set the window time + 10 ms
-	status |= TIM5_Init(2000000); //set TIM4 to 2s
+	status |= I2C1_Init_Master(I2C_configurations);
 
 
 	if(status != Success){
+
+		Ind_Watchdog_control(reload_food);
 		return Next_state_1;
 	}
 
-	status = Init_Win_Watchdog(WWDog);
-	Win_Watchdog_control(reload_food);
-	TIM3_Start();
+	Ind_Watchdog_control(reload_food);
+	return Next_state_0;
 
+}
+
+
+BMI160_TotalData_t Data;
+
+uint32_t config_tries =0;
+SM_next_state_t SM_Config_Sensors(void)
+{
+	Status_code_t status = Success;
+
+	BMI160_init_parameters config;
+	config.Acc_power_mode = Acc_Normal;
+	config.Gyr_power_mode = Gyr_Normal;
+	config.Mag_power_mode = Mag_Normal;
+	config.Acc_res = Acc_2g;
+	config.Gyr_res = Gyr_250s;
+
+	status = BMI160_Init(I2C1_Alt,&config);
 
 	if(status!= Success){
+
+		if(config_tries > 3){
+			config_tries=0;
+			Ind_Watchdog_control(reload_food);
+			return Next_state_2;
+		}
+		config_tries++;
+		Ind_Watchdog_control(reload_food);
 		return Next_state_1;
 	}
 
+	config_tries=0;
+	Ind_Watchdog_control(reload_food);
 	return Next_state_0;
 
 }
 
-SM_next_state_t SM_Welcome_msg(void){
-	lcd_printXY(0, 0," Welcome to my  ", 16);
-	lcd_printXY(0, 1," State Machine  ", 16);
-	state_to_print(welcome_msg);
+uint8_t read_sensor_tries =0;
+int16_t temperature = 0;
+int16_t temperaturesht20 = 0;
+uint16_t humedadsht20 = 0;
 
-	Delay(2000000);
 
-	return Next_state_0;
 
-}
 
-SM_next_state_t SM_Select_Action_msg_menu1(void){
+SM_next_state_t SM_Read_Sensors(void)
+{
+		Status_code_t status = Success;
+		data_status_t accelerometer = Not_ready;
+		data_status_t Gyroscope 	= Not_ready;
+		data_status_t magnetomer 	= Not_ready;
+		data_status_t FOC		 	= Not_ready;
 
-	Status_code_t status = Success;
-	uint32_t answere =0;
-	lcd_printXY(0, 0,"1-Write UART2 : ", 16);
-	lcd_printXY(0, 1,"2-Write UART1 >6", 16);
-	state_to_print(select_action_msg_menu1);
-	TIM5_Stop();
-	answere = print_keypad(keypad_PortA, &status,15,0);
-	TIM5_Start();
+		status = BMI160_Data_Status(I2C1_Alt, &accelerometer, &Gyroscope, &magnetomer, &FOC);
 
-	if(answere == 6){
-		return Next_state_2;
-	}else if(answere == 1){
+		if(status!= Success && Gyroscope != Not_ready && accelerometer != Not_ready){
+
+			read_sensor_tries++;
+			if(read_sensor_tries >= 3){
+				read_sensor_tries=0;
+				Ind_Watchdog_control(reload_food);
+				return Next_state_2;
+			}
+			Ind_Watchdog_control(reload_food);
+			return Next_state_1;
+		}
+
+		status = BMI160_Get_TotalData(I2C1_Alt, &Data);
+
+		if(status!= Success){
+			read_sensor_tries++;
+			if(read_sensor_tries>= 3){
+				read_sensor_tries=0;
+				Ind_Watchdog_control(reload_food);
+				return Next_state_0;
+			}
+			Ind_Watchdog_control(reload_food);
+			return Next_state_1;
+		}
+		read_sensor_tries=0;
+		Ind_Watchdog_control(reload_food);
 		return Next_state_0;
-	}
-	else if(answere == 2){
+}
+
+
+uint8_t msg_to_send[MAX_MSG_LENGHT] = {0};
+
+uint8_t string_start_json[]={"{"}; //start json
+uint8_t string_end_json[]={"}"}; //end json
+uint8_t string_colon[]={":"};
+uint8_t string_coma[]={","};
+uint8_t string_new_line[]={"\n"}; //end json
+
+uint8_t string_Gyro_X[]={"\"GyroX\": "}; //start json
+uint8_t string_Gyro_Y[]={"\"GyroY\": "}; //start json
+uint8_t string_Gyro_Z[]={"\"GyroZ\": "}; //start json
+
+//uint8_t string_Mag_X[]={"\"MagX\": "}; //start json
+//uint8_t string_Mag_Y[]={"\"MagY\": "}; //start json
+//uint8_t string_Mag_Z[]={"\"MagZ\": "}; //start json
+
+uint8_t string_Acc_X[]={"\"AccX\": "}; //start json
+uint8_t string_Acc_Y[]={"\"AccY\": "}; //start json
+uint8_t string_Acc_Z[]={"\"AccZ\": "}; //start json
+
+
+uint8_t string_temperature[]={"\"Temperature\": "}; //start json
+//uint8_t string_hall_res[]={"\"HallR\": "}; //start json
+
+
+
+#define DATA_BUFF_MAX_SIZE          (15)
+
+SM_next_state_t SM_Data_Format(void)
+{
+    uint8_t temp_buff[DATA_BUFF_MAX_SIZE] = {0};
+	memset(msg_to_send, '\0', sizeof(msg_to_send));
+	memset(temp_buff, '\0', sizeof(temp_buff));
+
+    strcpy((char *)(msg_to_send), (const char *)(string_start_json));
+
+    //___________INICIO_info del giroscopio_______________
+    strcat((char *)(msg_to_send), (const char *)(string_Gyro_X));
+    ftoa(Data.gyroscope_X, temp_buff, 2); //dos decimales despues
+    strncat((char *)(msg_to_send), (const char *)(temp_buff), strlen((const char *)temp_buff));//guardamos el dato de float en cadena
+	memset(temp_buff, '\0', sizeof(temp_buff));
+    strcat((char *)(msg_to_send), (const char *)(string_coma));
+
+    strcat((char *)(msg_to_send), (const char *)(string_Gyro_Y));
+    ftoa(Data.gyroscope_Y, temp_buff, 2); //dos decimales despues
+    strncat((char *)(msg_to_send), (const char *)(temp_buff), strlen((const char *)temp_buff));//guardamos el dato de float en cadena
+	memset(temp_buff, '\0', sizeof(temp_buff));
+    strcat((char *)(msg_to_send), (const char *)(string_coma));
+
+    strcat((char *)(msg_to_send), (const char *)(string_Gyro_Z));
+    ftoa(Data.gyroscope_Z, temp_buff, 2); //dos decimales despues
+    strncat((char *)(msg_to_send), (const char *)(temp_buff), strlen((const char *)temp_buff));//guardamos el dato de float en cadena
+	memset(temp_buff, '\0', sizeof(temp_buff));
+    strcat((char *)(msg_to_send), (const char *)(string_coma));
+    //___________FIN_info del giroscopio_______________
+
+    //__________INICIO_info de accelerometer______________
+    strcat((char *)(msg_to_send), (const char *)(string_Acc_X));
+    ftoa(Data.accelerometer_X, temp_buff, 2); //dos decimales despues
+    strncat((char *)(msg_to_send), (const char *)(temp_buff), strlen((const char *)temp_buff));//guardamos el dato de float en cadena
+	memset(temp_buff, '\0', sizeof(temp_buff));
+    strcat((char *)(msg_to_send), (const char *)(string_coma));
+
+    strcat((char *)(msg_to_send), (const char *)(string_Acc_Y));
+    ftoa(Data.accelerometer_Y, temp_buff, 2); //dos decimales despues
+    strncat((char *)(msg_to_send), (const char *)(temp_buff), strlen((const char *)temp_buff));//guardamos el dato de float en cadena
+	memset(temp_buff, '\0', sizeof(temp_buff));
+    strcat((char *)(msg_to_send), (const char *)(string_coma));
+
+    strcat((char *)(msg_to_send), (const char *)(string_Acc_Z));
+    ftoa(Data.accelerometer_Z, temp_buff, 2); //dos decimales despues
+    strncat((char *)(msg_to_send), (const char *)(temp_buff), strlen((const char *)temp_buff));//guardamos el dato de float en cadena
+	memset(temp_buff, '\0', sizeof(temp_buff));
+    //__________FIN info de accelerometer______________
+
+
+
+//    strcat((char *)(msg_to_send), (const char *)(string_coma));
+//    strcat((char *)(msg_to_send), (const char *)(string_temperature));
+//    itoa(temperature,(char *)(temp_buff), DECIMAL_BASE); //dos decimales despues
+//    strncat((char *)(msg_to_send), (const char *)(temp_buff), strlen((const char *)temp_buff));//guardamos el dato de float en cadena
+//	memset(temp_buff, '\0', sizeof(temp_buff));
+//
+    strcat((char *)(msg_to_send), (const char *)(string_end_json));
+    strcat((char *)(msg_to_send), (const char *)(string_new_line));
+
+
+	Ind_Watchdog_control(reload_food);
+	return Next_state_0;
+}
+
+uint8_t send_msg_retries =0;
+SM_next_state_t SM_Send_Msg(void)
+{
+	Status_code_t status = Success;
+
+	status = UART2_Write(msg_to_send, strlen((const char *)msg_to_send) , 1000);
+	Delay(500);
+
+	if( status != Success){
+
+		if(send_msg_retries >= 3){
+			send_msg_retries=0;
+			Ind_Watchdog_control(reload_food);
+			return Next_state_2;
+		}
+		send_msg_retries++;
+		Ind_Watchdog_control(reload_food);
 		return Next_state_1;
 
-	}else if(answere == 0 && status != Success){
-		return Next_state_3;
-
-	}else{
-		lcd_printXY(0, 0," INVALID OPTION ", 16);
-		lcd_printXY(0, 1,"                ", 16);
-		state_to_print(8);
-
-		Delay(1000000);
-		return Next_state_3;
 	}
-}
-
-SM_next_state_t SM_Select_Action_msg_menu2(void){
-	uint32_t answere =0;
-	Status_code_t status = Success;
-	lcd_printXY(0, 0,"3-Read UART1  : ", 16);
-	lcd_printXY(0, 1,"4-Reset WWDG  <8", 16);
-	state_to_print(select_action_msg_menu2);
-
-	TIM5_Stop();
-	answere = print_keypad(keypad_PortA, &status,15,0);
-	TIM5_Start();
-
-	if(answere == 8){
-		return Next_state_2;
-
-	}else if(answere == 3){
-		return Next_state_0;
-
-	}
-	else if(answere == 4){
-		return Next_state_1;
-
-	}else if(answere == 0 && status != Success){
-		return Next_state_3;
-
-	}else{
-		lcd_printXY(0, 0," INVALID OPTION ", 16);
-		lcd_printXY(0, 1,"                ", 16);
-		state_to_print(8);
-
-		Delay(1000000);
-		return Next_state_3;
-
-	}
-
-
-}
-
-SM_next_state_t SM_Send_UART2(void){
-	Status_code_t status = Success;
-	lcd_printXY(0, 0," Write to UART2 ", 16);
-	lcd_printXY(0, 1,"                ", 16);
-	state_to_print(send_UART2);
-
-	status = UART2_Write("I am \"UART 2\" From STM32\r\n",26 , 1000);
-	Delay(1000000);
+	send_msg_retries=0;
+	Ind_Watchdog_control(reload_food);
 	return Next_state_0;
 
 }
 
-SM_next_state_t SM_Send_UART1(void){
-	Status_code_t status = Success;
-	lcd_printXY(0, 0," Write to UART1 ", 16);
-	lcd_printXY(0, 1,"                ", 16);
-	state_to_print(send_UART1);
+SM_next_state_t SM_Deinit_protocols(void)
+{
 
-	status = UART1_Write("I am \"UART 1\" From STM32\r\n",26 , 1000);
-	Delay(1000000);
-	return Next_state_0;
+	BMI160_Deinit(I2C1_Alt);
+	I2C1_Deinit();
 
-}
-
-SM_next_state_t SM_Read_UART1(void){
-	Status_code_t status = Success;
-
-	uint8_t data[50]={0};
-	uint32_t data_lenght=0;
-	lcd_printXY(0, 0,"Received Data:  ", 16);
-	lcd_printXY(0, 1,"                ", 16);
-	state_to_print(read_UART1);
-
-	TIM5_Stop();
-
-	status = UART1_Read(data, &data_lenght, 3000);
-
-	if(status != Success){
-		lcd_printXY(0, 1,"Nothing",7);
-	}else{
-		lcd_printXY(0, 1,data,data_lenght);
-	}
-	Delay(1000000);
-
-	TIM5_Start();
-
-	return Next_state_0;
-
-}
-
-SM_next_state_t SM_Reset_WWDG(void){
-
-	lcd_printXY(0, 0,"  WWDG RESET!!  ", 16);
-	lcd_printXY(0, 1,"                ", 16);
-	state_to_print(reset_WWDG);
-
-	Delay(1000000);
-	TIM3_Stop();
-
-	return Next_state_0;
-
-}
-
-SM_next_state_t SM_Wait_Reset(void){
-
+	Ind_Watchdog_control(reload_food);
 	return Next_state_0;
 
 }
 
 
-static SM_functions_list_t run_funtion = init_Protocols;
-static SM_next_state_t next_move= Next_state_0;
+
+static SM_functions_list_t run_funtion = init_watchdog;
+static SM_next_state_t next_move = Next_state_0;
 
 
-void runMachine(void){
+void StartMachine(void){
 
 
     while(1){

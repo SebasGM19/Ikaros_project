@@ -35,41 +35,47 @@
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
+
 int main(void){
-
-	i2c_config_parameters_t I2C_config;
-	Status_code_t status =Success;
-	uint8_t chip_id =0;
-	int16_t temperature =0;
-	PMU_status_t accelerometer  = Normal;
-	PMU_status_t Gyroscope 		= Normal;
-	PMU_status_t magnetomer 	= Normal;
-
-	I2C_config.baudrate = FastMode_400Kbps;
-	I2C_config.duty = duty_2_1;
-
-	I2C1_Init_Master(I2C_config);
-
-	status = BMI160_Chip_ID(I2C1_Alt, &chip_id);
-
-	status =  BMI160_Temperature(I2C1_Alt,&temperature);
-
-	status = BMI160_PMU_Status(I2C1_Alt, &accelerometer, &Gyroscope, &magnetomer);
-
-
-	status =  BMI160_Set_Acceleromete_PM(I2C1_Alt, Acc_Normal);
-
-	status =  BMI160_Set_Gyroscope_PM(I2C1_Alt, Gyr_Normal);
-
-	status =  BMI160_Set_Magnetometer_PM(I2C1_Alt, Mag_Normal);
-
-	status = BMI160_PMU_Status(I2C1_Alt, &accelerometer, &Gyroscope, &magnetomer);
-
-	status =  BMI160_Temperature(I2C1_Alt,&temperature);
-
-	while(1);
-	return 0;
+	StartMachine();
 }
+
+
+//int main(void){
+//
+//	i2c_config_parameters_t I2C_config;
+//	Status_code_t status =Success;
+//	uint8_t chip_id =0;
+//	int16_t temperature =0;
+//	PMU_status_t accelerometer  = Normal;
+//	PMU_status_t Gyroscope 		= Normal;
+//	PMU_status_t magnetomer 	= Normal;
+//
+//	I2C_config.baudrate = FastMode_400Kbps;
+//	I2C_config.duty = duty_2_1;
+//
+//	I2C1_Init_Master(I2C_config);
+//
+//	status = BMI160_Chip_ID(I2C1_Alt, &chip_id);
+//
+//	status =  BMI160_Temperature(I2C1_Alt,&temperature);
+//
+//	status = BMI160_PMU_Status(I2C1_Alt, &accelerometer, &Gyroscope, &magnetomer);
+//
+//
+//	status =  BMI160_Set_Acceleromete_PM(I2C1_Alt, Acc_Normal);
+//
+//	status =  BMI160_Set_Gyroscope_PM(I2C1_Alt, Gyr_Normal);
+//
+//	status =  BMI160_Set_Magnetometer_PM(I2C1_Alt, Mag_Normal);
+//
+//	status = BMI160_PMU_Status(I2C1_Alt, &accelerometer, &Gyroscope, &magnetomer);
+//
+//	status =  BMI160_Temperature(I2C1_Alt,&temperature);
+//
+//	while(1);
+//	return 0;
+//}
 
 
 
