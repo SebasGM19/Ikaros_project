@@ -9,7 +9,7 @@
 #define TIMERS_H_
 
 #include "system_settings.h"
-
+#include "gpios.h"
 
 
 
@@ -312,19 +312,19 @@ typedef enum{
 
 typedef enum{//channel and PIN
 
-	TIM3_CH3= 0,//PORTB
-	TIM3_CH4= 1,//PORTB
-	TIM3_CH1= 4,//PORTB
-	TIM3_CH2= 5,//PORTB
+	TIM3_CH3 = Pin_0,//PORTB
+	TIM3_CH4 = Pin_1,//PORTB
+	TIM3_CH1 = Pin_4,//PORTB
+	TIM3_CH2 = Pin_5,//PORTB
 
 }TIM3_PWM_channel_select_t;
 
 typedef enum{//channel and PIN
 
-	TIM4_CH1= 6,//PORTB
-	TIM4_CH2= 7,//PORTB
-	TIM4_CH3= 8,//PORTB
-	TIM4_CH4= 9,//PORTB
+	TIM4_CH1 = Pin_6,//PORTB
+	TIM4_CH2 = Pin_7,//PORTB
+	TIM4_CH3 = Pin_8,//PORTB
+	TIM4_CH4 = Pin_9,//PORTB
 
 }TIM4_PWM_channel_select_t;
 

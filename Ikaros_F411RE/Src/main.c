@@ -30,15 +30,12 @@
 
 #include "../Inc/Peripherals/SHT20.h"
 #include "../Inc/Peripherals/BMI160.h"
+#include "../Inc/Peripherals/music_notes.h"
+
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
-
-
-int main(void){
-	StartMachine();
-}
 
 
 //int main(void){
@@ -78,7 +75,7 @@ int main(void){
 //}
 
 
-
+//
 //int main(void){
 //
 //i2c_config_parameters_t I2C_config;
@@ -112,6 +109,21 @@ int main(void){
 
 
 
+uint32_t data =0x12345678;
+
+int main(void){
+
+//	volatile uint8_t * ptr = (uint8_t*)&data;
+//
+//	uint8_t valor =0;
+//	uint16_t valor2 =0;
+//
+//	valor = (uint8_t)data;
+//	valor2 = (uint16_t)data;
+
+
+	return 0;
+}
 
 
 
