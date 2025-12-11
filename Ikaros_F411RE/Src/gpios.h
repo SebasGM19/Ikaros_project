@@ -29,8 +29,8 @@
 
 
 typedef enum{
-	Low,
-	High
+	Low 	= 0U,
+	High	= 1U,
 }Gpio_State_Control_t;
 
 

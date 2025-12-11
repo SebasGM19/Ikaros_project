@@ -81,6 +81,12 @@ typedef enum{
 	I2C_overrun_error,
 	I2C_bus_error,
 
+
+	SPI_frecuency_not_supported,
+	SPI_clock_value_out_of_range,
+	SPI_overrun_error,
+	SPI_frame_format_error,
+	SPI_CRC_error,
 }Status_code_t;
 
 typedef enum{
@@ -89,20 +95,20 @@ typedef enum{
 }Enabled_Disabled_t;
 
 typedef enum{
-	Clean_one_bit =			0x01, 	//to clean 1 bit
-	Clear_two_bits=			0x03, 	//to clean 1 GPIOS
-	Clear_three_bits = 		0x07, 	//to clena 3 bits
-	Clear_four_bits = 		0x0F, 	//to clean 2 GPIOS
+	Clean_one_bit =			0x0001, 	//to clean 1 bit
+	Clear_two_bits=			0x0003, 	//to clean 1 GPIOS
+	Clear_three_bits = 		0x0007, 	//to clena 3 bits
+	Clear_four_bits = 		0x000F, 	//to clean 2 GPIOS
 
-	Clear_five_bits = 		0x1F,
-	Clear_six_bits =		0x3F,
-	Clear_seven_bits =		0x7F,
-	Clear_eight_bits =		0xFF, 	//to clean 4 GPIOS
+	Clear_five_bits = 		0x001F,
+	Clear_six_bits =		0x003F,
+	Clear_seven_bits =		0x007F,
+	Clear_eight_bits =		0x00FF, 	//to clean 4 GPIOS
 
-	Clear_nine_bits =		0x1FF,
-	Clear_ten_bits =		0x3FF,
-	Clear_eleven_bits =		0x7FF,
-	Clear_twelve_bits =		0xFFF,
+	Clear_nine_bits =		0x01FF,
+	Clear_ten_bits =		0x03FF,
+	Clear_eleven_bits =		0x07FF,
+	Clear_twelve_bits =		0x0FFF,
 
 	Clear_thirteen_bits =   0x1FFF,
 	clear_fourteen_bits = 	0x3FFF, //to clean 7 GPIOS
@@ -156,7 +162,7 @@ typedef enum{
 //	USART6_ADDRESS = 		0x40011400,
 	ADC1_ADDRESS = 			0x40012000,
 	SDIO_ADDRESS = 			0x40012C00,
-//	SPI1_I2C1_ADDRESS =		0x40013000,
+//	SPI1_I2S1_ADDRESS =		0x40013000,
 //	SPI4_I2C4_ADDRESS = 	0x40013400,
 	SYSCFG_ADDRESS= 		0x40013800,
 	EXT1_ADDRESS =			0x40013C00,
@@ -192,10 +198,10 @@ typedef enum{
 
 typedef enum{
 	SPI2_I2S2_ADDRESS =		0x40003800,	//APB1 BUS
-	SPI3_I2S3_ADDRESS = 	0x40003C00,	//APB1 BUS
+//	SPI3_I2S3_ADDRESS = 	0x40003C00,	/*Not used*/
 
-	SPI1_I2C1_ADDRESS =		0x40013000, //APB2 BUS
-	SPI4_I2C4_ADDRESS = 	0x40013400,
+	SPI1_I2S1_ADDRESS =		0x40013000, //APB2 BUS
+//	SPI4_I2C4_ADDRESS = 	0x40013400, /*Not used*/
 	SPI5_I2S5_ADDRESS = 	0x40015000,
 
 }SPI_I2SMapAddr_t;

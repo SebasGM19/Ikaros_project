@@ -566,7 +566,7 @@ void I2C_Reset_Protocol(I2CMapAddr_t I2C_addr){
 Status_code_t I2C_Set_Clock_frecuency(I2CMapAddr_t I2C_addr, uint32_t peripherial_clock){
 	__IO uint32_t *I2C_CR2_Reg = (__IO uint32_t *)(I2C_addr + I2C_CR2);
 
-	if(peripherial_clock < 2000000 || peripherial_clock > 50000000){
+	if(peripherial_clock < 2000000U || peripherial_clock > 50000000U){
 		return I2C_frecuency_not_supported;
 	}
 

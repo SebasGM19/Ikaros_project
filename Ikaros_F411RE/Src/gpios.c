@@ -10,29 +10,6 @@
 
 uint8_t static GPIO_EXT_Pin_ocupped[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-
-Gpio_State_Control_t GPIO_DigitalRead(Set_Port_t Port_define, Pin_number_t Pin_defined){
-
-	__I uint32_t* const PORT_REG_INPUT = (__I uint32_t* const)(Port_define + GPIOx_IDR_OFFSET); //agregamos el 10 para decirle el offset
-
-	if(((1<<Pin_defined) & (*PORT_REG_INPUT))==(1<<Pin_defined)){
-		return High;
-	}
-	return Low;
-}
-
-
-Gpio_State_Control_t GPIO_DigitalWrite(Set_Port_t Port_define, Pin_number_t Pin_defined, Gpio_State_Control_t State){
-
-	__IO uint32_t *PORT_REG_OUTPUT = (__IO uint32_t *)(Port_define + GPIOx_ODR_OFFSET); //agregamos el 0x14 par indicar output
-
-    *PORT_REG_OUTPUT = (State) ? (*PORT_REG_OUTPUT | (Enabled << Pin_defined)) : (*PORT_REG_OUTPUT & ~(Enabled << Pin_defined));
-
-	return State;
-
-}
-
-
 Status_code_t SetPinMode(Set_Port_t Port_define, Pin_number_t Pin_defined, PinMode_t Mode){
 
 	__IO uint32_t *pPort_ModeReg = (__IO uint32_t *)(Port_define + OFFSET_PORTS);
@@ -76,6 +53,34 @@ Status_code_t SetPinMode(Set_Port_t Port_define, Pin_number_t Pin_defined, PinMo
 
 	return status;
 }
+
+Gpio_State_Control_t GPIO_DigitalRead(Set_Port_t Port_define, Pin_number_t Pin_defined){
+
+	__I uint32_t* const PORT_REG_INPUT = (__I uint32_t* const)(Port_define + GPIOx_IDR_OFFSET); //agregamos el 10 para decirle el offset
+
+	if(((1<<Pin_defined) & (*PORT_REG_INPUT))==(1<<Pin_defined)){
+		return High;
+	}
+	return Low;
+}
+
+
+Gpio_State_Control_t GPIO_DigitalWrite(Set_Port_t Port_define, Pin_number_t Pin_defined, Gpio_State_Control_t State){
+
+	__O uint32_t *PORT_REG_OUTPUT = (__O uint32_t *)(Port_define + GPIOx_BSRR_OFFSET); //BSRR is used to modify only 1 output pin
+
+	if(State){
+		*PORT_REG_OUTPUT = (Enabled << (Pin_defined));
+
+	}else{
+		*PORT_REG_OUTPUT = (Enabled << (Pin_defined + 16U));
+	}
+
+	return State;
+
+}
+
+
 
 void GpioSetAlternativeFunction(Set_Port_t Port_define, Pin_number_t Pin_defined, Alternate_function_map_t AF){
 

@@ -7,7 +7,6 @@
 
 
 #include "BMI160.h"
-#include "../src/watchdog.h"
 
 static const float Gyr_one_unit = 0.061f;
 static const float Acc_one_unit = 0.0039f;

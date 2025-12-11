@@ -8,17 +8,20 @@
 #ifndef DRIVERS_SPI_I2S_H_
 #define DRIVERS_SPI_I2S_H_
 
-#include "../Src/system_settings.h"
+#include "system_settings.h"
+#include "timers.h"
+#include "gpios.h"
+
+#define SPI_MAX_TIMEOUT		 (2000)
+
 
 
 typedef enum{
-	SPI1_I2C1_Alt = 12U,	//12 means RCC APB2 bit 12
-	SPI4_I2C4_Alt = 13U,	//13 means RCC APB2 bit 13
+	SPI1_I2S1_Alt = 12U,	//12 means RCC APB2 bit 12
 
 	SPI2_I2S2_Alt = 14U, 	//14 means RCC APB1 bit 14
-	SPI3_I2S3_Alt = 15U, 	//15 means RCC APB1 bit 15
 
-	SPI5_I2C5_Alt = 20U,	//20 means RCC APB2 bit 20
+	SPI5_I2S5_Alt = 20U,	//20 means RCC APB2 bit 20
 }SPI_I2S_alternative_t;
 
 typedef enum{
@@ -35,20 +38,23 @@ typedef enum{
 }SPI_I2S_Register_Offset_t;
 
 typedef enum{
-	SPI_firts_clk_transition 	= 0U,
-	SPI_second_clk_transition 	= 1U,
+	SPI_CPHA_first_edge 	= 0U,
+	SPI_CPHA_second_edge 	= 1U,
 }SPI_CPHA_t;
 
 typedef enum{
-	SPI_high_pol_clk 	= 0U,
-	SPI_Low_pol_clk 	= 1U,
+	SPI_CPOL_low_idle 	= 0U,
+	SPI_CPOL_high_idle 	= 1U,
 }SPI_CPOL_t;
 
 typedef enum{
 	SPI_set_as_slave 	= 0U,
 	SPI_set_as_master 	= 1U,
-}SPI_Master_Select_t;
+}SPI_MSTR_Master_Select_t;
 
+// select the preescaler to set the baud rate
+// the baud rate will be the SPI clock (16Mhz)/preescaler_divider
+//example: 16MHz / SPI_preescaler_2 = 8Mhz
 typedef enum{
 	SPI_preescaler_2 	= 0U,
 	SPI_preescaler_4 	= 1U,
@@ -59,27 +65,40 @@ typedef enum{
 	SPI_preescaler_128 	= 6U,
 	SPI_preescaler_256 	= 7U,
 
-}SPI_BaudRate_Control_t;
+}SPI_Preescaler_to_BaudRate_t;
 
 typedef enum{
 	SPI_MSB_trans_first = 0U,
 	SPI_LSB_trans_first = 1U,
 }SPI_CR1_Frame_Format_t;
 
+
+/*Note: it will always be set as 1 to use any GPIO*/
+typedef enum{
+	SPI_SSM_disabled	= 0U, //if is 0, it will use automatically the NSS define for every alternative
+	SPI_SSM_enabled		= 1U, //if is 1, then you must to control the CS by you own using any GPIO available
+}SPI_SSM_t;
+
 typedef enum{
 	SPI_full_duplex  = 0U,
 	SPI_receive_only = 1U,
-}SPI_Receive_Mode_t;
+}SPI_RXONLY_t;
 
 typedef enum{
 	SPI_8_bit_format  	= 0U,
 	SPI_16_bit_format	= 1U,
-}SPI_Data_Frame_Format_t;
+}SPI_DFF_t;
 
 typedef enum{
 	SPI_no_CRC  	= 0U,
 	SPI_CRC_phase 	= 1U,
 }SPI_CRC_Trans_Next_t;
+
+//CUANDO SE DEFINA A 1 LINEA BIDIRECIONAL, SE DEBERA ESTAR CAMBIANDO ESTE BIT DEPENDIENDO LA FUNCION
+typedef enum{
+	SPI_BIDIOE_set_as_RX  	= 0U,
+	SPI_BIDIOE_set_as_TX	= 1U,
+}SPI_BIDIOE_Mode_t;
 
 typedef enum{
 	SPI_2_lines_unidirectional  = 0U,
@@ -87,21 +106,22 @@ typedef enum{
 }SPI_Bidirectional_Mode_t;
 
 
+
 typedef enum{
-	SPI_CPHA		= 0U,
-	SPI_CPOL		= 1U,
-	SPI_MSTR		= 2U,
+	SPI_CPHA		= (1U<<0U),
+	SPI_CPOL		= (1U<<1U),
+	SPI_MSTR		= (1U<<2U),
 	SPI_BR			= 3U,
 	SPI_SPE 		= (1U<<6U),
-	SPI_LSBFIRST 	= 7U,
+	SPI_LSBFIRST 	= (1U<<7U),
 	SPI_SSI 		= (1U<<8U),
 	SPI_SSM 		= (1U<<9U),
-	SPI_RXONLY 		= 10U,
-	SPI_DFF 		= 11U,
+	SPI_RXONLY 		= (1U<<10U),
+	SPI_DFF 		= (1U<<11U),
 	SPI_CRCNEXT 	= 12U,
 	SPI_CRCEN 		= (1U<<13U),
-	SPI_BIDIOE 		= (1U<<14U),
-	SPI_BIDIMODE	= 15U,
+	SPI_BIDIOE 		= (1U<<14U), //
+	SPI_BIDIMODE	= (1U<<15U),
 }SPI_CR1_t;
 
 
@@ -109,7 +129,15 @@ typedef enum{
 typedef enum{
 	SPI_motorola_mode	= 0U,
 	SPI_TI_mode			= 1U,
-}SPI_CR2_Frame_Format_t;
+}SPI_CR2_FRF_t;
+
+
+
+typedef enum{
+	SPI_error_int_disabled	= 0U,
+	SPI_error_int_enabled	= 1U,
+}SPI_ERR_INT_t;
+
 
 typedef enum{
 	SPI_RXDMAEN = (1U<<0U),
@@ -227,12 +255,29 @@ typedef enum{
 	SPI_I2S_MCKOE 	= (1U<<9U),
 }SPI_I2SPR_t;
 
-//typedef struct{
-//	SPI_CPHA_t baud_rate;
-//	SPI_CPOL_t mode;
-//	SPI_Data_Frame_Format_t *synchronous_config;  //if is Asynchronous put NULL
-//	SPI_Bidirectional_Mode_t data_direction;
-//
-//}SPI_config_t;
+typedef struct{
+	SPI_CPHA_t CPHA;
+	SPI_CPOL_t CPOL;
+	SPI_Preescaler_to_BaudRate_t preescaler;
+	SPI_CR1_Frame_Format_t transmitionFormat;
+	SPI_DFF_t dataFrameFormat;
+	SPI_Bidirectional_Mode_t linesMode;
+	SPI_CR2_FRF_t SPIFrameFormat;
+//	SPI_ERR_INT_t ERR_INT;
+
+
+}SPI_config_t;
+
+Status_code_t SPI1_Init(SPI_config_t *SPI_config);
+Status_code_t SPI2_Init(SPI_config_t *SPI_config);
+Status_code_t SPI5_Init(SPI_config_t *SPI_config);
+
+Status_code_t SPI_Write(SPI_I2S_alternative_t SPI_alt, const void *buff, uint32_t buff_lenght);
+Status_code_t SPI_Read(SPI_I2S_alternative_t SPI_alt, void *buff, uint32_t buff_size_expected);
+
+Status_code_t SPI1_Deinit(void);
+Status_code_t SPI2_Deinit(void);
+Status_code_t SPI5_Deinit(void);
+
 
 #endif /* DRIVERS_SPI_I2S_H_ */
