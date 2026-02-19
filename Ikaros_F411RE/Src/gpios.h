@@ -162,11 +162,20 @@ void GPIO_Enable_EXTI4(void);
 void GPIO_Disable_EXTI4(void);
 void GPIO_Deinit_EXTI4(void);
 
+
+bool Grove_Get_EXT_flag_status(void);	//for ultrasonic
+void Grove_Clear_EXT_flag_status(void); //for ultrasonic
+
 void EXTI9_5_HANDLER(void);
 Status_code_t GPIO_Init_EXTI9_To_EXTI5(GPIO_Exti_Port_t EXTI_Port, Pin_number_t Pin_defined, GPIO_Exti_Config_t EXTI_mode);
 void GPIO_Enable_EXTI9_To_EXTI5(Pin_number_t Pin_defined);
 void GPIO_Disable_EXTI9_To_EXTI5(Pin_number_t Pin_defined);
 void GPIO_Deinit_EXTI9_To_EXTI5(Pin_number_t Pin_defined);
+
+
+uint32_t get_EXTI_times(void);
+
+void clear_EXTI_times(void);
 
 void EXTI15_10_HANDLER(void);
 Status_code_t GPIO_Init_EXTI15_To_EXTI10(GPIO_Exti_Port_t EXTI_Port, Pin_number_t Pin_defined, GPIO_Exti_Config_t EXTI_mode);

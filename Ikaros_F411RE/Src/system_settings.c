@@ -109,7 +109,7 @@ void resetDelay(TimerMapAddr_t Timer){
 
 Status_code_t Delay(uint32_t microseconds){
 
-	if(microseconds < 50 || microseconds > MAX_TIME_TIM5_AND_TIM2){
+	if(microseconds < 5 || microseconds > MAX_TIME_TIM5_AND_TIM2){
 		return DelayTimeNotSupported;
 	}
 
@@ -125,7 +125,6 @@ Status_code_t Delay(uint32_t microseconds){
 
 
 	*TIM_REG_PSC = (PSC_TO_MICROSEC_DELAY-1);
-//	*TIM_REG_ARR = (USEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MICROSEC_DELAY,microseconds) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
 	*TIM_REG_ARR = (microseconds - 1);
 	TIMER_cleanCountFlag(TIM2_ADDRESS);
 

@@ -15,6 +15,7 @@
 
 //#define TIM1  usado para delay periphericos
 //#define TIM2  usado para delay  general
+//#define TIM11 usado para timeouts de protocolos
 
 
 #define TIM3_HANDLER TIM3_IRQHandler
@@ -27,6 +28,8 @@
 
 /*Value in microseconds Equals to 2^32 bit count*/
 #define MAX_TIME_TIM5_AND_TIM2	(uint32_t)(4294967290U)
+#define MIN_TIME_TIM5_AND_TIM2	(uint32_t)(8U)
+
 #define MAX_TIME_TIM3_TIM4		(uint16_t)(65530U)
 #define MAX_TIME_TIM1			(uint16_t)(65530U)
 #define MAX_TIME_TIM9_TO_TIM11	(uint16_t)(65530U)
@@ -401,7 +404,6 @@ void TIM3_Start(void);
 void TIM3_Stop(void);
 void TIM3_Deinit(void);
 
-void state_to_print(uint8_t state); //dummy for example___________________
 
 void TIM4_HANDLER(void);
 Status_code_t TIM4_Init(uint16_t milliseconds);
@@ -409,11 +411,29 @@ void TIM4_Start(void);
 void TIM4_Stop(void);
 void TIM4_Deinit(void);
 
+
+void Grove_Clear_Count(void); 	//for ultrasonic
+uint32_t Grove_Get_Count(void);	//for ultrasonic
+
 void TIM5_HANDLER(void);
 Status_code_t TIM5_Init(uint32_t microseconds);
 void TIM5_Start(void);
 void TIM5_Stop(void);
 void TIM5_Deinit(void);
+
+
+void TIM9_HANDLER(void);
+Status_code_t TIM9_Init(uint32_t miliseconds);
+void TIM9_Start(void);
+void TIM9_Stop(void);
+void TIM9_Deinit(void);
+
+
+void TIM10_HANDLER(void);
+Status_code_t TIM10_Init(uint32_t miliseconds);
+void TIM10_Start(void);
+void TIM10_Stop(void);
+void TIM10_Deinit(void);
 
 
 void TIM11_HANDLER(void);

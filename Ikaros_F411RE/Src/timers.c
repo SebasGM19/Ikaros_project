@@ -21,6 +21,8 @@ uint32_t static global_TIM4_ARR_count = 1024; //set as 1024 to default
 bool static volatile reset_tim3_flag = false;
 bool static volatile reset_tim4_flag = false;
 bool static volatile reset_tim5_flag = false;
+bool static volatile reset_tim9_flag = false;
+bool static volatile reset_tim10_flag = false;
 bool static volatile reset_tim11_flag = false;
 
 bool static volatile TIM11_interrupt_flag_active = false;
@@ -66,10 +68,9 @@ void TIM3_HANDLER(void){
 	if(reset_tim3_flag){
 	/*Develop all the code to be executed in a second thread down here*/
 
-//		Win_Watchdog_control(reload_food); //reload the food
 
 
-	}else{reset_tim3_flag=!reset_tim3_flag;}
+	}else{reset_tim3_flag = !reset_tim3_flag;} //esto esta aqui ya que se noto que siempre se ejcuta una vez inmediatamente se inicia
 }
 
 Status_code_t TIM3_Init(uint16_t milliseconds){
@@ -144,7 +145,7 @@ void TIM4_HANDLER(void){
 	/*Develop all the code to be executed in a second thread down here*/
 
 
-	}else{reset_tim4_flag=!reset_tim4_flag;}
+	}else{reset_tim4_flag = !reset_tim4_flag;}
 }
 
 Status_code_t TIM4_Init(uint16_t milliseconds){
@@ -214,21 +215,30 @@ void TIM4_Deinit(void){
 
 /*///////////////////TIMER 5 HANDLER AND CONTROL FUNCTIONS///////////////////////////////////*/
 
+volatile uint32_t Grove_ultrasoinic_count = 0;
+
+uint32_t Grove_Get_Count(void){
+	return Grove_ultrasoinic_count;
+}
+
+void Grove_Clear_Count(void){
+	Grove_ultrasoinic_count = 0;
+}
 
 void TIM5_HANDLER(void){
 	TIMER_cleanCountFlag(TIM5_ADDRESS);
 	if(reset_tim5_flag){
 	/*Develop all the code to be executed in a second thread down here*/
+		Grove_ultrasoinic_count++;
 
-
-	}else{reset_tim5_flag=!reset_tim5_flag;}
+	}else{reset_tim5_flag = !reset_tim5_flag;}
 }
 
 
 
 Status_code_t TIM5_Init(uint32_t microseconds){
 
-	if(microseconds > MAX_TIME_TIM5_AND_TIM2){
+	if(microseconds < MIN_TIME_TIM5_AND_TIM2 || microseconds > MAX_TIME_TIM5_AND_TIM2){
 		return TimeSetNotSuported;
 	}
 	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_PSC);
@@ -288,6 +298,168 @@ void TIM5_Deinit(void){
 	NVIC_DisableIRQ(TIM5_IRQn);
 
 	TIMER_Clock(Disabled,TIMER_5);
+
+}
+
+
+
+
+
+/*///////////////////TIMER 9 HANDLER AND CONTROL FUNCTIONS///////////////////////////////////*/
+//TODO
+
+void TIM9_HANDLER(void){
+	TIMER_cleanCountFlag(TIM9_ADDRESS);
+	if(reset_tim9_flag){
+	/*Develop all the code to be executed in a second thread down here*/
+
+
+	}else{reset_tim9_flag=!reset_tim9_flag;}
+}
+
+
+
+Status_code_t TIM9_Init(uint32_t miliseconds){
+
+	if(miliseconds > MAX_TIME_TIM9_TO_TIM11){
+		return TimeSetNotSuported;
+	}
+	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_PSC);
+	__IO uint32_t *TIM_REG_ARR = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_ARR);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_CNT);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_DIER);
+
+	TIMER_Clock(Enabled,TIMER_9);
+
+	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
+	*TIM_REG_DIER &= ~TIMx_UIE;
+
+	*TIM_REG_PSC = (PSC_TO_MILLISEC_DELAY - 1U);
+	*TIM_REG_ARR = (miliseconds - 1U); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+
+	*TIM_REG_CNT = 0;
+
+	NVIC_EnableIRQ(TIM1_BRK_TIM9_IRQn);
+
+	return Success;
+
+}
+
+void TIM9_Start(void){
+
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_CNT);
+
+
+	TIMER_cleanCountFlag(TIM9_ADDRESS);
+	*TIM_REG_CNT = 0;
+	*TIM_REG_DIER |= TIMx_UIE;
+	*TIM_REG_CR1 |= TIMx_CEN;
+}
+
+void TIM9_Stop(void){
+
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_CNT);
+
+	TIMER_cleanCountFlag(TIM9_ADDRESS);
+	*TIM_REG_CNT = 0;
+	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
+	*TIM_REG_DIER &= ~TIMx_UIE;
+
+}
+
+void TIM9_Deinit(void){
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_DIER);
+
+	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
+	*TIM_REG_DIER &= ~TIMx_UIE;
+	NVIC_DisableIRQ(TIM1_BRK_TIM9_IRQn);
+
+	TIMER_Clock(Disabled,TIMER_9);
+
+}
+
+
+/*///////////////////TIMER 10 HANDLER AND CONTROL FUNCTIONS///////////////////////////////////*/
+
+//TODO
+void TIM10_HANDLER(void){
+	TIMER_cleanCountFlag(TIM10_ADDRESS);
+	if(reset_tim10_flag){
+	/*Develop all the code to be executed in a second thread down here*/
+
+
+	}else{reset_tim10_flag =! reset_tim10_flag;}
+}
+
+
+
+Status_code_t TIM10_Init(uint32_t miliseconds){
+
+	if(miliseconds > MAX_TIME_TIM9_TO_TIM11){
+		return TimeSetNotSuported;
+	}
+	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_PSC);
+	__IO uint32_t *TIM_REG_ARR = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_ARR);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_CNT);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_DIER);
+
+	TIMER_Clock(Enabled, TIMER_10);
+
+	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
+	*TIM_REG_DIER &= ~TIMx_UIE;
+
+	*TIM_REG_PSC = (PSC_TO_MILLISEC_DELAY - 1U);
+	*TIM_REG_ARR = (miliseconds - 1U); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+
+	*TIM_REG_CNT = 0;
+
+	NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+
+	return Success;
+
+}
+void TIM10_Start(void){
+
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_CNT);
+
+
+	TIMER_cleanCountFlag(TIM10_ADDRESS);
+	*TIM_REG_CNT = 0;
+	*TIM_REG_DIER |= TIMx_UIE;
+	*TIM_REG_CR1 |= TIMx_CEN;
+}
+
+void TIM10_Stop(void){
+
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_CNT);
+
+	TIMER_cleanCountFlag(TIM10_ADDRESS);
+	*TIM_REG_CNT = 0;
+	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
+	*TIM_REG_DIER &= ~TIMx_UIE;
+
+}
+
+void TIM10_Deinit(void){
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_DIER);
+
+	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
+	*TIM_REG_DIER &= ~TIMx_UIE;
+	NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
+
+	TIMER_Clock(Disabled,TIMER_10);
 
 }
 

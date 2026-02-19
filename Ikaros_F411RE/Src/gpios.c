@@ -226,7 +226,7 @@ void EXTI0_HANDLER(void){
 
 }
 
-Status_code_t GPIO_Init_EXTI0(GPIO_Exti_Port_t EXTI_Port,GPIO_Exti_Config_t EXTI_mode){//next task
+Status_code_t GPIO_Init_EXTI0(GPIO_Exti_Port_t EXTI_Port, GPIO_Exti_Config_t EXTI_mode){//next task
 	Status_code_t status =Success;
 	Set_Port_t Port_define=Port_A;
 
@@ -293,7 +293,7 @@ void EXTI1_HANDLER(void){
 	GPIO_EXTI_Clean_Flag(Pin_1);
 }
 
-Status_code_t GPIO_Init_EXTI1(GPIO_Exti_Port_t EXTI_Port,GPIO_Exti_Config_t EXTI_mode){//next task
+Status_code_t GPIO_Init_EXTI1(GPIO_Exti_Port_t EXTI_Port, GPIO_Exti_Config_t EXTI_mode){//next task
 	Status_code_t status =Success;
 	Set_Port_t Port_define=Port_A;
 
@@ -364,7 +364,7 @@ void EXTI2_HANDLER(void){
 
 }
 
-Status_code_t GPIO_Init_EXTI2(GPIO_Exti_Port_t EXTI_Port,GPIO_Exti_Config_t EXTI_mode){//next task
+Status_code_t GPIO_Init_EXTI2(GPIO_Exti_Port_t EXTI_Port, GPIO_Exti_Config_t EXTI_mode){//next task
 	Status_code_t status =Success;
 	Set_Port_t Port_define=Port_A;
 
@@ -433,7 +433,7 @@ void EXTI3_HANDLER(void){
 
 }
 
-Status_code_t GPIO_Init_EXTI3(GPIO_Exti_Port_t EXTI_Port,GPIO_Exti_Config_t EXTI_mode){//next task
+Status_code_t GPIO_Init_EXTI3(GPIO_Exti_Port_t EXTI_Port, GPIO_Exti_Config_t EXTI_mode){//next task
 	Status_code_t status =Success;
 	Set_Port_t Port_define=Port_A;
 
@@ -501,7 +501,7 @@ void EXTI4_HANDLER(void){
 	GPIO_EXTI_Clean_Flag(Pin_4);
 }
 
-Status_code_t GPIO_Init_EXTI4(GPIO_Exti_Port_t EXTI_Port,GPIO_Exti_Config_t EXTI_mode){//next task
+Status_code_t GPIO_Init_EXTI4(GPIO_Exti_Port_t EXTI_Port, GPIO_Exti_Config_t EXTI_mode){//next task
 	Status_code_t status =Success;
 	Set_Port_t Port_define=Port_A;
 
@@ -560,10 +560,21 @@ void GPIO_Deinit_EXTI4(void){
 
 
 ////////////////////////////////ONLY 1 PIN FROM PIN_5 TO PIN_9 OF ALL PORTS/////////////////////////////
+
+volatile bool Grove_EXT_flag = false;
+
+bool Grove_Get_EXT_flag_status(void){
+	return Grove_EXT_flag;
+}
+
+void Grove_Clear_EXT_flag_status(void){
+	Grove_EXT_flag = false;
+}
+
 void EXTI9_5_HANDLER(void){
 	/*Develop your interruption code from here*/
 
-
+	Grove_EXT_flag = true;
 
 
 	/*To here*/
@@ -574,7 +585,7 @@ Status_code_t GPIO_Init_EXTI9_To_EXTI5(GPIO_Exti_Port_t EXTI_Port, Pin_number_t 
 	Status_code_t status =Success;
 	Set_Port_t Port_define=Port_A;
 
-	if(Pin_defined>9 || Pin_defined<5){
+	if(Pin_defined > Pin_9 || Pin_defined < Pin_5){
 		return EXTI_Pin_Not_Allowed;
 	}
 
@@ -642,16 +653,22 @@ void GPIO_Deinit_EXTI9_To_EXTI5(Pin_number_t Pin_defined){
 ////////////////////////////////ONLY 1 PIN FROM PIN_10 TO PIN_15 OF ALL PORTS/////////////////////////////
 
 
+uint32_t EXTI_button = 0;
+
+uint32_t get_EXTI_times(void){
+	return EXTI_button;
+}
+void clear_EXTI_times(void){
+	EXTI_button = 0;
+}
 
 void EXTI15_10_HANDLER(void){
 	/*Develop your interruption code from here*/
 	uint32_t hw_count_dummy=0;
 
-
+	EXTI_button++;
 
 	while(hw_count_dummy<40000){hw_count_dummy++;} //dummy count to avoid debouncing
-
-
 
 	/*To here*/
 	GPIO_EXTI_Clean_Group_Of_Flag(Pin_10,Clear_six_bits);
@@ -662,7 +679,7 @@ Status_code_t GPIO_Init_EXTI15_To_EXTI10(GPIO_Exti_Port_t EXTI_Port, Pin_number_
 	Status_code_t status =Success;
 	Set_Port_t Port_define=Port_A;
 
-	if(Pin_defined>15 || Pin_defined<10){
+	if(Pin_defined > Pin_15 || Pin_defined < Pin_10){
 		return EXTI_Pin_Not_Allowed;
 	}
 	for(uint8_t i = 10;i<16;i++){

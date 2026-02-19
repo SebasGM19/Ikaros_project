@@ -261,6 +261,7 @@ uint32_t ADC_Read(ADC_channel_t Channel);
 Status_code_t ADC_Deinit(void);
 Status_code_t ADC_Init_Temperature_Sensor(ADC_resolution_t resolution);
 Status_code_t ADC_Read_Temperature(uint32_t *temperature);
+Status_code_t ADC_Deinit_Temperature_Sensor(void);
 
 
 void ADC_conversion_state(Enabled_Disabled_t state);

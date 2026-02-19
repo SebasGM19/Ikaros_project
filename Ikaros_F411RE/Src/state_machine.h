@@ -11,7 +11,7 @@
 #include "system_settings.h"
 
 
-#define SM_MAX_STATES (9)
+#define SM_MAX_STATES (15)
 #define MAX_MSG_LENGHT	(1500)
 
 typedef enum{
@@ -30,12 +30,17 @@ typedef enum{
 
 typedef enum{
 	init_watchdog,
-	init_Protocols,
+	init_peripherals,
 	config_sensors,
+
+	wait_exti,
 	read_sensors,
+	save_data,
+
 	data_format,
+	clean_memory,
 	send_msg,
-	deinit_protocols,
+	deinit_peripherals,
 
 }SM_functions_list_t;
 
@@ -49,12 +54,18 @@ typedef struct{
 
 
 SM_next_state_t SM_Watchdog_Init(void);
-SM_next_state_t SM_Init_Protocols(void);
+SM_next_state_t SM_Init_Peripherals(void);
 SM_next_state_t SM_Config_Sensors(void);
+
+SM_next_state_t SM_Wait_EXTI(void);
 SM_next_state_t SM_Read_Sensors(void);
+SM_next_state_t SM_Save_Data(void);
+
 SM_next_state_t SM_Data_Format(void);
+SM_next_state_t SM_Clean_Memory(void);
+
 SM_next_state_t SM_Send_Msg(void);
-SM_next_state_t SM_Deinit_protocols(void);
+SM_next_state_t SM_Deinit_Peripherals(void);
 
 
 void StartMachine(void);

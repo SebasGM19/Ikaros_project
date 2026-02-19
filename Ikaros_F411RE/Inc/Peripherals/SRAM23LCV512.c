@@ -14,7 +14,6 @@
 #define OPER_PLUS_ADDRS_PLUS_BYTE	(4U)
 #define TOTAL_PAGES					(2048U)
 
-//TO TEST
 // this function read the mode of reading the memory, where it could be byte, page or sequential mode
 Status_code_t SRAM23LCV_Get_Mode(SPI_I2S_alternative_t alt, SRAM23LCV_operation_mode* mode){
 	Status_code_t status = Success;
@@ -33,7 +32,6 @@ Status_code_t SRAM23LCV_Get_Mode(SPI_I2S_alternative_t alt, SRAM23LCV_operation_
 
 }
 
-//TO TEST
 // this function set the mode of reading the memory, where it could be byte, page or sequential mode
 Status_code_t SRAM23LCV_Set_Mode(SPI_I2S_alternative_t alt, const SRAM23LCV_operation_mode mode){
 	Status_code_t status = Success;
@@ -99,7 +97,6 @@ Status_code_t SRAM23LCV_Write_Sequential(SPI_I2S_alternative_t alt, uint16_t sta
 	return status;
 }
 
-//TO TEST
 Status_code_t SRAM23LCV_Read_Sequential(SPI_I2S_alternative_t alt, uint16_t start_addr, uint8_t* buff, uint16_t buff_lengt){
 	Status_code_t status = Success;
 
@@ -121,8 +118,8 @@ Status_code_t SRAM23LCV_Read_Sequential(SPI_I2S_alternative_t alt, uint16_t star
 }
 
 
-
-//TO TEST
+/*una pagina consta de 32 bytes, y el total de paginas que se puede tener es de 2048*/
+/* starts as Page 1*/
 Status_code_t SRAM23LCV_Write_Page(SPI_I2S_alternative_t alt, uint16_t pageX, const uint8_t* buff, uint8_t buff_lenght){
 	Status_code_t status = Success;
 

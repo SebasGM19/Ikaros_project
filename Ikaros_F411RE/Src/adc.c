@@ -140,7 +140,16 @@ Status_code_t ADC_Read_Temperature(uint32_t *temperature){
 }
 
 
+Status_code_t ADC_Deinit_Temperature_Sensor(void){
+	__IO uint32_t * const ADC_REG_CCR = (__IO uint32_t * const)(ADC1_ADDRESS + ADC_CCR);
 
+	ADC_Set_temperature_sensor_state(Disabled);
+	*ADC_REG_CCR &= ~(Clear_two_bits << ADC_ADCPRE);
+
+	ADC_Deinit();
+
+	return Success;
+}
 
 
 
