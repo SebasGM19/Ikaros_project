@@ -11,6 +11,8 @@
 
 void Init_Board(void){
 	__disable_irq();
+	resetDelay(TIM2_ADDRESS);
+	resetDelay(TIM1_ADDRESS);
 	Delay(100000);
 	__enable_irq();
 
@@ -86,7 +88,8 @@ void resetDelay(TimerMapAddr_t Timer){
 	if(Timer == TIM2_ADDRESS){
 		TIMER_Clock(Enabled, TIMER_2);
 		*TIM_REG_PSC = (PSC_TO_MICROSEC_DELAY);
-		*TIM_REG_ARR = (USEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MICROSEC_DELAY,2) - 1);
+//		*TIM_REG_ARR = (USEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MICROSEC_DELAY,2) - 1);
+		*TIM_REG_ARR = 1U;
 		*TIM_REG_CR1 |= TIMx_CEN;
 		TIMER_Clock(Disabled, TIMER_2);
 
@@ -94,7 +97,8 @@ void resetDelay(TimerMapAddr_t Timer){
 		TIMER_Clock(Enabled, TIMER_1);
 		*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
 		*TIM_REG_PSC = (PSC_TO_MILLISEC_DELAY-1);
-		*TIM_REG_ARR = (MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,2) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+//		*TIM_REG_ARR = (MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,2) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+		*TIM_REG_ARR = 1U;
 		*TIM_REG_CR1 |= TIMx_CEN;
 		TIMER_Clock(Disabled, TIMER_1);
 	}else{
@@ -105,7 +109,7 @@ void resetDelay(TimerMapAddr_t Timer){
 
 Status_code_t Delay(uint32_t microseconds){
 
-	if(microseconds < 50 || microseconds > MAX_TIME_TIM5_AND_TIM2){
+	if(microseconds < 5 || microseconds > MAX_TIME_TIM5_AND_TIM2){
 		return DelayTimeNotSupported;
 	}
 
@@ -114,14 +118,14 @@ Status_code_t Delay(uint32_t microseconds){
 	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM2_ADDRESS + TIMx_CNT);
 	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM2_ADDRESS + TIMx_CR1);
 
-	resetDelay(TIM2_ADDRESS);
+//	resetDelay(TIM2_ADDRESS);
 	TIMER_Clock(Enabled,TIMER_2);
 
 	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
 
 
 	*TIM_REG_PSC = (PSC_TO_MICROSEC_DELAY-1);
-	*TIM_REG_ARR = (USEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MICROSEC_DELAY,microseconds) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+	*TIM_REG_ARR = (microseconds - 1);
 	TIMER_cleanCountFlag(TIM2_ADDRESS);
 
 	*TIM_REG_CNT = 0;
@@ -144,13 +148,14 @@ Status_code_t Peripherial_delay(uint16_t miliseconds){
 	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM1_ADDRESS + TIMx_CNT);
 	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM1_ADDRESS + TIMx_CR1);
 
-	resetDelay(TIM1_ADDRESS);
+//	resetDelay(TIM1_ADDRESS);
 	TIMER_Clock(Enabled,TIMER_1);
 
 	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
 
 	*TIM_REG_PSC = (PSC_TO_MILLISEC_DELAY-1);
-	*TIM_REG_ARR = (MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,miliseconds) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+//	*TIM_REG_ARR = (MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,miliseconds) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+	*TIM_REG_ARR = (miliseconds - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
 	TIMER_cleanCountFlag(TIM1_ADDRESS);
 
 	*TIM_REG_CNT = 0;

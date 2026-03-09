@@ -13,14 +13,16 @@
 #include "watchdog.h"
 
 
-uint32_t static global_TIM3_ARR_count = 1024; //set as 1048 to default
-uint32_t static global_TIM4_ARR_count = 1024; //set as 2048 to default
-//uint32_t static global_TIM5_ARR_count = 1024; //set as 2048 to default
+uint32_t static global_TIM3_ARR_count = 1024; //set as 1024 to default
+uint32_t static global_TIM4_ARR_count = 1024; //set as 1024 to default
+//uint32_t static global_TIM5_ARR_count = 1024; //set as 1024 to default
 
 
 bool static volatile reset_tim3_flag = false;
 bool static volatile reset_tim4_flag = false;
 bool static volatile reset_tim5_flag = false;
+bool static volatile reset_tim9_flag = false;
+bool static volatile reset_tim10_flag = false;
 bool static volatile reset_tim11_flag = false;
 
 bool static volatile TIM11_interrupt_flag_active = false;
@@ -66,10 +68,9 @@ void TIM3_HANDLER(void){
 	if(reset_tim3_flag){
 	/*Develop all the code to be executed in a second thread down here*/
 
-//		Win_Watchdog_control(reload_food); //reload the food
 
 
-	}else{reset_tim3_flag=!reset_tim3_flag;}
+	}else{reset_tim3_flag = !reset_tim3_flag;} //esto esta aqui ya que se noto que siempre se ejcuta una vez inmediatamente se inicia
 }
 
 Status_code_t TIM3_Init(uint16_t milliseconds){
@@ -88,8 +89,8 @@ Status_code_t TIM3_Init(uint16_t milliseconds){
 	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
 	*TIM_REG_DIER &= ~TIMx_UIE;
 
-	*TIM_REG_PSC = (PSC_TO_MILLISEC_DELAY-1);
-	*TIM_REG_ARR = (MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,milliseconds) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+	*TIM_REG_PSC = (PSC_TO_MILLISEC_DELAY - 1U);
+	*TIM_REG_ARR = (milliseconds - 1U); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
 	*TIM_REG_CNT = 0;
 
 	NVIC_EnableIRQ(TIM3_IRQn);
@@ -144,7 +145,7 @@ void TIM4_HANDLER(void){
 	/*Develop all the code to be executed in a second thread down here*/
 
 
-	}else{reset_tim4_flag=!reset_tim4_flag;}
+	}else{reset_tim4_flag = !reset_tim4_flag;}
 }
 
 Status_code_t TIM4_Init(uint16_t milliseconds){
@@ -163,8 +164,8 @@ Status_code_t TIM4_Init(uint16_t milliseconds){
 	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
 	*TIM_REG_DIER &= ~TIMx_UIE;
 
-	*TIM_REG_PSC = (PSC_TO_MILLISEC_DELAY-1);
-	*TIM_REG_ARR = (MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,milliseconds) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+	*TIM_REG_PSC = (PSC_TO_MILLISEC_DELAY - 1U);
+	*TIM_REG_ARR = (milliseconds - 1U); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
 	*TIM_REG_CNT = 0;
 
 	NVIC_EnableIRQ(TIM4_IRQn);
@@ -213,61 +214,31 @@ void TIM4_Deinit(void){
 
 
 /*///////////////////TIMER 5 HANDLER AND CONTROL FUNCTIONS///////////////////////////////////*/
-uint8_t netx_lcd_msg =0;//dummy var
-void state_to_print(uint8_t state){  //dummy function
-	netx_lcd_msg = state;
+
+volatile uint32_t Grove_ultrasoinic_count = 0;
+
+uint32_t Grove_Get_Count(void){
+	return Grove_ultrasoinic_count;
+}
+
+void Grove_Clear_Count(void){
+	Grove_ultrasoinic_count = 0;
 }
 
 void TIM5_HANDLER(void){
 	TIMER_cleanCountFlag(TIM5_ADDRESS);
 	if(reset_tim5_flag){
 	/*Develop all the code to be executed in a second thread down here*/
+		Grove_ultrasoinic_count++;
 
-//		switch(netx_lcd_msg){
-//		case 1:
-//			lcd_printXY(0, 0," Welcome to my  ", 16);
-//			lcd_printXY(0, 1," State Machine  ", 16);
-//			break;
-//		case 2:
-//			lcd_printXY(0, 0,"1-Write UART2 : ", 16);
-//			lcd_printXY(0, 1,"2-Write UART1 >6", 16);
-//			break;
-//		case 3:
-//			lcd_printXY(0, 0,"3-Read UART1  : ", 16);
-//			lcd_printXY(0, 1,"4-Reset WWDG  <8", 16);
-//			break;
-//		case 4:
-//			lcd_printXY(0, 0," Write to UART2 ", 16);
-//			lcd_printXY(0, 1,"                ", 16);
-//			break;
-//		case 5:
-//			lcd_printXY(0, 0," Write to UART1 ", 16);
-//			lcd_printXY(0, 1,"                ", 16);
-//			break;
-//		case 6:
-//			lcd_printXY(0, 0,"Received Data:  ", 16);
-//			lcd_printXY(0, 1,"                ", 16);
-//			break;
-//		case 7:
-//			lcd_printXY(0, 0,"  WWDG RESET!!  ", 16);
-//			lcd_printXY(0, 1,"                ", 16);
-//			break;
-//		case 8:
-//			lcd_printXY(0, 0," INVALID OPTION ", 16);
-//			lcd_printXY(0, 1,"                ", 16);
-//			break;
-//
-//
-//		}
-
-	}else{reset_tim5_flag=!reset_tim5_flag;}
+	}else{reset_tim5_flag = !reset_tim5_flag;}
 }
 
 
 
 Status_code_t TIM5_Init(uint32_t microseconds){
 
-	if(microseconds > MAX_TIME_TIM5_AND_TIM2){
+	if(microseconds < MIN_TIME_TIM5_AND_TIM2 || microseconds > MAX_TIME_TIM5_AND_TIM2){
 		return TimeSetNotSuported;
 	}
 	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t *)(TIM5_ADDRESS + TIMx_PSC);
@@ -281,8 +252,9 @@ Status_code_t TIM5_Init(uint32_t microseconds){
 	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
 	*TIM_REG_DIER &= ~TIMx_UIE;
 
-	*TIM_REG_PSC = (PSC_TO_MICROSEC_DELAY-1);
-	*TIM_REG_ARR = (USEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MICROSEC_DELAY,microseconds) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+	*TIM_REG_PSC = (PSC_TO_MICROSEC_DELAY - 1U);
+	*TIM_REG_ARR = (microseconds - 1U); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+
 	*TIM_REG_CNT = 0;
 
 	NVIC_EnableIRQ(TIM5_IRQn);
@@ -330,6 +302,168 @@ void TIM5_Deinit(void){
 }
 
 
+
+
+
+/*///////////////////TIMER 9 HANDLER AND CONTROL FUNCTIONS///////////////////////////////////*/
+//TODO
+
+void TIM9_HANDLER(void){
+	TIMER_cleanCountFlag(TIM9_ADDRESS);
+	if(reset_tim9_flag){
+	/*Develop all the code to be executed in a second thread down here*/
+
+
+	}else{reset_tim9_flag=!reset_tim9_flag;}
+}
+
+
+
+Status_code_t TIM9_Init(uint32_t miliseconds){
+
+	if(miliseconds > MAX_TIME_TIM9_TO_TIM11){
+		return TimeSetNotSuported;
+	}
+	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_PSC);
+	__IO uint32_t *TIM_REG_ARR = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_ARR);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_CNT);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_DIER);
+
+	TIMER_Clock(Enabled,TIMER_9);
+
+	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
+	*TIM_REG_DIER &= ~TIMx_UIE;
+
+	*TIM_REG_PSC = (PSC_TO_MILLISEC_DELAY - 1U);
+	*TIM_REG_ARR = (miliseconds - 1U); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+
+	*TIM_REG_CNT = 0;
+
+	NVIC_EnableIRQ(TIM1_BRK_TIM9_IRQn);
+
+	return Success;
+
+}
+
+void TIM9_Start(void){
+
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_CNT);
+
+
+	TIMER_cleanCountFlag(TIM9_ADDRESS);
+	*TIM_REG_CNT = 0;
+	*TIM_REG_DIER |= TIMx_UIE;
+	*TIM_REG_CR1 |= TIMx_CEN;
+}
+
+void TIM9_Stop(void){
+
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_CNT);
+
+	TIMER_cleanCountFlag(TIM9_ADDRESS);
+	*TIM_REG_CNT = 0;
+	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
+	*TIM_REG_DIER &= ~TIMx_UIE;
+
+}
+
+void TIM9_Deinit(void){
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM9_ADDRESS + TIMx_DIER);
+
+	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
+	*TIM_REG_DIER &= ~TIMx_UIE;
+	NVIC_DisableIRQ(TIM1_BRK_TIM9_IRQn);
+
+	TIMER_Clock(Disabled,TIMER_9);
+
+}
+
+
+/*///////////////////TIMER 10 HANDLER AND CONTROL FUNCTIONS///////////////////////////////////*/
+
+//TODO
+void TIM10_HANDLER(void){
+	TIMER_cleanCountFlag(TIM10_ADDRESS);
+	if(reset_tim10_flag){
+	/*Develop all the code to be executed in a second thread down here*/
+
+
+	}else{reset_tim10_flag =! reset_tim10_flag;}
+}
+
+
+
+Status_code_t TIM10_Init(uint32_t miliseconds){
+
+	if(miliseconds > MAX_TIME_TIM9_TO_TIM11){
+		return TimeSetNotSuported;
+	}
+	__IO uint32_t *TIM_REG_PSC = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_PSC);
+	__IO uint32_t *TIM_REG_ARR = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_ARR);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_CNT);
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_DIER);
+
+	TIMER_Clock(Enabled, TIMER_10);
+
+	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
+	*TIM_REG_DIER &= ~TIMx_UIE;
+
+	*TIM_REG_PSC = (PSC_TO_MILLISEC_DELAY - 1U);
+	*TIM_REG_ARR = (miliseconds - 1U); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+
+	*TIM_REG_CNT = 0;
+
+	NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+
+	return Success;
+
+}
+void TIM10_Start(void){
+
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_CNT);
+
+
+	TIMER_cleanCountFlag(TIM10_ADDRESS);
+	*TIM_REG_CNT = 0;
+	*TIM_REG_DIER |= TIMx_UIE;
+	*TIM_REG_CR1 |= TIMx_CEN;
+}
+
+void TIM10_Stop(void){
+
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_DIER);
+	__IO uint32_t *TIM_REG_CNT = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_CNT);
+
+	TIMER_cleanCountFlag(TIM10_ADDRESS);
+	*TIM_REG_CNT = 0;
+	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
+	*TIM_REG_DIER &= ~TIMx_UIE;
+
+}
+
+void TIM10_Deinit(void){
+	__IO uint32_t *TIM_REG_CR1 = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_CR1);
+	__IO uint32_t *TIM_REG_DIER = (__IO uint32_t *)(TIM10_ADDRESS + TIMx_DIER);
+
+	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
+	*TIM_REG_DIER &= ~TIMx_UIE;
+	NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
+
+	TIMER_Clock(Disabled,TIMER_10);
+
+}
+
+
 /*///////////////////TIMER 11 HANDLER FOR TIMEOUT FOR PROTOCOLS///////////////////////////////////*/
 void TIM11_HANDLER(void){
 	TIMER_cleanCountFlag(TIM11_ADDRESS);
@@ -361,8 +495,8 @@ Status_code_t TIM11_Init(uint32_t milliseconds){
 	*TIM_REG_CR1 &= ~TIMx_CEN; // Disable timer before configuration
 	*TIM_REG_DIER &= ~TIMx_UIE;
 
-	*TIM_REG_PSC = (PSC_TO_MILLISEC_DELAY-1);
-	*TIM_REG_ARR = (MILLSEC_TO_DELAY(BOARD_CLOCK,PSC_TO_MILLISEC_DELAY,milliseconds) - 1); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
+	*TIM_REG_PSC = (PSC_TO_MILLISEC_DELAY - 1U);
+	*TIM_REG_ARR = (milliseconds - 1U); //real para 5s = the result from the psc it aplied in this ecuation arr/1000000= seconds
 	*TIM_REG_CNT = 0;
 
 	NVIC_EnableIRQ(TIM1_TRG_COM_TIM11_IRQn);
@@ -551,7 +685,7 @@ Status_code_t TIM3_PWM_start_custom_channel(TIM3_pwm_custom_parameters_t const P
 
 
 	*TIM_REG_PSC = (PWM_Custom.prescaler);
-	*TIM_REG_ARR = (PWM_Custom.Total_count_ARR - 1); 	//total count
+	*TIM_REG_ARR = (PWM_Custom.Total_count_ARR - 1U); 	//total count
 	*TIM_REG_CCRx= PWM_Custom.duty_count;  				//start count
 
 	*TIM_REG_CR1 |= TIMx_CEN;
@@ -579,6 +713,9 @@ Status_code_t TIM3_PWM_start_channel(TIM3_pwm_auto_parameters_t const PWM){
 
 	int32_t preescaler=0;
 
+	if(PWM.frequency <= 0){
+		return PWM_frecuency_is_cero;
+	}
 
 	switch(PWM.channel){
 	case TIM3_CH1:
@@ -608,22 +745,22 @@ Status_code_t TIM3_PWM_start_channel(TIM3_pwm_auto_parameters_t const PWM){
 	__IO uint32_t *TIM_REG_CCRx = (__IO uint32_t *)(TIM3_ADDRESS + capture_compare_reg);
 
 
-	if(PWM.duty_cycle_percent<=0){
+	if(PWM.duty_cycle_percent <= 0U){
 		miliseconds_duty=0;
-	}else if(PWM.duty_cycle_percent>=100){
+	}else if(PWM.duty_cycle_percent >= 100U){
 		miliseconds_duty = global_TIM3_ARR_count;
 	}else{
 		miliseconds_duty = (uint32_t)((PWM.duty_cycle_percent * global_TIM3_ARR_count) / 100.0f);
 	}
 
-	preescaler = (int32_t)round((float)((BOARD_CLOCK / ((global_TIM3_ARR_count + 1) * PWM.frequency)) - 1));
-	if(preescaler<=0){
+	preescaler = (int32_t)round((float)((BOARD_CLOCK / ((global_TIM3_ARR_count + 1U) * PWM.frequency)) - 1));
+	if(preescaler <= 0U){
 		/*NOTE: if this happend try change the global_ARR_reg to a lower value*/
 		return PWM_frecuency_not_supported_in_this_mode;
 	}
 
 	*TIM_REG_PSC = preescaler;
-	*TIM_REG_ARR = (global_TIM3_ARR_count-1);
+	*TIM_REG_ARR = (global_TIM3_ARR_count - 1U);
 	*TIM_REG_CCRx = miliseconds_duty;
 
 	*TIM_REG_CR1 |= TIMx_CEN; 						// Disable timer before configuration
@@ -806,7 +943,7 @@ Status_code_t TIM4_PWM_start_custom_channel(TIM4_pwm_custom_parameters_t const P
 
 
 	*TIM_REG_PSC = (PWM_Custom.prescaler);
-	*TIM_REG_ARR = (PWM_Custom.Total_count_ARR - 1); 	//total count
+	*TIM_REG_ARR = (PWM_Custom.Total_count_ARR - 1U); 	//total count
 	*TIM_REG_CCRx= PWM_Custom.duty_count;  				//start count
 
 	*TIM_REG_CR1 |= TIMx_CEN;
@@ -834,6 +971,9 @@ Status_code_t TIM4_PWM_start_channel(TIM4_pwm_auto_parameters_t const PWM){
 
 	int32_t preescaler=0;
 
+	if(PWM.frequency <= 0){
+		return PWM_frecuency_is_cero;
+	}
 
 	switch(PWM.channel){
 	case TIM4_CH1:
@@ -878,7 +1018,7 @@ Status_code_t TIM4_PWM_start_channel(TIM4_pwm_auto_parameters_t const PWM){
 	}
 
 	*TIM_REG_PSC = preescaler;
-	*TIM_REG_ARR = (global_TIM4_ARR_count-1);
+	*TIM_REG_ARR = (global_TIM4_ARR_count - 1U);
 	*TIM_REG_CCRx = miliseconds_duty;
 
 	*TIM_REG_CR1 |= TIMx_CEN; 						// Disable timer before configuration

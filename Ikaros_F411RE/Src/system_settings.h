@@ -62,6 +62,7 @@ typedef enum{
 
 	TIMx_incorrect,
 	PWM_frecuency_not_supported_in_this_mode,
+	PWM_frecuency_is_cero,
 
 	USART_alternative_not_supported,
 	USART_baud_rate_out_of_limit,
@@ -80,28 +81,36 @@ typedef enum{
 	I2C_overrun_error,
 	I2C_bus_error,
 
+
+	SPI_frecuency_not_supported,
+	SPI_clock_value_out_of_range,
+	SPI_overrun_error,
+	SPI_frame_format_error,
+	SPI_CRC_error,
 }Status_code_t;
 
 typedef enum{
-	Disabled,
-	Enabled
+	Disabled = 0U,
+	Enabled = 1U
 }Enabled_Disabled_t;
 
+
+
 typedef enum{
-	Clean_one_bit =			0x01, 	//to clean 1 bit
-	Clear_two_bits=			0x03, 	//to clean 1 GPIOS
-	Clear_three_bits = 		0x07, 	//to clena 3 bits
-	Clear_four_bits = 		0x0F, 	//to clean 2 GPIOS
+	Clean_one_bit =			0x0001, 	//to clean 1 bit
+	Clear_two_bits=			0x0003, 	//to clean 1 GPIOS
+	Clear_three_bits = 		0x0007, 	//to clena 3 bits
+	Clear_four_bits = 		0x000F, 	//to clean 2 GPIOS
 
-	Clear_five_bits = 		0x1F,
-	Clear_six_bits =		0x3F,
-	Clear_seven_bits =		0x7F,
-	Clear_eight_bits =		0xFF, 	//to clean 4 GPIOS
+	Clear_five_bits = 		0x001F,
+	Clear_six_bits =		0x003F,
+	Clear_seven_bits =		0x007F,
+	Clear_eight_bits =		0x00FF, 	//to clean 4 GPIOS
 
-	Clear_nine_bits =		0x1FF,
-	Clear_ten_bits =		0x3FF,
-	Clear_eleven_bits =		0x7FF,
-	Clear_twelve_bits =		0xFFF,
+	Clear_nine_bits =		0x01FF,
+	Clear_ten_bits =		0x03FF,
+	Clear_eleven_bits =		0x07FF,
+	Clear_twelve_bits =		0x0FFF,
 
 	Clear_thirteen_bits =   0x1FFF,
 	clear_fourteen_bits = 	0x3FFF, //to clean 7 GPIOS
@@ -141,8 +150,8 @@ typedef enum{
 	WWDG_ADDRESS = 			0x40002C00,
 	IWDG_ADDRESS = 			0x40003000,
 	I2S2ext_ADDRESS =		0x40003400,
-	SPI2_I2S2_ADDRESS =		0x40003800,
-	SPI3_I2S3_ADDRESS = 	0x40003C00,
+//	SPI2_I2S2_ADDRESS =		0x40003800,
+//	SPI3_I2S3_ADDRESS = 	0x40003C00,
 	I2S3ext_ADDRESS = 		0x40004000,
 //	USART2_ADDRESS = 		0x40004400,
 //	I2C1_ADDRESS = 			0x40005400,
@@ -155,24 +164,31 @@ typedef enum{
 //	USART6_ADDRESS = 		0x40011400,
 	ADC1_ADDRESS = 			0x40012000,
 	SDIO_ADDRESS = 			0x40012C00,
-	SPI1_I2C1_ADDRESS =		0x40013000,
-	SPI4_I2C4_ADDRESS = 	0x40013400,
+//	SPI1_I2S1_ADDRESS =		0x40013000,
+//	SPI4_I2C4_ADDRESS = 	0x40013400,
 	SYSCFG_ADDRESS= 		0x40013800,
 	EXT1_ADDRESS =			0x40013C00,
 //	TIM9_ADDRESS = 			0x40014000,
 //	TIM10_ADDRESS = 		0x40014400,
 //	TIM11_ADDRESS = 		0x40014800,
-	SPI5_I2S5_ADDRESS = 	0x40015000,
+//	SPI5_I2S5_ADDRESS = 	0x40015000,
 
 	CRC_ADDRESS = 			0x40023000, //AHB1 BUS
 	RCC_ADDRESS =			0x40023800,
 	FLASH_INT_REG_ADDRESS = 0x40023C00,
-	DMA1_ADDRESS = 			0x40026000,
-	DMA2_ADDRESS = 			0x40026400,
+//	DMA1_ADDRESS = 			0x40026000,
+//	DMA2_ADDRESS = 			0x40026400,
 
 	USB_OTG_FS_ADDRESS = 	0x50000000 //BUS AHB2
 
 }memoryMapAddress_t;
+
+
+typedef enum{
+	DMA1_ADDRESS = 			0x40026000,
+	DMA2_ADDRESS = 			0x40026400,
+
+}DMAMapAddr_t;
 
 typedef enum{
 	USART2_ADDRESS = 		0x40004400,
@@ -187,6 +203,17 @@ typedef enum{
 	I2C3_ADDRESS = 			0x40005C00,
 
 }I2CMapAddr_t;
+
+
+typedef enum{
+	SPI2_I2S2_ADDRESS =		0x40003800,	//APB1 BUS
+//	SPI3_I2S3_ADDRESS = 	0x40003C00,	/*Not used*/
+
+	SPI1_I2S1_ADDRESS =		0x40013000, //APB2 BUS
+//	SPI4_I2C4_ADDRESS = 	0x40013400, /*Not used*/
+	SPI5_I2S5_ADDRESS = 	0x40015000,
+
+}SPI_I2SMapAddr_t;
 
 typedef enum{
 	TIM2_ADDRESS = 	0x40000000, //APB1 BUS

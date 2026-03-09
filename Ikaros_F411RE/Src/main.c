@@ -30,15 +30,190 @@
 
 #include "../Inc/Peripherals/SHT20.h"
 #include "../Inc/Peripherals/BMI160.h"
+#include "../Inc/Peripherals/music_notes.h"
+#include "SRAM23LCV512.h"
+#include "spi_i2s.h"
+
+#include "grove_ultrasonic.h"
+
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
 
+//SPI_config_t SPI_SRAM_config = {
+//		SPI_CPHA_first_edge,
+//		SPI_CPOL_low_idle,
+//		SPI_preescaler_2, //defined for 4MHz clock frecuency
+//		SPI_MSB_trans_first, //datasheet of the sensor indicates this
+//		SPI_8_bit_format,
+//		SPI_2_lines_unidirectional,
+//		SPI_motorola_mode
+//};
+
+
+usart_config_t UART_config = {
+
+		.baud_rate = 9600,
+		.mode = Asynchronous,
+		.synchronous_config = NULL,
+		.data_direction = enable_TX_and_RX,
+		.parity = None,
+		.data_bits = Data_8_bits,
+		.stop_bits = Stop_1_bits
+
+};
+
 int main(void){
-	StartMachine();
+
+	Init_Board();
+
+	Status_code_t status =Success;
+	uint32_t ADC_read_value = 0;
+//	uint32_t dist = 0;
+//
+//	status = Grove_Init(Port_C,Pin_9);
+//	status = Grove_Read_Distance(&dist);
+
+
+//	StartMachine();
+
+	status = UART2_Init(UART_config);
+	uint8_t buff[50] = {0};
+
+	status = ADC_Init(RES_12_bits);
+	status = ADC_Configure_Channel(Channel_8);
+
+
+	while(1){
+		ADC_read_value = 0U;
+		ADC_read_value = ADC_Read(Channel_8);
+		utoa(ADC_read_value, (char *)buff, DECIMAL_BASE);
+
+		status = UART2_Write(buff, strlen((const char *)buff), 1000);
+
+		memset(buff,'\0', sizeof(buff));
+		Delay(50000);
+
+	}
+
+	return 0;
 }
+
+//int main(void){
+//	Init_Board();
+//
+//	Status_code_t status = Success;
+//	SRAM23LCV_operation_mode my_mode = SRAM23LCV_Sequential_mode;
+//	SetPinMode(Port_C, Pin_8, Output);
+//	GPIO_DigitalWrite(Port_C, Pin_8, High);
+//	status = SPI1_Init(&SPI_SRAM_config);
+//
+// /////////// TEST 1 byte mode ////////////////////////////////////
+//	GPIO_DigitalWrite(Port_C, Pin_8, Low);
+//	status = SRAM23LCV_Set_Mode(SPI1_I2S1_Alt, SRAM23LCV_byte_mode);
+//	GPIO_DigitalWrite(Port_C, Pin_8, High);
+//
+//	Delay(500);
+//
+//	GPIO_DigitalWrite(Port_C, Pin_8, Low);
+//	status = SRAM23LCV_Get_Mode(SPI1_I2S1_Alt, &my_mode);
+//	GPIO_DigitalWrite(Port_C, Pin_8, High);
+//
+//	Delay(500);
+//
+//
+//	uint8_t data_cap = 0x00U;
+//	uint8_t data_cap2 = 0x00U;
+//	GPIO_DigitalWrite(Port_C, Pin_8, Low);
+//	status = SRAM23LCV_Write_Byte(SPI1_I2S1_Alt, (uint16_t)0x0045, (uint8_t)0xEE);
+//	GPIO_DigitalWrite(Port_C, Pin_8, High);
+//
+//	Delay(500);
+//
+//	GPIO_DigitalWrite(Port_C, Pin_8, Low);
+//	status = SRAM23LCV_Write_Byte(SPI1_I2S1_Alt, (uint16_t)0x0046, (uint8_t)0xAA);
+//	GPIO_DigitalWrite(Port_C, Pin_8, High);
+//
+//	Delay(500);
+//
+//	GPIO_DigitalWrite(Port_C, Pin_8, Low);
+//	status = SRAM23LCV_Read_Byte(SPI1_I2S1_Alt, (uint16_t)0x0045, &data_cap2);
+//	GPIO_DigitalWrite(Port_C, Pin_8, High);
+//
+//	Delay(500);
+//
+//	GPIO_DigitalWrite(Port_C, Pin_8, Low);
+//	status = SRAM23LCV_Read_Byte(SPI1_I2S1_Alt, (uint16_t)0x0046, &data_cap);
+//	GPIO_DigitalWrite(Port_C, Pin_8, High);
+/////////////////////////////////////////////////////////////////////////////////////////////
+//	Delay(500);
+//
+//
+// /////////// TEST 2 sequence mode ////////////////////////////////////
+//	GPIO_DigitalWrite(Port_C, Pin_8, Low);
+//	status = SRAM23LCV_Set_Mode(SPI1_I2S1_Alt, SRAM23LCV_Sequential_mode);
+//	GPIO_DigitalWrite(Port_C, Pin_8, High);
+//
+//	Delay(500);
+//
+//	GPIO_DigitalWrite(Port_C, Pin_8, Low);
+//	status = SRAM23LCV_Get_Mode(SPI1_I2S1_Alt, &my_mode);
+//	GPIO_DigitalWrite(Port_C, Pin_8, High);
+//
+//	Delay(500);
+//
+//	uint8_t sentence[] = "hola sebastian";
+//	uint8_t buff_seque[14] = {0};
+//	GPIO_DigitalWrite(Port_C, Pin_8, Low);
+//	status = SRAM23LCV_Write_Sequential(SPI1_I2S1_Alt, (uint16_t)0x0140, sentence, strlen((const char*)sentence));
+//	GPIO_DigitalWrite(Port_C, Pin_8, High);
+//
+//	Delay(500);
+//
+//	GPIO_DigitalWrite(Port_C, Pin_8, Low);
+//	status = SRAM23LCV_Read_Sequential(SPI1_I2S1_Alt, (uint16_t)0x0140, buff_seque, 14);
+//	GPIO_DigitalWrite(Port_C, Pin_8, High);
+/////////////////////////////////////////////////////////////////////////////////////////////
+//
+//	Delay(500);
+//
+// /////////// TEST 2 sequence mode ////////////////////////////////////
+//
+//	GPIO_DigitalWrite(Port_C, Pin_8, Low);
+//	status = SRAM23LCV_Set_Mode(SPI1_I2S1_Alt, SRAM23LCV_Page_mode);
+//	GPIO_DigitalWrite(Port_C, Pin_8, High);
+//
+//	Delay(500);
+//
+//	GPIO_DigitalWrite(Port_C, Pin_8, Low);
+//	status = SRAM23LCV_Get_Mode(SPI1_I2S1_Alt, &my_mode);
+//	GPIO_DigitalWrite(Port_C, Pin_8, High);
+//
+//	Delay(500);
+//
+//	uint8_t sentence_page[] = "hola te hablo desde una pagina";
+//	uint8_t buff_page[32] = {0};
+//	GPIO_DigitalWrite(Port_C, Pin_8, Low);
+//	status = SRAM23LCV_Write_Page(SPI1_I2S1_Alt, 20, sentence_page, strlen((const char*)sentence_page));
+//	GPIO_DigitalWrite(Port_C, Pin_8, High);
+//
+//	Delay(500);
+//
+//	GPIO_DigitalWrite(Port_C, Pin_8, Low);
+//	status = SRAM23LCV_Read_Page(SPI1_I2S1_Alt, 20, buff_page);
+//	GPIO_DigitalWrite(Port_C, Pin_8, High);
+/////////////////////////////////////////////////////////////////////////////////////////////
+//
+//	SPI1_Deinit();
+//
+//
+//
+//	return 0;
+//}
+
+
 
 
 //int main(void){
@@ -78,7 +253,7 @@ int main(void){
 //}
 
 
-
+//
 //int main(void){
 //
 //i2c_config_parameters_t I2C_config;
@@ -104,16 +279,6 @@ int main(void){
 //
 //	return 0;
 //}
-
-
-
-
-
-
-
-
-
-
 
 
 
