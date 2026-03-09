@@ -42,36 +42,59 @@
 #endif
 
 
-SPI_config_t SPI_SRAM_config = {
-		SPI_CPHA_first_edge,
-		SPI_CPOL_low_idle,
-		SPI_preescaler_2, //defined for 4MHz clock frecuency
-		SPI_MSB_trans_first, //datasheet of the sensor indicates this
-		SPI_8_bit_format,
-		SPI_2_lines_unidirectional,
-		SPI_motorola_mode
+//SPI_config_t SPI_SRAM_config = {
+//		SPI_CPHA_first_edge,
+//		SPI_CPOL_low_idle,
+//		SPI_preescaler_2, //defined for 4MHz clock frecuency
+//		SPI_MSB_trans_first, //datasheet of the sensor indicates this
+//		SPI_8_bit_format,
+//		SPI_2_lines_unidirectional,
+//		SPI_motorola_mode
+//};
+
+
+usart_config_t UART_config = {
+
+		.baud_rate = 9600,
+		.mode = Asynchronous,
+		.synchronous_config = NULL,
+		.data_direction = enable_TX_and_RX,
+		.parity = None,
+		.data_bits = Data_8_bits,
+		.stop_bits = Stop_1_bits
+
 };
-
-
-
 
 int main(void){
 
 	Init_Board();
 
-//	Status_code_t status =Success;
+	Status_code_t status =Success;
+	uint32_t ADC_read_value = 0;
 //	uint32_t dist = 0;
 //
 //	status = Grove_Init(Port_C,Pin_9);
 //	status = Grove_Read_Distance(&dist);
 
 
-	StartMachine();
+//	StartMachine();
 
+	status = UART2_Init(UART_config);
+	uint8_t buff[50] = {0};
+
+	status = ADC_Init(RES_12_bits);
+	status = ADC_Configure_Channel(Channel_8);
 
 
 	while(1){
+		ADC_read_value = 0U;
+		ADC_read_value = ADC_Read(Channel_8);
+		utoa(ADC_read_value, (char *)buff, DECIMAL_BASE);
 
+		status = UART2_Write(buff, strlen((const char *)buff), 1000);
+
+		memset(buff,'\0', sizeof(buff));
+		Delay(50000);
 
 	}
 

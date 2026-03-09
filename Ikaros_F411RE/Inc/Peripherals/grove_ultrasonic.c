@@ -18,30 +18,31 @@ static Status_code_t Grove_Wait_Rising_Edge(void);
 static Status_code_t Grove_Wait_Falling_Edge(void);
 static void Grove_Send_trig(void);
 
-/// TIM5 Functions change
+//TO USE THIS PERIPHERAL IS NECESARI TO CONFIGURE THE TIM5 HANDLER WITH THE FOLLOWING CODE
 
-//volatile bool Grove_ultrasoinic_flag = false;
+//#########use this function in TIM5 handler#############
+
+//volatile uint32_t Grove_ultrasoinic_count = 0;
 //
-//bool Grove_Get_interrupt_flag_status(void){
-//	return Grove_ultrasoinic_flag;
+//uint32_t Grove_Get_Count(void){
+//	return Grove_ultrasoinic_count;
 //}
 //
-//void Grove_Clear_interrupt_flag_status(void){
-//	Grove_ultrasoinic_flag = false;
+//void Grove_Clear_Count(void){
+//	Grove_ultrasoinic_count = 0;
 //}
 //
 //void TIM5_HANDLER(void){
 //	TIMER_cleanCountFlag(TIM5_ADDRESS);
 //	if(reset_tim5_flag){
 //	/*Develop all the code to be executed in a second thread down here*/
-//
-//		Grove_ultrasoinic_flag = true;
+//		Grove_ultrasoinic_count++;
 //
 //	}else{reset_tim5_flag = !reset_tim5_flag;}
 //}
 
 
-/// EXT Functions change
+//################# EXT Functions change ###############
 
 //volatile bool Grove_EXT_flag = false;
 //
@@ -63,9 +64,10 @@ static void Grove_Send_trig(void);
 //	GPIO_EXTI_Clean_Group_Of_Flag(Pin_5,Clear_five_bits);
 //}
 
+
+
 #if HANDLER_5_SET
 
-//TO USE THIS PERIPHERAL IS NECESARI TO CONFIGURE THE TIM5 HANDLER WITH THE FOLLOWING CODE
 static Set_Port_t GPIO_PORT = Port_A;
 static Pin_number_t GPIO_PIN = Pin_0;
 static GPIO_Exti_Port_t EXT_PORT =EXTI_Port_A;
@@ -74,7 +76,7 @@ static GPIO_Exti_Port_t EXT_PORT =EXTI_Port_A;
 Status_code_t Grove_Init(Set_Port_t PORT, Pin_number_t GPIO){
 
 
-	if(GPIO > 9U || GPIO < 5U){
+	if(GPIO > Pin_9 || GPIO < Pin_5){
 		return EXTI_Pin_Not_Allowed;
 	}
 

@@ -45,7 +45,7 @@ Status_code_t ADC_Configure_Channel(ADC_channel_t Channel){
 	}
 
 	SetPinMode(ADC_PORT_MAP[Channel], ADC_PIN_MAP[Channel], Analog_mode);
-	ADC_channel_ocupped[Channel] = 1;
+	ADC_channel_ocupped[Channel] = 1U;
 
 
 	return Success;

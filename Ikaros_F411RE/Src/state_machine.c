@@ -283,14 +283,14 @@ SM_next_state_t SM_Save_Data(void)
 
 
     strcpy((char *)(page), (const char *)(string_distance));
-	utoa(distance_read, (char *)aux_data_buff, 10);
+	utoa(distance_read, (char *)aux_data_buff, DECIMAL_BASE);
     strncat((char *)(page), (const char *)(aux_data_buff), strlen((const char *)aux_data_buff));//guardamos el dato de float en cadena
     strcat((char *)(page), (const char *)(string_coma));
 	memset(aux_data_buff, '\0', sizeof(aux_data_buff));
 
 
     strcat((char *)(page), (const char *)(string_temperature));
-	utoa(temperature_val, (char *)aux_data_buff, 10);
+	utoa(temperature_val, (char *)aux_data_buff, DECIMAL_BASE);
     strncat((char *)(page), (const char *)(aux_data_buff), strlen((const char *)aux_data_buff));
 	strcat((char *)(page), (const char *)(string_end_json));
 

@@ -90,9 +90,11 @@ typedef enum{
 }Status_code_t;
 
 typedef enum{
-	Disabled,
-	Enabled
+	Disabled = 0U,
+	Enabled = 1U
 }Enabled_Disabled_t;
+
+
 
 typedef enum{
 	Clean_one_bit =			0x0001, 	//to clean 1 bit
@@ -174,12 +176,19 @@ typedef enum{
 	CRC_ADDRESS = 			0x40023000, //AHB1 BUS
 	RCC_ADDRESS =			0x40023800,
 	FLASH_INT_REG_ADDRESS = 0x40023C00,
-	DMA1_ADDRESS = 			0x40026000,
-	DMA2_ADDRESS = 			0x40026400,
+//	DMA1_ADDRESS = 			0x40026000,
+//	DMA2_ADDRESS = 			0x40026400,
 
 	USB_OTG_FS_ADDRESS = 	0x50000000 //BUS AHB2
 
 }memoryMapAddress_t;
+
+
+typedef enum{
+	DMA1_ADDRESS = 			0x40026000,
+	DMA2_ADDRESS = 			0x40026400,
+
+}DMAMapAddr_t;
 
 typedef enum{
 	USART2_ADDRESS = 		0x40004400,
